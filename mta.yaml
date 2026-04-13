@@ -1,0 +1,107 @@
+_schema-version: "3.2"
+ID: Container_Inspection_mta
+version: 0.0.3
+modules:
+- name: Container_Inspection_mta-app-content
+  type: com.sap.application.content
+  path: .
+  requires:
+  - name: Container_Inspection_mta-repo-host
+    parameters:
+      content-target: true
+  build-parameters:
+    build-result: resources
+    requires:
+    - artifacts:
+      - insptrack.zip
+      name: insptrack
+      target-path: resources/
+    - artifacts:
+      - carrieranalytics.zip
+      name: carrieranalytics
+      target-path: resources/
+- name: insptrack
+  type: html5
+  path: app/insptrack
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+- name: carrieranalytics
+  type: html5
+  path: app/carrieranalytics
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+- name: Container_Inspection_mta-destination-content
+  type: com.sap.application.content
+  requires:
+  - name: Container_Inspection_mta-destination-service
+    parameters:
+      content-target: true
+  - name: Container_Inspection_mta-repo-host
+    parameters:
+      service-key:
+        name: Container_Inspection_mta-repo-host-key
+  - name: uaa_Container_Inspection_mta
+    parameters:
+      service-key:
+        name: uaa_Container_Inspection_mta-key
+  parameters:
+    content:
+      instance:
+        destinations:
+        - Name: Container_router_Container_Inspection_mta_repo_host
+          ServiceInstanceName: Container_Inspection_mta-html5-service
+          ServiceKeyName: Container_Inspection_mta-repo-host-key
+          sap.cloud.service: Container_router
+        - Authentication: OAuth2UserTokenExchange
+          Name: Container_router_uaa_Container_Inspection_mta
+          ServiceInstanceName: Container_Inspection_mta-xsuaa-service
+          ServiceKeyName: uaa_Container_Inspection_mta-key
+          sap.cloud.service: Container_router
+        existing_destinations_policy: update
+  build-parameters:
+    no-source: true
+resources:
+- name: Container_Inspection_mta-repo-host
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-name: Container_Inspection_mta-html5-service
+    service-plan: app-host
+- name: Container_Inspection_mta-destination-service
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      HTML5Runtime_enabled: true
+      version: 1.0.0
+      init_data:
+        instance:
+          existing_destinations_policy: update
+          destinations:
+          - Name: ui5
+            Authentication: NoAuthentication
+            ProxyType: Internet
+            Type: HTTP
+            URL: https://ui5.sap.com
+    service: destination
+    service-name: Container_Inspection_mta-destination-service
+    service-plan: lite
+- name: uaa_Container_Inspection_mta
+  type: org.cloudfoundry.managed-service
+  parameters:
+    path: ./xs-security.json
+    service: xsuaa
+    service-name: Container_Inspection_mta-xsuaa-service
+    service-plan: application
+parameters:
+  deploy_mode: html5-repo
+  enable-parallel-deployments: true

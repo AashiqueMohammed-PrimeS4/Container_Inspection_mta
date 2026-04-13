@@ -1,0 +1,397 @@
+<mvc:View
+    controllerName="carrieranalytics.controller.Main"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:l="sap.ui.layout"
+    xmlns:viz="sap.viz.ui5.controls"
+    xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds"
+    xmlns:viz.data="sap.viz.ui5.data"
+    displayBlock="true"
+>
+   
+    <Page
+        id="page"
+        title="Carrier Inspection Analytics"
+    >
+       
+        <content>
+            <VBox
+                id="mainVBox"
+                class="sapUiMediumMargin"
+            >
+                <!-- ========== Date Range Selection for Inspection Data ========== -->
+                <VBox
+                    id="datePickerSection"
+                    class="sapUiSmallMarginBottom"
+                >
+                    <Label
+                        id="dateLabel"
+                        text="Select Inspection Date Range"
+                        design="Bold"
+                    />
+                    <DateRangeSelection
+                        id="inspectionDateRangePicker"
+                        placeholder="Choose a date range"
+                        displayFormat="dd/MM/yyyy"
+                        change="onDateRangeChangeMain"
+                        width="250px"
+                    />
+                </VBox>
+                <!-- Tiles Section -->
+                <l:HorizontalLayout
+                    id="tilesLayout"
+                    class="sapUiMediumMarginTop"
+                    allowWrapping="true"
+                >
+                    <!-- Tile 1: Accepted Carriers -->
+                    <GenericTile
+                        id="acceptedTile"
+                        class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
+                        header="Accepted Carriers"
+                        frameType="OneByOne"
+                    >
+                        <TileContent id="acceptedTileContent">
+                            <NumericContent
+                                id="acceptedNumericContent"
+                                value="{viewModel>/acceptedCount}"
+                                icon="sap-icon://inventory"
+                                valueColor="Good"
+                                withMargin="false"
+                            />
+                        </TileContent>
+                    </GenericTile>
+                    <!-- Tile 2: Rejected Carriers -->
+                    <GenericTile
+                        id="rejectedTile"
+                        class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
+                        header="Rejected Carriers"
+                        frameType="OneByOne"
+                    >
+                        <TileContent id="rejectedTileContent">
+                            <NumericContent
+                                id="rejectedNumericContent"
+                                value="{viewModel>/rejectedCount}"
+                                icon="sap-icon://inventory"
+                                valueColor="Error"
+                                withMargin="false"
+                            />
+                        </TileContent>
+                    </GenericTile>
+                    <!-- Tile 3: Carrier Reservation Sheet  -->
+                    <GenericTile
+                        id="reservationSheetTile"
+                        class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
+                        header="Carrier Reservation Sheet"
+                        subheader="View Report"
+                        frameType="OneByOne"
+                        press="onNavigateToCarrierReport"
+                    >
+                        <TileContent id="reservationSheetTileContent">
+                            <ImageContent
+                                id="reservationSheetImage"
+                                src="sap-icon://manager-insight"
+                            />
+                        </TileContent>
+                    </GenericTile>
+                    <!-- Tile 4: Carrier AI Summary -->
+                    <GenericTile
+                        id="aiSummaryTile"
+                        class="sapUiTinyMarginBottom"
+                        header="AI Summary"
+                        subheader="View AI Summary"
+                        frameType="OneByOne"
+                        press="onNavigateToAiSummary"
+                    >
+                        <TileContent id="aiSummaryTileContent">
+                            <ImageContent src="sap-icon://ai" />
+                        </TileContent>
+                    </GenericTile>
+
+                    
+
+                </l:HorizontalLayout>
+                <!-- ========== NEW FEATURE - Date Range Trend Analysis ========== -->
+                <Panel
+                    id="trendPanel"
+                    headerText="Trend Analysis - Date Range"
+                    class="sapUiMediumMarginTop"
+                    expandable="true"
+                    expanded="false"
+                >
+                    <content>
+                        <!-- Date Range Selection -->
+                        <VBox
+                            id="dateRangeSection"
+                            class="sapUiSmallMargin"
+                        >
+                            <Label
+                                id="dateRangeLabel"
+                                text="Select Date Range for Trend Analysis"
+                                design="Bold"
+                            />
+                            <l:HorizontalLayout
+                                id="dateRangeControls"
+                                allowWrapping="true"
+                            >
+                                <DateRangeSelection
+                                    id="dateRangeSelection"
+                                    placeholder="Select date range (week/month)"
+                                    displayFormat="dd/MM/yyyy"
+                                    change="onDateRangeChange"
+                                    width="100%"
+                                    class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
+                                />
+                                <Button
+                                    id="analyzeBtn"
+                                    text="Analyze Trends"
+                                    press="onAnalyzeTrends"
+                                    type="Emphasized"
+                                    icon="sap-icon://bar-chart"
+                                    enabled="{viewModel>/rangeSelected}"
+                                />
+                            </l:HorizontalLayout>
+                        </VBox>
+                        <!-- Chart Type Toggle -->
+                        <Toolbar
+                            id="chartToolbar"
+                            class="sapUiSmallMarginTop"
+                        >
+                            <Title
+                                id="chartTitle"
+                                text="Daily Inspection Trends"
+                                level="H3"
+                            />
+                            <ToolbarSpacer id="_IDGenToolbarSpacer" />
+                            <SegmentedButton
+                                id="chartTypeSelector"
+                                selectedKey="{viewModel>/chartType}"
+                                selectionChange="onChartTypeChange"
+                                visible="{viewModel>/showChart}"
+                            >
+                                <items>
+                                    <SegmentedButtonItem
+                                        id="lineChartBtn"
+                                        key="line"
+                                        icon="sap-icon://line-chart"
+                                        text="Line Chart"
+                                    />
+                                    <SegmentedButtonItem
+                                        id="barChartBtn"
+                                        key="column"
+                                        icon="sap-icon://horizontal-bar-chart"
+                                        text="Bar Chart"
+                                    />
+                                </items>
+                            </SegmentedButton>
+                        </Toolbar>
+                        <!-- Loading Indicator -->
+                        <BusyIndicator
+                            id="chartBusyIndicator"
+                            visible="{viewModel>/isLoading}"
+                            text="Fetching data..."
+                            class="sapUiMediumMargin"
+                        />
+                        <!-- Chart Container -->
+                        <VBox
+                            id="chartContainer"
+                            visible="{viewModel>/showChart}"
+                            class="sapUiSmallMargin"
+                        >
+                            <!-- Scrollable container for chart on mobile -->
+                            <ScrollContainer
+                                id="chartScrollContainer"
+                                horizontal="true"
+                                vertical="false"
+                                height="450px"
+                                width="100%"
+                            >
+                                <!-- VizFrame Chart -->
+                                <viz:VizFrame
+                                    id="inspectionTrendChart"
+                                    uiConfig="{
+                                        applicationSet: 'fiori'
+                                    }"
+                                    height="400px"
+                                    width="100%"
+                                    vizType="{viewModel>/chartType}"
+                                    selectData="onChartBarSelect"
+                                    vizProperties="{
+                                        plotArea: {
+                                            dataLabel: {
+                                                visible: true
+                                            }
+                                        },
+                                        title: {
+                                            visible: false
+                                        },
+                                        legend: {
+                                            visible: true
+                                        },
+                                        interaction: {
+                                            selectability: {
+                                                mode: 'SINGLE'
+                                            }
+                                        }
+                                    }"
+                                >
+                                    <viz:dataset>
+                                        <viz.data:FlattenedDataset
+                                            id="_IDGenFlattenedDataset1"
+                                            data="{viewModel>/chartData}"
+                                        >
+                                            <viz.data:dimensions>
+                                                <viz.data:DimensionDefinition
+                                                    id="_IDGenDimensionDefinition"
+                                                    name="Date"
+                                                    value="{viewModel>date}"
+                                                />
+                                            </viz.data:dimensions>
+                                            <viz.data:measures>
+                                                <viz.data:MeasureDefinition
+                                                    id="_IDGenMeasureDefinition"
+                                                    name="Accepted"
+                                                    value="{viewModel>accepted}"
+                                                />
+                                                <viz.data:MeasureDefinition
+                                                    id="_IDGenMeasureDefinition1"
+                                                    name="Rejected"
+                                                    value="{viewModel>rejected}"
+                                                />
+                                            </viz.data:measures>
+                                        </viz.data:FlattenedDataset>
+                                    </viz:dataset>
+                                    <viz:feeds>
+                                        <viz.feeds:FeedItem
+                                            id="_IDGenFeedItem"
+                                            uid="categoryAxis"
+                                            type="Dimension"
+                                            values="Date"
+                                        />
+                                        <viz.feeds:FeedItem
+                                            id="_IDGenFeedItem1"
+                                            uid="valueAxis"
+                                            type="Measure"
+                                            values="Accepted,Rejected"
+                                        />
+                                    </viz:feeds>
+                                </viz:VizFrame>
+                            </ScrollContainer>
+                            <!-- Summary Statistics - Responsive Layout -->
+                            <l:Grid
+                                id="summaryStats"
+                                defaultSpan="L3 M6 S12"
+                                hSpacing="1"
+                                vSpacing="1"
+                                containerQuery="true"
+                                class="sapUiMediumMarginTop"
+                            >
+                                <!-- Total Accepted -->
+                                <VBox
+                                    id="totalAcceptedBox"
+                                    alignItems="Center"
+                                    class="sapUiSmallMarginBottom"
+                                >
+                                    <layoutData>
+                                        <l:GridData
+                                            id="totalAcceptedBoxLayoutData"
+                                            span="L3 M6 S12"
+                                        />
+                                    </layoutData>
+                                    <Label
+                                        id="totalAcceptedLabel"
+                                        text="Total Accepted"
+                                        design="Bold"
+                                    />
+                                    <Text
+                                        id="totalAcceptedText"
+                                        text="{viewModel>/totalAccepted}"
+                                        class="sapUiTinyMarginTop"
+                                    />
+                                </VBox>
+                                <!-- Total Rejected -->
+                                <VBox
+                                    id="totalRejectedBox"
+                                    alignItems="Center"
+                                    class="sapUiSmallMarginBottom"
+                                >
+                                    <layoutData>
+                                        <l:GridData
+                                            id="totalRejectedBoxLayoutData"
+                                            span="L3 M6 S12"
+                                        />
+                                    </layoutData>
+                                    <Label
+                                        id="totalRejectedLabel"
+                                        text="Total Rejected"
+                                        design="Bold"
+                                    />
+                                    <Text
+                                        id="totalRejectedText"
+                                        text="{viewModel>/totalRejected}"
+                                        class="sapUiTinyMarginTop"
+                                    />
+                                </VBox>
+                                <!-- Avg. Daily Accepted -->
+                                <VBox
+                                    id="avgAcceptedBox"
+                                    alignItems="Center"
+                                    class="sapUiSmallMarginBottom"
+                                >
+                                    <layoutData>
+                                        <l:GridData
+                                            id="avgAcceptedBoxLayoutData"
+                                            span="L3 M6 S12"
+                                        />
+                                    </layoutData>
+                                    <Label
+                                        id="avgAcceptedLabel"
+                                        text="Avg. Daily Accepted"
+                                        design="Bold"
+                                    />
+                                    <Text
+                                        id="avgAcceptedText"
+                                        text="{viewModel>/avgAccepted}"
+                                        class="sapUiTinyMarginTop"
+                                    />
+                                </VBox>
+                                <!-- Avg. Daily Rejected -->
+                                <VBox
+                                    id="avgRejectedBox"
+                                    alignItems="Center"
+                                    class="sapUiSmallMarginBottom"
+                                >
+                                    <layoutData>
+                                        <l:GridData
+                                            id="avgRejectedBoxLayoutData"
+                                            span="L3 M6 S12"
+                                        />
+                                    </layoutData>
+                                    <Label
+                                        id="avgRejectedLabel"
+                                        text="Avg. Daily Rejected"
+                                        design="Bold"
+                                    />
+                                    <Text
+                                        id="avgRejectedText"
+                                        text="{viewModel>/avgRejected}"
+                                        class="sapUiTinyMarginTop"
+                                    />
+                                </VBox>
+                            </l:Grid>
+                            
+                        </VBox>
+                        <!-- No Data Message -->
+                        <MessageStrip
+                            id="noDataMessage"
+                            text="No data available for the selected date range. Please select a different range."
+                            type="Information"
+                            showIcon="true"
+                            visible="{viewModel>/showNoData}"
+                            class="sapUiSmallMargin"
+                        />
+                    </content>
+                </Panel>
+            </VBox>
+        </content>
+    </Page>
+</mvc:View>

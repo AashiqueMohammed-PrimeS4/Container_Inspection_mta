@@ -1,0 +1,262 @@
+<mvc:View controllerName="insptrack.controller.Main"
+    height="100%"
+    xmlns:form="sap.ui.layout.form"
+    xmlns:core="sap.ui.core"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:customData="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1"
+    xmlns:cssgrid="sap.ui.layout.cssgrid"
+    xmlns="sap.m">
+
+    <NavContainer id="inspectionWizardNavContainer">
+        <pages>
+            <Page id="wizardContentPage" showHeader="false">
+                <content>
+                    <Wizard id="ContainerInspectionWizard"
+                           complete="onFinishInspection"
+                           finishButtonText="Complete Inspection"
+                           class="sapUiResponsivePadding--header sapUiResponsivePadding--content"            
+                           enableBranching="true" 
+                           renderMode="Page"
+                           stepActivate="onStepActivate"
+                           >         
+                        <!-- Step 1: Document Details -->
+                        <WizardStep id="DocumentDetailsStep"
+                                   title="Document Details"
+                                   nextStep="InspectionCodesStep"
+                                   subsequentSteps="InspectionCodesStep, ImageUploadStep"
+                                   complete="onDocumentDetailsComplete"
+                                   validated="false"
+                                   >
+                            <MessageStrip id="_IDGenMessageStrip" class="sapUiSmallMarginBottom"
+                                        text="Enter the document details to start carrier inspection process."
+                                        showIcon="true"/>
+                           
+                            <form:SimpleForm id="_IDGenSimpleForm1" editable="true" layout="ResponsiveGridLayout">
+                                <Label id="_IDGenLabel2" text="SO/Delivery/Shipment" required="true"/>
+                                <Input id="documentInput"
+                                    change="onDocumentDetailsChange"
+                                    placeholder="document number"
+                                    width="250px"
+                                    maxLength="10"/>
+                               
+                                <Label id="_IDGenLabel" text="Sequence Number" required="true"/>
+                                <Input id="sequenceInput"
+                                      change="onDocumentDetailsChange"
+                                      placeholder="sequence number"
+                                      width="250px"
+                                      maxLength="6"/>
+                               
+                                <Label id="_IDGenLabel1" text="Carrier Number" required="true"/>
+                                <HBox alignItems="Center" justifyContent="Start">
+                                    <Input id="carrierInput"
+                                        change="onDocumentDetailsChange"
+                                        placeholder="carrier number"
+                                        width="250px"
+                                        maxLength="15"
+                                        showValueHelp = "true"
+                                        valueHelpIconSrc = "sap-icon://camera"
+                                        valueHelpRequest = "onContainerScan"
+                                        />    
+                                </HBox>
+                               
+                                    
+                                <Label id="_IDGenLabelCarrierLine" text="Carrier Line" required="true" visible="{/showCarrierLineCombo}"/>
+                                <ComboBox id="carrierLineCombo"
+                                        change="onDocumentDetailsChange"
+                                        placeholder="Select carrier line"
+                                        width="250px"
+                                        visible="{/showCarrierLineCombo}"
+                                        items="{/CarrierLines}">
+                                <core:Item id="_IDGenItemCarrierLine" key="{CarrierLineCode}" text="{CarrierLineCodeText}"/>
+                                </ComboBox>
+
+                                <Label id="_IDGenLabelcartype" text="Carrier Type" required="true" visible="{/showCarrierTypeCombo}"/>
+                                <ComboBox id="carrierTypeCombo"
+                                        change="onDocumentDetailsChange"
+                                        placeholder="Select carrier type"
+                                        width="250px"
+                                        visible="{/showCarrierTypeCombo}"
+                                        items="{/CarrierTypes}">
+                                <core:Item id="_IDGenItem" key="{CarrierTypeCode}" text="{CarrierTypeCodeText}"/>
+                                </ComboBox>
+                            </form:SimpleForm>
+                        </WizardStep>
+                       
+                        <!-- Step 2: Inspection Codes -->
+                        <WizardStep id="InspectionCodesStep"
+                                    title="Inspection Codes"
+                                    nextStep="ImageUploadStep"
+                                    validated="false">
+                            <MessageStrip id="_IDGenMessageStrip1" class="sapUiSmallMarginBottom"
+                                        text="Select inspection codes for the carrier defects found."
+                                        showIcon="true"/>
+                            
+                            <ScrollContainer id="_IDGenScrollContainer1" height="100%" width="100%" vertical="true">
+                                <VBox id="_IDGenVBox" class="sapUiSmallMargin">
+                                    <Label id="_IDGenLabel3" text="Select Defects Found:" class="sapUiSmallMarginBottom"/>
+                                    
+                                    <!-- Remove wrap and use responsive widths -->
+                                    <FlexBox id="_IDGenFlexBox" 
+                                            direction="Row" 
+                                            wrap="NoWrap"
+                                            class="sapUiTinyMargin"
+                                            alignItems="Start">
+                                        
+                                        <!-- Left column with responsive width -->
+                                        <VBox id="_IDGenVBox1"
+                                            items="{/inspectionCodesLeft}"
+                                            class="sapUiSmallMarginEnd">
+                                            <layoutData>
+                                                <FlexItemData id="_IDGenFlexItemData1" growFactor="1" baseSize="0"/>
+                                            </layoutData>
+                                            <CheckBox id="_IDGenCheckBox1"
+                                                text="{text}"
+                                                select="onDefectCodeChange"
+                                                width="100%"
+                                                class="sapUiTinyMarginBottom">
+                                                <customData>
+                                                    <core:CustomData key="codeKey" value="{key}"/>
+                                                </customData>
+                                            </CheckBox>
+                                        </VBox>
+
+                                        <!-- Right column with responsive width -->
+                                        <VBox id="_IDGenVBox2"
+                                            items="{/inspectionCodesRight}">
+                                            <layoutData>
+                                                <FlexItemData id="_IDGenFlexItemData2" growFactor="1" baseSize="0"/>
+                                            </layoutData>
+                                            <CheckBox id="_IDGenCheckBox2"
+                                                text="{text}"
+                                                select="onDefectCodeChange"
+                                                width="100%"
+                                                class="sapUiTinyMarginBottom">
+                                                <customData>
+                                                    <core:CustomData key="codeKey" value="{key}"/>
+                                                </customData>
+                                            </CheckBox>
+                                        </VBox>
+                                    </FlexBox>
+                                </VBox>
+                            </ScrollContainer>
+
+                            <HBox id="_IDGenHBox1" justifyContent="Center" class="sapUiLargeMarginTop" visible="{/showAcceptRejectButtons}">
+                                <Button id="_IDGenButton" text="Accept"
+                                    type="Emphasized"
+                                    press="onAcceptCodes"
+                                    enabled="{/isAcceptButtonEnabled}"
+                                    class="sapUiTinyMarginEnd"/>
+                                <Button id="_IDGenButton1" text="Reject"
+                                    type="Reject"
+                                    enabled="{= ${/isRejectEnabled} }"
+                                    press="onRejectCodes"/>
+                            </HBox>
+
+                            <HBox id="_IDGenHBoxBack" justifyContent="End" class="sapUiLargeMarginTop">
+                                <Button id="btnBackToStep1"
+                                    text="Back"
+                                    icon="sap-icon://nav-back"
+                                    press="onBackToStep1"/>
+                            </HBox>
+                        </WizardStep>
+                       
+                       
+                        <!-- Step 3: Image Upload -->
+                    <WizardStep id="ImageUploadStep"
+                            title="{/imageStepTitle}"
+                            validated="true">
+                        <MessageStrip id="_IDGenMessageStrip2" class="sapUiSmallMarginBottom"
+                                    text="{/imageStepMessage}"
+                                    type="{/imageStepType}"
+                                    showIcon="true"/>
+                   
+                        <!-- Camera Controls -->
+                       
+                        <VBox id="_IDGenVBox3" class="sapUiMediumMargin" alignItems="Center">
+                            <HBox id="_IDGenHBox5" justifyContent="Center" class="sapUiSmallMarginBottom">
+                                <Button id="btnBeforePhoto"
+                                    enabled="{= !${/hasBeforeImg} }"
+                                    text="Before Loading Photos"
+                                    press="onTakeBeforePhoto"
+                                    type="Emphasized"
+                                    icon="sap-icon://camera"
+                                    class="sapUiTinyMarginEnd"/>
+                               
+                                <Button id="btnAfterPhoto"
+                                    enabled="{= ${/hasBeforeImg} }"
+                                    text="After Loading Photos"
+                                    press="onTakeAfterPhoto"
+                                    type="Emphasized"
+                                    icon="sap-icon://camera"/>
+                            </HBox>
+                   
+                            <!-- Counters Display -->
+                            <HBox id="_IDGenHBox6" justifyContent="Center" class="sapUiSmallMarginTop">
+                                <Text id="_IDGenText3" text="Before: {/beforeImageCount}/6" class="sapUiTinyMarginEnd"/>
+                                <Text id="_IDGenText4" text="After: {/afterImageCount}/6"/>
+                            </HBox>
+                        </VBox>
+                                          
+                        <!-- Before Images Gallery -->
+                        <Panel id="_IDGenPanel1" headerText="Before Loading Images ({/beforeImageCount}/6)"
+                            class="sapUiResponsiveMargin"
+                            visible="{= ${/beforeImageCount} > 0}">
+                            <List id="_IDGenList" items="{/beforeImages}" mode="Delete" delete="onDeleteBeforeImage">
+                                <CustomListItem id="_IDGenCustomListItem">
+                                    <HBox id="_IDGenHBox2" alignItems="Center">
+                                        <Image id="_IDGenImage" 
+                                            src="{base64}" 
+                                            width="80px" 
+                                            height="80px"
+                                            press="onViewFullImage"
+                                            class="sapUiTinyMarginEnd"
+                                            customData:imageId="{id}"
+                                            customData:imageType="B"/>
+                                        <VBox id="_IDGenVBox10">
+                                            <Text id="_IDGenText5" text="Image #{= ${/beforeImages}.indexOf(${}) + 1 }"/>
+                                            <Text id="_IDGenText7" text="Stored in memory" class="sapUiTinyText"/>
+                                        </VBox>
+                                    </HBox>
+                                </CustomListItem>
+                            </List>
+                        </Panel>
+
+                        <!-- After Images Gallery -->
+                        <Panel id="_IDGenPanel2" headerText="After Loading Images ({/afterImageCount}/6)"
+                            class="sapUiResponsiveMargin"
+                            visible="{= ${/afterImageCount} > 0}">
+                            <List id="_IDGenList1" items="{/afterImages}" mode="Delete" delete="onDeleteAfterImage">
+                                <CustomListItem id="_IDGenCustomListItem1">
+                                    <HBox id="_IDGenHBox7" alignItems="Center">
+                                        <Image id="_IDGenImage1" 
+                                            src="{base64}" 
+                                            width="80px" 
+                                            height="80px"
+                                            press="onViewFullImage"
+                                            class="sapUiTinyMarginEnd"
+                                            customData:imageId="{id}"
+                                            customData:imageType="A"/>
+                                        <VBox id="_IDGenVBox11">
+                                            <Text id="_IDGenText6" text="Image #{= ${/afterImages}.indexOf(${}) + 1 }"/>
+                                            <Text id="_IDGenText8" text="Stored in memory" class="sapUiTinyText"/>
+                                        </VBox>
+                                    </HBox>
+                                </CustomListItem>
+                            </List>
+                        </Panel>     
+
+                    </WizardStep>
+                    </Wizard>
+                </content>
+                <!-- <footer>
+                    <OverflowToolbar id="_IDGenOverflowToolbar">
+                        <ToolbarSpacer id="_IDGenToolbarSpacer"/>
+                        <Button id="_IDGenButton4" text="Cancel" press="onWizardCancel"/>
+                    </OverflowToolbar>
+                </footer> -->
+            </Page>
+           
+        </pages>
+    </NavContainer>
+
+  </mvc:View>

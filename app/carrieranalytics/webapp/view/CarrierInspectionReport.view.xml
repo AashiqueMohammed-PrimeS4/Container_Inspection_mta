@@ -1,0 +1,393 @@
+<mvc:View
+    controllerName="carrieranalytics.controller.CarrierInspectionReport"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:l="sap.ui.layout"
+    xmlns:core="sap.ui.core"
+    displayBlock="true">
+
+    <Page id="carrierReportPage"
+          title="Carrier Inspection Report"
+          showNavButton="true"
+          navButtonPress="onNavBack">
+        <content>
+            <!-- Responsive Grid layout for both desktop and mobile -->
+            <l:Grid id="mainGrid"
+                    defaultSpan="L12 M12 S12"
+                    containerQuery="true"
+                    class="sapUiResponsiveMargin">
+
+                <!-- Left Side: Carrier Data Table -->
+                <VBox id="tableSection" class="sapUiSmallMargin" width="100%">
+                    <layoutData>
+                        <l:GridData id="leftLayoutData" span="L9 M12 S12" />
+                    </layoutData>
+
+                    <!-- Desktop/Tablet Toolbar with Status Counts -->
+                    <Toolbar id="tableToolbar" visible="{viewModel>/showTableView}">
+                        <Title id="tableTitle" text="Records of - {viewModel>/currentDate}" level="H2"/>
+                        <ToolbarSpacer id="tableToolbarSpacer"/>
+                        <HBox id="statusCountsBox" alignItems="Center" class="sapUiTinyMarginEnd">
+                            <ObjectStatus
+                                id="acceptedStatus"
+                                text="Accepted: {viewModel>/acceptedCount}"
+                                state="Success"
+                                class="sapUiTinyMarginEnd"/>
+                            <Text id="statusSeparator" text="|" class="sapUiTinyMarginEnd"/>
+                            <ObjectStatus
+                                id="rejectedStatus"
+                                text="Rejected: {viewModel>/rejectedCount}"
+                                state="Error"
+                                class="sapUiTinyMarginEnd"/>
+                            <Text id="statusSeparator2" text="|" class="sapUiTinyMarginEnd"/>
+                            <ObjectStatus
+                                id="totalStatus"
+                                text="Total: {viewModel>/totalCount}"
+                                state="Information"/>
+                        </HBox>
+                        <Button
+                            id="emailBtn"
+                            icon="sap-icon://email"
+                            tooltip="Send Report via Email"
+                            press="onSendEmail"
+                            enabled="{= ${viewModel>/carrierData}.length > 0}"/>
+                        <Button
+                            id="refreshBtn"
+                            icon="sap-icon://refresh"
+                            tooltip="Refresh Data"
+                            press="onRefresh"/>
+                    </Toolbar>
+
+                    <!-- Mobile Toolbar with title and action buttons -->
+                    <Toolbar id="tableToolbarMobile" visible="{viewModel>/showListView}">
+                        <Title id="tableTitleMobile" text="Records of - {viewModel>/currentDateMobile}" level="H2"/>
+                        <ToolbarSpacer id="tableToolbarSpacerMobile"/>
+                        <Button
+                            id="emailBtnMobile"
+                            icon="sap-icon://email"
+                            tooltip="Send Report via Email"
+                            press="onSendEmail"
+                            enabled="{= ${viewModel>/carrierData}.length > 0}"/>
+                        <Button
+                            id="refreshBtnMobile"
+                            icon="sap-icon://refresh"
+                            tooltip="Refresh Data"
+                            press="onRefresh"/>
+                    </Toolbar>
+
+                    <!-- Status counts bar - Mobile only (below toolbar) -->
+                    <VBox id="statusCountsMobileBox"
+                          alignItems="Center"
+                          class="sapUiSmallMarginTop sapUiSmallMarginBottom"
+                          visible="{viewModel>/showListView}">
+                        <ObjectStatus
+                            id="acceptedStatusMobile"
+                            text="Accepted: {viewModel>/acceptedCount}"
+                            state="Success"
+                            class="sapUiTinyMarginBottom"/>
+                        <ObjectStatus
+                            id="rejectedStatusMobile"
+                            text="Rejected: {viewModel>/rejectedCount}"
+                            state="Error"
+                            class="sapUiTinyMarginBottom"/>
+                        <ObjectStatus
+                            id="totalStatusMobile"
+                            text="Total: {viewModel>/totalCount}"
+                            state="Information"/>
+                    </VBox>
+
+                    <!-- Shared Filter Bar - Responsive layout: Desktop (Horizontal), Mobile (Vertical) -->
+                    <l:Grid id="filterBarContainer"
+                            
+                            class="sapUiSmallMarginTop sapUiSmallMarginBottom"
+                            visible="{= !${viewModel>/isLoadingTable}}">
+                        <SearchField
+                            id="carrierLineFilter"
+                          
+                            placeholder="Filter by Carrier Line..."
+                            search="onFilterCarrierLine"
+                            liveChange="onFilterCarrierLine">
+                            <layoutData>
+                                <l:GridData id="carrierLineFilterLayoutData" span="L4 M6 S12"  />
+                            </layoutData>
+                        </SearchField>
+                        <SearchField
+                            id="createdByFilter"
+                          
+                            placeholder="Filter by Inspector..."
+                            search="onFilterCreatedBy"
+                            liveChange="onFilterCreatedBy">
+                            <layoutData>
+                                <l:GridData id="createdByFilterLayoutData" span="L4 M6 S12"  />
+                            </layoutData>
+                        </SearchField>
+                        <SearchField
+                            id="StatusFilter"
+                            
+                            placeholder="Filter by Status..."
+                            search="onFilterStatus"
+                            liveChange="onFilterStatus">
+                            <layoutData>
+                                <l:GridData id="statusFilterLayoutData" span="L4 M6 S12"  />
+                            </layoutData>
+                        </SearchField>
+                    </l:Grid>
+
+                    <BusyIndicator
+                        id="tableBusyIndicator"
+                        visible="{viewModel>/isLoadingTable}"
+                        text="Loading carrier data..."
+                        class="sapUiMediumMargin"/>
+
+                    <!-- Table for Carrier Data - Tablet and Desktop only -->
+                    <Table
+                        id="carrierTable"
+                        items="{viewModel>/carrierData}"
+                        growing="true"
+                        growingThreshold="20"
+                        visible="{= !${viewModel>/isLoadingTable} &amp;&amp; ${viewModel>/showTableView}}"
+                        mode="SingleSelectMaster"
+                        selectionChange="onCarrierSelect"
+                        class="sapUiSmallMarginTop"
+                        width="100%"
+                        fixedLayout="false"
+                        sticky="ColumnHeaders,HeaderToolbar"
+                        popinLayout="Block">
+                        <columns>
+                            <Column id="serialNumberColumn"
+                                    width="4rem"
+                                    minScreenWidth="Phone"
+                                    demandPopin="false"
+                                    hAlign="Center">
+                                <Text id="serialNumberHeader" text="S.No"/>
+                            </Column>
+                            <Column id="documentSeqColumn"
+                                    width="6rem"
+                                    minScreenWidth="Phone"
+                                    demandPopin="false"
+                                    hAlign="Begin">
+                                <Text text="Document/&#10;Seq" wrapping="true"/>
+                            </Column>
+                            <Column id="carrierNumberColumn"
+                                    width="11rem"
+                                    minScreenWidth="Phone"
+                                    demandPopin="false">
+                                <Text id="carrierNumberHeader" text="Carrier Number"/>
+                            </Column>
+                            <Column id="carrierLineColumn"
+                                    width="11rem"
+                                    minScreenWidth="Tablet"
+                                    demandPopin="true">
+                                <Text id="carrierLineHeader" text="Carrier Line"/>
+                            </Column>
+                            <Column id="codeValuesColumn"
+                                    width="15rem"
+                                    minScreenWidth="Tablet"
+                                    demandPopin="true">
+                                <Text id="codeValuesHeader" text="Inspection Codes"/>
+                            </Column>
+                            <Column id="createdByColumn"
+                                    width="11rem"
+                                    minScreenWidth="Tablet"
+                                    demandPopin="true">
+                                <Text id="createdByHeader" text="Inspected By"/>
+                            </Column>
+                            <Column id="statusColumn"
+                                    width="7.5rem"
+                                    minScreenWidth="Tablet"
+                                    demandPopin="true"
+                                    hAlign="Center">
+                                <Text id="statusHeader" text="Status"/>
+                            </Column>
+                        </columns>
+                        <items>
+                            <ColumnListItem id="carrierListItem" vAlign="Middle">
+                                <cells>
+                                    <Text id="serialNumberText"
+                                          text="{viewModel>SerialNumber}"
+                                          wrapping="false"
+                                          textAlign="Center"/>
+                                    <Text id="documentSeqText"
+                                            text="{= ${viewModel>DocumentNo} + '/' + ${viewModel>Sequencenumber} }"
+                                            wrapping="false"/>
+
+                                    <Text id="carrierNumberText"
+                                          text="{viewModel>CarrierNumber}"
+                                          wrapping="false"
+                                          renderWhitespace="false"
+                                          maxLines="1"/>
+                                    <Text id="carrierLineText"
+                                          text="{viewModel>CarrierTypeCodeText}"
+                                          wrapping="false"
+                                          renderWhitespace="false"
+                                          maxLines="1"/>
+                                    <Text id="codeValueText"
+                                          text="{viewModel>CodeValue}"
+                                          wrapping="true"
+                                          renderWhitespace="false"/>
+                                    <Text id="createdByText"
+                                          text="{viewModel>CreatedBy}"
+                                          wrapping="false"
+                                          renderWhitespace="false"
+                                          maxLines="1"/>
+                                    <ObjectStatus id="statusObjectStatus"
+                                                  text="{= ${viewModel>Status} === 'A' ? 'Accepted' : ${viewModel>Status} === 'R' ? 'Rejected' : ${viewModel>Status} }"
+                                                  state="{= ${viewModel>Status} === 'A' ? 'Success' : ${viewModel>Status} === 'R' ? 'Error' : 'None' }"/>
+                                </cells>
+                            </ColumnListItem>
+                        </items>
+                    </Table>
+
+                    <!-- List for Carrier Data - Phone only with inline labels -->
+                    <List
+                        id="carrierList"
+                        items="{viewModel>/carrierData}"
+                        growing="true"
+                        growingThreshold="20"
+                        visible="{= !${viewModel>/isLoadingTable} &amp;&amp; ${viewModel>/showListView}}"
+                        mode="SingleSelectMaster"
+                        selectionChange="onCarrierSelect"
+                        class="sapUiSmallMarginTop">
+                        <items>
+                            <CustomListItem id="idCarrierItemCustomListItem" type="Active">
+                                <VBox id="idCarrierItemContainerVBox" class="sapUiSmallMargin">
+                                    <!-- Serial Number with label -->
+                                    <HBox id="idSerialNumberRowHBox">
+                                        <Label id="idSNoLabel" text="S.No:" class="sapUiTinyMarginEnd" design="Bold"/>
+                                        <Text id="idSerialNumberText" text="{viewModel>SerialNumber}"/>
+                                    </HBox>
+
+                                    <!-- Document Number with label -->
+                                    <HBox id="idDocumentNumberRowHBox" class="sapUiTinyMarginTop">
+                                        <Label id="idDocumentLabel" text="Document:" class="sapUiTinyMarginEnd" design="Bold"/>
+                                        <Text id="idDocumentNumberText" text="{viewModel>DocumentNo}"/>
+                                    </HBox>
+
+                                    <!-- Sequence Number with label -->
+                                    <HBox id="idSequenceNumberRowHBox" class="sapUiTinyMarginTop">
+                                        <Label id="idSequenceLabel" text="Sequence:" class="sapUiTinyMarginEnd" design="Bold"/>
+                                        <Text id="idSequenceNumberText" text="{viewModel>Sequencenumber}"/>
+                                    </HBox>
+
+                                    <!-- Carrier Number with label -->
+                                    <HBox id="idCarrierNumberRowHBox" class="sapUiTinyMarginTop">
+                                        <Label id="idCarrierNumberLabel" text="Carrier Number:" class="sapUiTinyMarginEnd" design="Bold"/>
+                                        <Text id="idCarrierNumberValueText" text="{viewModel>CarrierNumber}"/>
+                                    </HBox>
+
+                                    <!-- Carrier Line with label -->
+                                    <HBox id="idCarrierLineRowHBox" class="sapUiTinyMarginTop">
+                                        <Label id="idCarrierLineLabel" text="Carrier Line:" class="sapUiTinyMarginEnd" design="Bold"/>
+                                        <Text id="idCarrierLineValueText" text="{viewModel>CarrierTypeCodeText}"/>
+                                    </HBox>
+
+                                    <!-- Inspection Codes with label -->
+                                    <HBox id="idInspectionCodesRowHBox" class="sapUiTinyMarginTop">
+                                        <Label id="idInspectionCodesLabel" text="Inspection Codes:" class="sapUiTinyMarginEnd" design="Bold"/>
+                                        <Text id="idCodeValueText" text="{viewModel>CodeValue}"/>
+                                    </HBox>
+
+                                    <!-- Inspected By with label -->
+                                    <HBox id="idCreatedByRowHBox" class="sapUiTinyMarginTop">
+                                        <Label id="idCreatedByLabel" text="Inspected By:" class="sapUiTinyMarginEnd" design="Bold"/>
+                                        <Text id="idCreatedByValueText" text="{viewModel>CreatedBy}"/>
+                                    </HBox>
+
+                                    <!-- Status with label -->
+                                    <HBox id="idStatusRowHBox" class="sapUiTinyMarginTop">
+                                        <Label id="idStatusLabel" text="Status:" class="sapUiTinyMarginEnd" design="Bold"/>
+                                        <ObjectStatus id="idStatusObjectStatus"
+                                                      text="{= ${viewModel>Status} === 'A' ? 'Accepted' : ${viewModel>Status} === 'R' ? 'Rejected' : ${viewModel>Status} }"
+                                                      state="{= ${viewModel>Status} === 'A' ? 'Success' : ${viewModel>Status} === 'R' ? 'Error' : 'None' }"/>
+                                    </HBox>
+                                </VBox>
+                            </CustomListItem>
+                        </items>
+                    </List>
+
+                    <!-- No Data Message -->
+                    <MessageStrip
+                        id="noCarrierDataMessage"
+                        text="No carrier inspection data found for today ({viewModel>/currentDate}). Please check back later."
+                        type="Information"
+                        showIcon="true"
+                        visible="{= !${viewModel>/isLoadingTable} &amp;&amp; ${viewModel>/carrierData}.length === 0}"
+                        class="sapUiMediumMarginTop"/>
+
+                </VBox>
+
+                <!-- Right Side: Code Reference Panel -->
+                <VBox id="referenceSection" class="sapUiSmallMargin" width="100%">
+                    <layoutData>
+                        <l:GridData id="rightLayoutData" span="L3 M12 S12" />
+                    </layoutData>
+
+                    <Toolbar id="referenceToolbar">
+                        <Title id="referenceTitle" text="Inspection Code Reference" level="H2"/>
+                    </Toolbar>
+
+                    <BusyIndicator
+                        id="referenceBusyIndicator"
+                        visible="{viewModel>/isLoadingCodes}"
+                        text="Loading code reference..."
+                        class="sapUiMediumMargin"/>
+
+                    <!-- Search field for codes -->
+                    <SearchField
+                        id="codeSearchField"
+                        placeholder="Search codes..."
+                        width="100%"
+                        search="onSearchCodes"
+                        liveChange="onSearchCodes"
+                        visible="{= !${viewModel>/isLoadingCodes}}"
+                        class="sapUiSmallMarginTop"/>
+
+                    <!-- Table for Code Reference -->
+                    <Table
+                        id="codeReferenceTable"
+                        items="{viewModel>/codeReference}"
+                        visible="{= !${viewModel>/isLoadingCodes}}"
+                        class="sapUiSmallMarginTop"
+                        width="100%">
+                        <columns>
+                            <Column id="codeColumn" width="25%">
+                                <Text id="codeHeader" text="Code"/>
+                            </Column>
+                            <Column id="conditionColumn" width="75%">
+                                <Text id="conditionHeader" text="Condition Description"/>
+                            </Column>
+                        </columns>
+                        <items>
+                            <ColumnListItem id="codeListItem">
+                                <cells>
+                                    <ObjectStatus
+                                        id="codeStatus"
+                                        text="{viewModel>InspectionCode}"
+                                        state="Information"/>
+                                    <Text
+                                        id="codeText"
+                                        text="{viewModel>InspectionCodeText}"
+                                        wrapping="false"
+                                        class="sapUiSmallText"/>
+                                </cells>
+                            </ColumnListItem>
+                        </items>
+                    </Table>
+
+                    <!-- Message when no codes found -->
+                    <MessageStrip
+                        id="noCodesMessage"
+                        text="No inspection codes available. Please contact system administrator."
+                        type="Warning"
+                        showIcon="true"
+                        visible="{= !${viewModel>/isLoadingCodes} &amp;&amp; ${viewModel>/codeReference}.length === 0}"
+                        class="sapUiMediumMarginTop"/>
+
+                </VBox>
+
+            </l:Grid>
+
+        </content>
+    </Page>
+
+</mvc:View>

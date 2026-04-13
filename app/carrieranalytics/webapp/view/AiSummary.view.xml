@@ -1,0 +1,294 @@
+<mvc:View
+    controllerName="carrieranalytics.controller.AiSummary"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:f="sap.f"
+    xmlns:l="sap.ui.layout"
+    xmlns:c="sap.ui.core"
+    displayBlock="true"
+    height="100%"
+    busyIndicatorDelay="0"
+>
+    <Page
+        id="aiSummaryPage"
+        title="Ai Summary"
+        showNavButton="true"
+        navButtonPress="onNavBack"
+    >
+        <content>
+            <IconTabBar
+                id="idIconTabBar"
+                expandable="false"
+                class="sapUiResponsiveContentPadding"
+            >
+                <items>
+                    <!-- ===== TAB 1: AI SUMMARY ===== -->
+                    <IconTabFilter
+                        key="aiSummary"
+                        text="AI Summary"
+                        icon="sap-icon://ai"
+                    >
+                        <VBox
+                            id="aiSummaryVBox"
+                            class="sapUiSmallMargin"
+                        >
+                            <!-- Loading Indicator -->
+                            <!-- <BusyIndicator id="summaryBusyIndicator" visible="{viewModel>/isLoading}" text="Loading summary data..." class="sapUiMediumMargin" /> -->
+                            <!-- Summary Content -->
+                            <VBox
+                                id="summaryContentVBox"
+                                visible="{=${viewModel>/summaryData} &amp;&amp; ${viewModel>/summaryData/hasData}}"
+                            >
+                                <!-- Summary Details Section -->
+                                <Panel
+                                    id="detailsPanel"
+                                    headerText="Summary Details"
+                                    class="sapUiSmallMarginBottom"
+                                    expandable="false"
+                                >
+                                    <VBox
+                                        id="detailsVBox"
+                                        class="sapUiSmallMargin"
+                                    >
+                                        <Text
+                                            id="summaryLine0"
+                                            text="{viewModel>/summaryData/summaryLines/0}"
+                                            wrapping="true"
+                                            class="sapUiSmallMarginBottom"
+                                        />
+                                        <Text
+                                            id="summaryLine1"
+                                            text="{viewModel>/summaryData/summaryLines/1}"
+                                            wrapping="true"
+                                            class="sapUiSmallMarginBottom"
+                                        />
+                                        <Text
+                                            id="summaryLine2"
+                                            text="{viewModel>/summaryData/summaryLines/2}"
+                                            wrapping="true"
+                                            class="sapUiSmallMarginBottom"
+                                        />
+                                        <Text
+                                            id="summaryLine3"
+                                            text="{viewModel>/summaryData/summaryLines/3}"
+                                            wrapping="true"
+                                            class="sapUiSmallMarginBottom"
+                                        />
+                                        <Text
+                                            id="summaryLine4"
+                                            text="{viewModel>/summaryData/summaryLines/4}"
+                                            wrapping="true"
+                                            class="sapUiSmallMarginBottom"
+                                        />
+                                    </VBox>
+                                </Panel>
+                                <!-- Rejection Rate Trend Card -->
+                                <Panel
+                                    id="trendPanel"
+                                    headerText="Rejection Rate Trend"
+                                    class="sapUiSmallMarginBottom"
+                                    expandable="false"
+                                >
+                                    <VBox
+                                        id="trendVBox"
+                                        class="sapUiSmallMargin"
+                                        alignItems="Center"
+                                    >
+                                        <!-- Previous Period -->
+                                        <HBox
+                                            id="prevPeriodHBox"
+                                            alignItems="Center"
+                                            justifyContent="Center"
+                                            class="sapUiSmallMarginBottom"
+                                        >
+                                            <Text
+                                                id="prevPeriodLabel"
+                                                text="Previous Period: "
+                                                class="sapUiTinyMarginEnd"
+                                            />
+                                            <Text
+                                                id="prevPeriodValue"
+                                                text="{viewModel>/summaryData/prevRejectionRate}%"
+                                                class="sapUiMediumText"
+                                            />
+                                        </HBox>
+                                        <!-- Arrow Indicator -->
+                                        <Text
+                                            id="arrowText"
+                                            text="↓"
+                                            class="sapUiSmallMarginBottom sapUiLargeText"
+                                            textAlign="Center"
+                                        />
+                                        <!-- Current Period -->
+                                        <HBox
+                                            id="currPeriodHBox"
+                                            alignItems="Center"
+                                            justifyContent="Center"
+                                            class="sapUiSmallMarginBottom"
+                                        >
+                                            <Text
+                                                id="currPeriodLabel"
+                                                text="Current Period: "
+                                                class="sapUiTinyMarginEnd"
+                                            />
+                                            <Text
+                                                id="currPeriodValue"
+                                                text="{viewModel>/summaryData/rejectionRate}%"
+                                                class="sapUiMediumText sapUiNegativeTextColor"
+                                                textAlign="Center"
+                                            />
+                                        </HBox>
+                                        <!-- Delta/Change -->
+                                        <HBox
+                                            id="deltaHBox"
+                                            alignItems="Center"
+                                            justifyContent="Center"
+                                            class="sapUiSmallMarginTop"
+                                        >
+                                            <Text
+                                                id="deltaLabel"
+                                                text="Change: "
+                                                class="sapUiTinyMarginEnd"
+                                            />
+                                            <Text
+                                                id="deltaValue"
+                                                text="{= ${viewModel>/summaryData/rateDeltaValue} + '%'}"
+                                                class="sapUiMediumText"
+                                                textAlign="Center"
+                                            />
+                                            <Text
+                                                id="deltaTrend"
+                                                text="{viewModel>/summaryData/rateTrend}"
+                                                class="sapUiSmallMarginBegin sapUiMediumText"
+                                            />
+                                        </HBox>
+                                    </VBox>
+                                </Panel>
+                            </VBox>
+                            <!-- No Data Message -->
+                            <MessageStrip
+                                id="noDataMessageStrip"
+                                text="No summary data available for the selected date range."
+                                type="Information"
+                                showIcon="true"
+                                visible="{=
+                                    ${viewModel>/summaryData}
+                                    &amp;&amp; !${viewModel>/summaryData/hasData}
+                                    &amp;&amp; !${viewModel>/isLoading}
+                                }"
+                                class="sapUiSmallMargin"
+                            />
+                        </VBox>
+                    </IconTabFilter>
+                    <!-- ===== TAB 2: INSIGHTS ===== -->
+                    <IconTabFilter
+                        id="insightsTabFilter"
+                        key="insights"
+                        text="Insights"
+                        icon="sap-icon://bar-chart"
+                    >
+                        <VBox class="sapUiSmallMargin">
+                            <!-- Loading -->
+                            <BusyIndicator
+                                visible="{viewModel>/isLoading}"
+                                text="Loading insights..."
+                                class="sapUiMediumMargin"
+                            />
+                            <!-- INSIGHTS LIST -->
+                            <l:Grid
+                                visible="{= ${viewModel>/insights}.length > 0 &amp;&amp; !${viewModel>/isLoading} }"
+                                defaultSpan="L6 M6 S12"
+                                hSpacing="1"
+                                vSpacing="1"
+                                containerQuery="true"
+                                content="{viewModel>/insights}"
+                            >
+                                <l:content>
+                                    <Panel
+                                        expandable="false"
+                                        width="100%"
+                                        class="sapUiSmallMarginBottom"
+                                        visible="{
+                                            parts: ['viewModel>KeyText'],
+                                            formatter: '.isInsightAvailable'
+                                        }"
+                                    >
+                                        <headerToolbar>
+                                            <OverflowToolbar>
+                                                <Title
+                                                    level="H4"
+                                                    text="{
+                                                        parts: [
+                                                            'viewModel>InsightType',
+                                                            'viewModel>KeyText',
+                                                            'viewModel>KeyId',
+                                                            'viewModel>PeriodType'
+                                                        ],
+                                                        formatter: '.formatPanelHeader'
+                                                    }"
+                                                />
+                                                <ToolbarSpacer />
+                                                <ObjectStatus
+                                                    inverted="true"
+                                                    text="{viewModel>Severity}"
+                                                    state="{
+                                                        path: 'viewModel>Severity',
+                                                        formatter: '.formatSeverityState'
+                                                    }"
+                                                />
+                                            </OverflowToolbar>
+                                        </headerToolbar>
+                                        <VBox class="sapUiMediumMargin">
+                                            <!-- Insight -->
+                                            <VBox class="sapUiSmallMarginBottom">
+                                                <Label text="Insight" />
+                                                <Text
+                                                    wrapping="true"
+                                                    text="{
+                                                        parts: [
+                                                            'viewModel>InsightType',
+                                                            'viewModel>KeyText',
+                                                            'viewModel>KeyId',
+                                                            'viewModel>PeriodType'
+                                                        ],
+                                                        formatter: '.formatInsightHeadline'
+                                                    }"
+                                                />
+                                            </VBox>
+                                            <!-- Evidence -->
+                                            <VBox>
+                                                <Label text="Evidence" />
+                                                <Text
+                                                    wrapping="true"
+                                                    text="{
+                                                        parts: [
+                                                            'viewModel>InsightType',
+                                                            'viewModel>RejectionCount',
+                                                            'viewModel>TotalRejections',
+                                                            'viewModel>RejectionRate',
+                                                            'viewModel>PeriodType'
+                                                        ],
+                                                        formatter: '.formatInsightEvidence'
+                                                    }"
+                                                />
+                                            </VBox>
+                                        </VBox>
+                                    </Panel>
+                                </l:content>
+                            </l:Grid>
+                        </VBox>
+                        <!-- No Data -->
+                        <MessageStrip
+                            text="No insights available for the selected date range."
+                            type="Information"
+                            showIcon="true"
+                            visible="{= ${viewModel>/insights}.length === 0 &amp;&amp; !${viewModel>/isLoading} }"
+                            class="sapUiSmallMargin"
+                        />
+                    
+                </IconTabFilter>
+            </items>
+        </IconTabBar>
+    </content>
+</Page>
+</mvc:View>
