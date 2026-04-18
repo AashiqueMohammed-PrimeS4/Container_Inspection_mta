@@ -152,7 +152,6 @@ sap.ui.define([
                 success: function (oData) {
                     var iAcceptedCount = 0;
                     var iRejectedCount = 0;
-
                     if (oData.results) {
                         oData.results.forEach(function (oItem) {
                             if (oItem.Status === "A") {
