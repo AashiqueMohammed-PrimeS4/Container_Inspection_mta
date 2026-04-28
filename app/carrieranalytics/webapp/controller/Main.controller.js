@@ -142,7 +142,7 @@ sap.ui.define([
             var sPath = "/InspectionHeaderSet";
             var sFormattedStartDate = this._formatDateForOData(oStartDate);
             var sFormattedEndDate = this._formatDateForOData(oEndDate);
-
+            
             var aFilters = [
                 new Filter("InspectionDate", FilterOperator.BT, sFormattedStartDate, sFormattedEndDate)
             ];
@@ -161,7 +161,6 @@ sap.ui.define([
                             }
                         });
                     }
-
                     var oViewModel = this.getView().getModel("viewModel");
                     oViewModel.setProperty("/acceptedCount", iAcceptedCount);
                     oViewModel.setProperty("/rejectedCount", iRejectedCount);

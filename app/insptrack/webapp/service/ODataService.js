@@ -241,54 +241,34 @@ sap.ui.define([
          * @param {string} slug - File slug
          * @returns {Promise} Promise resolving when upload is complete
          */
-        uploadPDF(oDataModel, pdfBlob, slug) {
-            return new Promise((resolve, reject) => {
-                oDataModel.refreshSecurityToken(
-                    () => {
-                        const sCSRFToken = oDataModel.getSecurityToken();
-                        const sUrl = oDataModel.sServiceUrl + "/AttachmentSet";
+        async uploadPDF(oDataModel, pdfBlob, slug) {
+            try {
+                const sCSRFToken = await oDataModel.securityTokenAvailable();
+                console.log("pdfBlob",pdfBlob);
 
-                        const mHeaders = {
-                            "Content-Type": "application/pdf",
-                            "slug": slug,
+                const sUrl = oDataModel.sServiceUrl + "/AttachmentSet";
+
+                return new Promise((resolve, reject) => {
+                    $.ajax({
+                        url: sUrl,
+                        type: "POST",
+                        data: pdfBlob,
+                        processData: false,
+                        contentType: "application/pdf",
+                        headers: {
                             "X-CSRF-Token": sCSRFToken,
+                            "slug": slug,
                             "X-Requested-With": "XMLHttpRequest"
-                        };
+                        },
+                        success: resolve,
+                        error: reject
+                    });
+                });
 
-                        jQuery.ajax({
-                            url: sUrl,
-                            type: "POST",
-                            data: pdfBlob,
-                            headers: mHeaders,
-                            processData: false,
-                            contentType: "application/pdf",
-                            success: (data) => {
-                                console.log("Upload successful:", data);
-                                resolve(data);
-                            },
-                            error: (jqXHR, textStatus, errorThrown) => {
-                                console.error("Upload failed:", textStatus, errorThrown);
-                                let sErrorMsg = "Upload failed: " + textStatus;
-                                if (jqXHR.responseText) {
-                                    try {
-                                        const oError = JSON.parse(jqXHR.responseText);
-                                        if (oError.error && oError.error.message) {
-                                            sErrorMsg = oError.error.message.value;
-                                        }
-                                    } catch (e) {
-                                        sErrorMsg = jqXHR.responseText;
-                                    }
-                                }
-                                reject(new Error(sErrorMsg));
-                            }
-                        });
-                    },
-                    () => {
-                        console.error("Could not refresh CSRF token");
-                        reject(new Error("Could not refresh CSRF token"));
-                    }
-                );
-            });
+            } catch (err) {
+                console.error("Token fetch failed", err);
+                throw err;
+            }
         }
     };
 });

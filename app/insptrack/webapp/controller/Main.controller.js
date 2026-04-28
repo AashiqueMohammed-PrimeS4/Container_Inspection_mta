@@ -796,7 +796,6 @@ sap.ui.define([
             try {
                 await this._loadPdfMake();
                 console.log("pdfMake loaded");
-
                 const inspectionData = await this._fetchInspectionData();
                 const oHeaderData = {
                     document: this.oModel.getProperty("/document"),
@@ -1311,7 +1310,7 @@ sap.ui.define([
 
             this._cameraDialog.close();
             sap.ui.core.BusyIndicator.show(0);
-
+            
             const oCropModel = this.getOwnerComponent().getModel("catalog");
 
             /* ================= STEP 1: CROP ================= */

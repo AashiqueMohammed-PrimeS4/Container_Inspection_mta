@@ -3,8 +3,8 @@
   "authenticationMethod": "route",
   "routes": [
     {
-      "source": "^/sap/(.*)$",
-      "target": "/sap/$1",
+      "source": "^/sap/(.*)$",   
+      "target": "/sap/$1",       
       "destination": "DEV-100-PrincipalPropogation",
       "authenticationType": "xsuaa",
       "csrfProtection": false
