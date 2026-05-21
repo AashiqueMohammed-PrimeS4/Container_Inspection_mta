@@ -33,23 +33,6 @@
                     </contentRight>
                 </Bar>
             </customHeader>
-            <dependents>
-                <Popover
-                    id="suggestionPopover"
-                    placement="Top"
-                    showHeader="false"
-                >
-                    <List items="{chatModel>/suggestions}">
-                        <items>
-                            <StandardListItem
-                                title="{chatModel>title}"
-                                type="Active"
-                                press="onSuggestionItemPress"
-                            />
-                        </items>
-                    </List>
-                </Popover>
-            </dependents>
             <content>
                 <VBox
                     height="100%"
@@ -106,14 +89,21 @@
                             </items>
                         </List>
                     </ScrollContainer>
+                    <!-- Suggestion Chips -->
+                    <HBox
+                        items="{chatModel>/suggestions}"
+                        wrap="Wrap"
+                        class="sapUiTinyMarginBegin sapUiTinyMarginEnd sapUiTinyMarginBottom"
+                    >
+                        <Button
+                            text="{chatModel>title}"
+                            type="Ghost"
+                            press="onSuggestionItemPress"
+                            class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
+                        />
+                    </HBox>
                     <!-- Input Section -->
                     <Toolbar>
-                        <Button
-                            id="helpButton"
-                            icon="sap-icon://discussion-2"
-                            type="Ghost"
-                            press="onOpenSuggestionPopover"
-                        />
                         <Input
                             id="chatInput"
                             width="100%"

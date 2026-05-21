@@ -784,16 +784,11 @@ sap.ui.define([
         },
 
         onSuggestionItemPress: function (oEvent) {
-            const sText = oEvent.getSource().getTitle();
-            console.log("hi")
+            const sText = oEvent.getSource().getText();
             this.byId("chatInput").setValue(sText);
-
-            this.byId("suggestionPopover").close();
         },
 
         onOpenSuggestionPopover: function (oEvent) {
-
-
             const oPopover = this.byId("suggestionPopover");
             oPopover.openBy(oEvent.getSource());
         },
