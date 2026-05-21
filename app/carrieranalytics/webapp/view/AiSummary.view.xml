@@ -11,7 +11,7 @@
 >
     <Page
         id="aiSummaryPage"
-        title="Ai Summary"
+        title="PRIVA Summary"
         showNavButton="true"
         navButtonPress="onNavBack"
     >
@@ -42,7 +42,7 @@
                                 <!-- Summary Details Section -->
                                 <Panel
                                     id="detailsPanel"
-                                    headerText="Summary Details"
+                                    headerText="Operation Summary"
                                     class="sapUiSmallMarginBottom"
                                     expandable="false"
                                 >
@@ -85,7 +85,7 @@
                                 <!-- Rejection Rate Trend Card -->
                                 <Panel
                                     id="trendPanel"
-                                    headerText="Rejection Rate Trend"
+                                    headerText="Inspection Rejection Trend"
                                     class="sapUiSmallMarginBottom"
                                     expandable="false"
                                 >
@@ -181,11 +181,13 @@
                         </VBox>
                     </IconTabFilter>
                     <!-- ===== TAB 2: INSIGHTS ===== -->
+                   
                     <IconTabFilter
                         id="insightsTabFilter"
                         key="insights"
-                        text="Insights"
+                        text="Op. Insights"
                         icon="sap-icon://bar-chart"
+                        
                     >
                         <VBox class="sapUiSmallMargin">
                             <!-- Loading -->
@@ -285,8 +287,9 @@
                             visible="{= ${viewModel>/insights}.length === 0 &amp;&amp; !${viewModel>/isLoading} }"
                             class="sapUiSmallMargin"
                         />
+                    </IconTabFilter>
                     
-                </IconTabFilter>
+                
             </items>
         </IconTabBar>
     </content>

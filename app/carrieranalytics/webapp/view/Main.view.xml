@@ -11,8 +11,16 @@
    
     <Page
         id="page"
-        title="Carrier Inspection Analytics"
+        title="SmartInspect Insights"
+        titleAlignment="Center"
     >
+        <subHeader>
+            <Bar>
+                <contentMiddle>
+                     <Label text="AI-Powered Inspection Intelligence &amp; Operational Visibility" design="Bold"/>
+                </contentMiddle>
+            </Bar>
+        </subHeader>
        
         <content>
             <VBox
@@ -47,7 +55,7 @@
                     <GenericTile
                         id="acceptedTile"
                         class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
-                        header="Accepted Carriers"
+                        header="Accepted Inspections"
                         frameType="OneByOne"
                     >
                         <TileContent id="acceptedTileContent">
@@ -64,7 +72,7 @@
                     <GenericTile
                         id="rejectedTile"
                         class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
-                        header="Rejected Carriers"
+                        header="Rejected Inspections"
                         frameType="OneByOne"
                     >
                         <TileContent id="rejectedTileContent">
@@ -81,7 +89,7 @@
                     <GenericTile
                         id="reservationSheetTile"
                         class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
-                        header="Carrier Reservation Sheet"
+                        header="Inspection Reports"
                         subheader="View Report"
                         frameType="OneByOne"
                         press="onNavigateToCarrierReport"
@@ -97,8 +105,8 @@
                     <GenericTile
                         id="aiSummaryTile"
                         class="sapUiTinyMarginBottom"
-                        header="AI Summary"
-                        subheader="View AI Summary"
+                        header="PRIVA Summary"
+                        subheader="View PRIVA Summary"
                         frameType="OneByOne"
                         press="onNavigateToAiSummary"
                     >
@@ -113,7 +121,7 @@
                 <!-- ========== NEW FEATURE - Date Range Trend Analysis ========== -->
                 <Panel
                     id="trendPanel"
-                    headerText="Trend Analysis - Date Range"
+                    headerText="Inspection Trends - Date Range"
                     class="sapUiMediumMarginTop"
                     expandable="true"
                     expanded="false"

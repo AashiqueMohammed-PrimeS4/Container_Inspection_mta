@@ -3,8 +3,8 @@
   "authenticationMethod": "route",
   "routes": [
     {
-      "source": "^/sap/(.*)$",   
-      "target": "/sap/$1",       
+      "source": "^/sap/(.*)$",
+      "target": "/sap/$1",
       "destination": "DEV-100-PrincipalPropogation",
       "authenticationType": "xsuaa",
       "csrfProtection": false
@@ -19,6 +19,13 @@
     {
       "source": "^/odata/v2/ocr/(.*)$",
       "target": "/odata/v2/ocr/$1",
+      "destination": "CROP_SERVICE",
+      "authenticationType": "xsuaa",
+      "csrfProtection": false
+    },
+    {
+      "source": "^/odata/v2/defect/(.*)$",
+      "target": "/odata/v2/defect/$1",
       "destination": "CROP_SERVICE",
       "authenticationType": "xsuaa",
       "csrfProtection": false

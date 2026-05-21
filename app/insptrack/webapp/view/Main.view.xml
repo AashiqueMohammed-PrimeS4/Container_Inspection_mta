@@ -47,7 +47,7 @@
                                       maxLength="6"/>
                                
                                 <Label id="_IDGenLabel1" text="Carrier Number" required="true"/>
-                                <HBox alignItems="Center" justifyContent="Start">
+                                <HBox id="_IDGenHBoxCarrier" alignItems="Center" justifyContent="Start">
                                     <Input id="carrierInput"
                                         change="onDocumentDetailsChange"
                                         placeholder="carrier number"
@@ -88,58 +88,62 @@
                                     nextStep="ImageUploadStep"
                                     validated="false">
                             <MessageStrip id="_IDGenMessageStrip1" class="sapUiSmallMarginBottom"
-                                        text="Select inspection codes for the carrier defects found."
+                                        text="Scan the container to automatically detect defects. Review and edit the detected defects, then accept or reject."
                                         showIcon="true"/>
-                            
-                            <ScrollContainer id="_IDGenScrollContainer1" height="100%" width="100%" vertical="true">
-                                <VBox id="_IDGenVBox" class="sapUiSmallMargin">
-                                    <Label id="_IDGenLabel3" text="Select Defects Found:" class="sapUiSmallMarginBottom"/>
-                                    
-                                    <!-- Remove wrap and use responsive widths -->
-                                    <FlexBox id="_IDGenFlexBox" 
-                                            direction="Row" 
-                                            wrap="NoWrap"
-                                            class="sapUiTinyMargin"
-                                            alignItems="Start">
-                                        
-                                        <!-- Left column with responsive width -->
-                                        <VBox id="_IDGenVBox1"
-                                            items="{/inspectionCodesLeft}"
-                                            class="sapUiSmallMarginEnd">
-                                            <layoutData>
-                                                <FlexItemData id="_IDGenFlexItemData1" growFactor="1" baseSize="0"/>
-                                            </layoutData>
-                                            <CheckBox id="_IDGenCheckBox1"
-                                                text="{text}"
-                                                select="onDefectCodeChange"
-                                                width="100%"
-                                                class="sapUiTinyMarginBottom">
-                                                <customData>
-                                                    <core:CustomData key="codeKey" value="{key}"/>
-                                                </customData>
-                                            </CheckBox>
-                                        </VBox>
 
-                                        <!-- Right column with responsive width -->
-                                        <VBox id="_IDGenVBox2"
-                                            items="{/inspectionCodesRight}">
-                                            <layoutData>
-                                                <FlexItemData id="_IDGenFlexItemData2" growFactor="1" baseSize="0"/>
-                                            </layoutData>
-                                            <CheckBox id="_IDGenCheckBox2"
-                                                text="{text}"
-                                                select="onDefectCodeChange"
-                                                width="100%"
-                                                class="sapUiTinyMarginBottom">
-                                                <customData>
-                                                    <core:CustomData key="codeKey" value="{key}"/>
-                                                </customData>
-                                            </CheckBox>
-                                        </VBox>
-                                    </FlexBox>
+                            <!-- Camera + image preview block (centered, matches defectanalysis layout) -->
+                            <VBox id="containerScanBox" alignItems="Center" class="sapUiMediumMargin">
+                                <Button id="btnScanContainer"
+                                    text="Scan Container"
+                                    icon="sap-icon://camera"
+                                    type="Emphasized"
+                                    press="onScanContainer"
+                                    enabled="{/isAcceptButtonEnabled}"/>
+
+                                <Image id="containerPreviewImage"
+                                    src="{/containerImageSrc}"
+                                    width="320px"
+                                    visible="{/showContainerImage}"
+                                    densityAware="false"
+                                    decorative="false"
+                                    alt="Captured container"
+                                    class="sapUiSmallMarginTop"/>
+
+                                
+
+                                <BusyIndicator id="defectBusyIndicator"
+                                    visible="{/isAnalyzing}"
+                                    size="1rem"
+                                    class="sapUiSmallMarginTop"/>
+                            </VBox>
+
+                            <!-- Defect tokenizer section (shown after AI analysis) -->
+                            <VBox visible="{/showDefectSection}" alignItems="Center" class="sapUiSmallMarginBottom">
+                                <VBox width="480px">
+                                    <Label text="Detected Defects:" class="sapUiSmallMarginBottom sapUiSmallMarginTop"/>
+
+                                    <!-- Add token row (hidden after accept) -->
+                                    <HBox visible="{/isAcceptButtonEnabled}" class="sapUiTinyMarginBottom" alignItems="Center">
+                                        <Input id="newDefectInput"
+                                            value="{/newDefectText}"
+                                            placeholder="Add defect manually"
+                                            width="200px"
+                                            class="sapUiTinyMarginEnd"
+                                            submit="onAddDefectToken"/>
+                                        <Button text="Add Defect"
+                                            press="onAddDefectToken"
+                                            class="sapUiTinyMarginEnd"/>
+                                    </HBox>
+
+                                    <Tokenizer id="defectTokenizer"
+                                        width="100%"
+                                        editable="{/isTokenizerEditable}"
+                                        tokenDelete="onDefectTokenDelete"
+                                        class="sapUiSmallMarginBottom"/>
                                 </VBox>
-                            </ScrollContainer>
+                            </VBox>
 
+                            <!-- Accept / Reject buttons -->
                             <HBox id="_IDGenHBox1" justifyContent="Center" class="sapUiLargeMarginTop" visible="{/showAcceptRejectButtons}">
                                 <Button id="_IDGenButton" text="Accept"
                                     type="Emphasized"

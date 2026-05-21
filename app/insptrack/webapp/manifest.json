@@ -40,6 +40,14 @@
         "settings": {
           "odataVersion": "2.0"
         }
+      },
+      "DefectDet": {
+        "uri": "/odata/v2/defect/",
+        "type": "OData",
+        "settings": {
+          "odataVersion": "2.0",
+          "localUri": "localService/DefectDet/metadata.xml"
+        }
       }
     }
   },
@@ -93,6 +101,15 @@
       },
       "ocr": {
         "dataSource": "ocrService",
+        "preload": false,
+        "settings": {
+          "operationMode": "Server",
+          "groupId": "$direct",
+          "useBatch": false
+        }
+      },
+      "defect": {
+        "dataSource": "DefectDet",
         "preload": false,
         "settings": {
           "operationMode": "Server",
