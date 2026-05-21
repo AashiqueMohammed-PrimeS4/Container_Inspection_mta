@@ -8,7 +8,129 @@
     xmlns:viz.data="sap.viz.ui5.data"
     displayBlock="true"
 >
-   
+    <!-- Start Depenedents -->
+    <mvc:dependents>
+        <Popover
+            id="chatDialog"
+            contentWidth="400px"
+            placement="Left"
+            afterOpen="onChatAfterOpen"
+        >
+            <customHeader>
+                <Bar
+                    design="Auto"
+                    titleAlignment="None"
+                >
+                    <contentLeft>
+                        <Title text="PRIVA Assists" />
+                    </contentLeft>
+                    <contentRight>
+                        <Button
+                            icon="sap-icon://decline"
+                            type="Transparent"
+                            press="onCloseChat"
+                        />
+                    </contentRight>
+                </Bar>
+            </customHeader>
+            <dependents>
+                <Popover
+                    id="suggestionPopover"
+                    placement="Top"
+                    showHeader="false"
+                >
+                    <List items="{chatModel>/suggestions}">
+                        <items>
+                            <StandardListItem
+                                title="{chatModel>title}"
+                                type="Active"
+                                press="onSuggestionItemPress"
+                            />
+                        </items>
+                    </List>
+                </Popover>
+            </dependents>
+            <content>
+                <VBox
+                    height="100%"
+                    justifyContent="SpaceBetween"
+                >
+                    <!-- Message Area -->
+                    <ScrollContainer
+                        id="chatScroll"
+                        height="300px"
+                        vertical="true"
+                        focusable="false"
+                    >
+                        <List
+                            items="{chatModel>/messages}"
+                            showSeparators="None"
+                        >
+                            <items>
+                                <CustomListItem>
+                                    <HBox
+                                        justifyContent="{= ${chatModel>sender} === 'Me' ? 'End' : 'Start' }"
+                                        alignItems="End"
+                                        class="sapUiSmallMargin"
+                                    >
+                                        <!-- Bot Avatar (Left Side) -->
+                                        <Avatar
+                                            src="sap-icon://SAP-icons-TNT/robot"
+                                            displaySize="XS"
+                                            displayShape="Square"
+                                            backgroundColor="Accent3"
+                                            visible="{= ${chatModel>sender} !== 'Me' }"
+                                            class="sapUiTinyMarginEnd"
+                                        />
+                                        <!-- MessageStrip Bubble -->
+                                        <MessageStrip
+                                            text="{= ${chatModel>typing} === true ? '...' : ${chatModel>text} }"
+                                            type="{= ${chatModel>sender} === 'Me' ? 'Success' : 'Warning' }"
+                                            showIcon="false"
+                                            class="sapUiTinyMarginTop sapUiTinyMarginBottom"
+                                        />
+                                        <!-- User Avatar (Right Side) -->
+                                        <Avatar
+                                            initials="{
+                                                path: 'chatModel>/userName',
+                                                formatter: '.formatInitial'
+                                            }"
+                                            displaySize="XS"
+                                            displayShape="Square"
+                                            backgroundColor="Accent9"
+                                            visible="{= ${chatModel>sender} === 'Me' }"
+                                            class="sapUiTinyMarginBegin"
+                                        />
+                                    </HBox>
+                                </CustomListItem>
+                            </items>
+                        </List>
+                    </ScrollContainer>
+                    <!-- Input Section -->
+                    <Toolbar>
+                        <Button
+                            id="helpButton"
+                            icon="sap-icon://discussion-2"
+                            type="Ghost"
+                            press="onOpenSuggestionPopover"
+                        />
+                        <Input
+                            id="chatInput"
+                            width="100%"
+                            placeholder="Ask PRIVA"
+                            submit="onPostMessage"
+                        />
+                        <Button
+                            icon="sap-icon://paper-plane"
+                            type="Emphasized"
+                            press="onPostMessage"
+                        />
+                    </Toolbar>
+                </VBox>
+            </content>
+        </Popover>
+    </mvc:dependents>
+    <!-- End of AI Dependents -->
     <Page
         id="page"
         title="SmartInspect Insights"
@@ -22,6 +144,19 @@
             </Bar>
         </subHeader>
        
+        <headerContent>
+            <OverflowToolbar>
+                <ToolbarSpacer />
+                <Button
+                text="PRIVA Assist"
+                    id="floatingActionBtn"
+                    icon="sap-icon://da-2"
+                    type="Transparent"
+                    tooltip="PRIVA Assists"
+                    press="onFloatingPress"
+                />
+            </OverflowToolbar>
+        </headerContent>
         <content>
             <VBox
                 id="mainVBox"
