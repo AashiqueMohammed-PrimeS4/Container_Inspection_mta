@@ -1,11 +1,15 @@
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/ui/model/json/JSONModel",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator",
     "sap/m/MessageBox",
     "sap/m/MessageToast"
 ], function (
     Controller,
     JSONModel,
+    Filter,
+    FilterOperator,
     MessageBox,
     MessageToast
 ) {
@@ -23,7 +27,17 @@ sap.ui.define([
                 insights: [],
                 isLoading: false,
                 selectedStartDate: null,
-                selectedEndDate: null
+                selectedEndDate: null,
+                // Trend Analysis tab
+                trendChartType: "line",
+                trendShowChart: false,
+                trendIsLoading: false,
+                trendShowNoData: false,
+                trendChartData: [],
+                trendTotalAccepted: 0,
+                trendTotalRejected: 0,
+                trendAvgAccepted: 0,
+                trendAvgRejected: 0
             });
             this.getView().setModel(oViewModel, "viewModel");
 
@@ -52,6 +66,7 @@ sap.ui.define([
                 if (sStartDate && sEndDate) {
                     this._loadSummaryData(sStartDate, sEndDate);
                     this._loadInsights(sStartDate, sEndDate);
+                    this._loadTrendData(sStartDate, sEndDate);
 
                 } else {
                     // Use today as default
@@ -299,6 +314,219 @@ sap.ui.define([
             return !!(sKeyText && sKeyText.trim());
         },
 
+
+        // ============= Trend Analysis =============
+
+        _loadTrendData: function (sStartDate, sEndDate) {
+            var oStartDate = new Date(sStartDate);
+            var oEndDate = new Date(sEndDate);
+            var iDaysDiff = Math.ceil((oEndDate - oStartDate) / (1000 * 60 * 60 * 24));
+
+            if (iDaysDiff > 90) {
+                MessageToast.show("Date range exceeds 90 days — trend data limited to first 90 days.");
+                oEndDate = new Date(oStartDate);
+                oEndDate.setDate(oEndDate.getDate() + 90);
+            }
+
+            this._fetchTrendData(oStartDate, oEndDate);
+        },
+
+        _fetchTrendData: function (oStartDate, oEndDate) {
+            var oViewModel = this.getView().getModel("viewModel");
+
+            oViewModel.setProperty("/trendIsLoading", true);
+            oViewModel.setProperty("/trendShowChart", false);
+            oViewModel.setProperty("/trendShowNoData", false);
+
+            var aDates = this._getTrendDateRange(oStartDate, oEndDate);
+            var aPromises = [];
+            var oResults = {};
+            this._trendCarrierCache = {};
+
+            aDates.forEach(function (oDate) {
+                var sDisplayDate = this._formatDateForDisplay(oDate);
+                oResults[sDisplayDate] = { date: sDisplayDate, accepted: 0, rejected: 0 };
+                this._trendCarrierCache[sDisplayDate] = { accepted: [], rejected: [] };
+
+                aPromises.push(this._fetchCarriersWithCountPromise(oDate, "A").then(function (oData) {
+                    oResults[sDisplayDate].accepted = oData.count;
+                    this._trendCarrierCache[sDisplayDate].accepted = oData.carriers;
+                }.bind(this)));
+                aPromises.push(this._fetchCarriersWithCountPromise(oDate, "R").then(function (oData) {
+                    oResults[sDisplayDate].rejected = oData.count;
+                    this._trendCarrierCache[sDisplayDate].rejected = oData.carriers;
+                }.bind(this)));
+            }.bind(this));
+
+            Promise.all(aPromises).then(function () {
+                var aChartData = aDates.map(function (oDate) {
+                    return oResults[this._formatDateForDisplay(oDate)];
+                }.bind(this));
+
+                var iTotalAccepted = 0, iTotalRejected = 0, bHasData = false;
+                aChartData.forEach(function (oData) {
+                    iTotalAccepted += oData.accepted;
+                    iTotalRejected += oData.rejected;
+                    if (oData.accepted > 0 || oData.rejected > 0) { bHasData = true; }
+                });
+
+                var iDaysCount = aChartData.length;
+                oViewModel.setProperty("/trendChartData", aChartData);
+                oViewModel.setProperty("/trendTotalAccepted", iTotalAccepted);
+                oViewModel.setProperty("/trendTotalRejected", iTotalRejected);
+                oViewModel.setProperty("/trendAvgAccepted", iDaysCount > 0 ? (iTotalAccepted / iDaysCount).toFixed(1) : 0);
+                oViewModel.setProperty("/trendAvgRejected", iDaysCount > 0 ? (iTotalRejected / iDaysCount).toFixed(1) : 0);
+                oViewModel.setProperty("/trendIsLoading", false);
+                oViewModel.setProperty("/trendShowChart", bHasData);
+                oViewModel.setProperty("/trendShowNoData", !bHasData);
+            }.bind(this)).catch(function (oError) {
+                console.error("Error fetching trend data:", oError);
+                oViewModel.setProperty("/trendIsLoading", false);
+                oViewModel.setProperty("/trendShowNoData", true);
+            }.bind(this));
+        },
+
+        _getTrendDateRange: function (oStartDate, oEndDate) {
+            var aDates = [];
+            var oCurrentDate = new Date(oStartDate);
+            while (oCurrentDate <= oEndDate) {
+                aDates.push(new Date(oCurrentDate));
+                oCurrentDate.setDate(oCurrentDate.getDate() + 1);
+            }
+            return aDates;
+        },
+
+        _formatDateForDisplay: function (oDate) {
+            var sDay = ("0" + oDate.getDate()).slice(-2);
+            var sMonth = ("0" + (oDate.getMonth() + 1)).slice(-2);
+            return sDay + "/" + sMonth + "/" + oDate.getFullYear();
+        },
+
+        _fetchCarriersWithCountPromise: function (oDate, sStatus) {
+            return new Promise(function (resolve) {
+                var oModel = this.getView().getModel();
+                var sFormattedDate = this._formatDateForOData(new Date(oDate));
+                var aFilters = [
+                    new Filter("InspectionDate", FilterOperator.EQ, sFormattedDate),
+                    new Filter("Status", FilterOperator.EQ, sStatus)
+                ];
+                oModel.read("/InspectionHeaderSet", {
+                    filters: aFilters,
+                    success: function (oData) {
+                        var aCarriers = [], iCount = 0;
+                        if (oData.results && oData.results.length > 0) {
+                            iCount = oData.results.length;
+                            aCarriers = oData.results.map(function (oItem) {
+                                return oItem.CarrierNumber || oItem.Carrier || "N/A";
+                            });
+                        }
+                        resolve({ count: iCount, carriers: aCarriers });
+                    },
+                    error: function () { resolve({ count: 0, carriers: [] }); }
+                });
+            }.bind(this));
+        },
+
+        onTrendChartTypeChange: function (oEvent) {
+            var sKey = oEvent.getParameter("item").getKey();
+            this.getView().getModel("viewModel").setProperty("/trendChartType", sKey);
+            MessageToast.show("Chart type changed to " + (sKey === "line" ? "Line Chart" : "Bar Chart"));
+        },
+
+        onTrendChartBarSelect: function (oEvent) {
+            var aData = oEvent.getParameter("data");
+            if (!aData || aData.length === 0) { return; }
+
+            var oSelectedData = aData[0].data;
+            var sSelectedDate = oSelectedData.Date;
+            var aParts = sSelectedDate.split("/");
+            if (aParts.length !== 3) { return; }
+            var oDate = new Date(parseInt(aParts[2]), parseInt(aParts[1]) - 1, parseInt(aParts[0]));
+
+            var sStatus = "A", sStatusLabel = "Accepted";
+            if (oSelectedData.measureNames === "Rejected") { sStatus = "R"; sStatusLabel = "Rejected"; }
+
+            if (this._trendCarrierCache && this._trendCarrierCache[sSelectedDate]) {
+                var aCarriers = sStatus === "A"
+                    ? this._trendCarrierCache[sSelectedDate].accepted
+                    : this._trendCarrierCache[sSelectedDate].rejected;
+                if (aCarriers && aCarriers.length > 0) {
+                    this._showTrendCarrierPopover(aCarriers, sStatusLabel, sSelectedDate, oEvent);
+                    return;
+                }
+            }
+
+            var oModel = this.getView().getModel();
+            var sFormattedDate = this._formatDateForOData(new Date(oDate));
+            oModel.read("/InspectionHeaderSet", {
+                filters: [
+                    new Filter("InspectionDate", FilterOperator.EQ, sFormattedDate),
+                    new Filter("Status", FilterOperator.EQ, sStatus)
+                ],
+                success: function (oData) {
+                    if (oData.results && oData.results.length > 0) {
+                        var aCarrierNumbers = oData.results.map(function (oItem) {
+                            return oItem.CarrierNumber || oItem.Carrier || "N/A";
+                        });
+                        this._showTrendCarrierPopover(aCarrierNumbers, sStatusLabel, sSelectedDate, oEvent);
+                    } else {
+                        MessageToast.show("No carriers found for this selection");
+                    }
+                }.bind(this),
+                error: function () { MessageBox.error("Error fetching carrier details."); }.bind(this)
+            });
+        },
+
+        _showTrendCarrierPopover: function (aCarrierNumbers, sStatusLabel, sDate, oEvent) {
+            if (this._oTrendCarrierPopover) { this._oTrendCarrierPopover.destroy(); }
+
+            var oTarget = oEvent && oEvent.mParameters && oEvent.mParameters.data && oEvent.mParameters.data[0]
+                ? oEvent.mParameters.data[0].target : null;
+
+            var aUnique = Array.from(new Set(aCarrierNumbers));
+            var iTotalCount = aCarrierNumbers.length;
+            var sInfoText = iTotalCount === aUnique.length
+                ? "Total: " + iTotalCount + " carrier(s)"
+                : "Total: " + iTotalCount + " carrier(s) (" + aUnique.length + " unique)";
+
+            this._oTrendCarrierPopover = new sap.m.Popover({
+                title: sStatusLabel + " Carriers - " + sDate,
+                placement: sap.m.PlacementType.Top,
+                contentWidth: "300px",
+                content: [
+                    new sap.m.VBox({
+                        width: "100%",
+                        items: [
+                            new sap.m.Text({ text: sInfoText }).addStyleClass("sapUiTinyMarginBegin sapUiTinyMarginTop"),
+                            new sap.m.ScrollContainer({
+                                height: aUnique.length <= 3 ? "90px" : "150px",
+                                width: "100%",
+                                vertical: true,
+                                content: [new sap.m.List({
+                                    items: aUnique.map(function (s) {
+                                        return new sap.m.StandardListItem({ title: s, icon: "sap-icon://shipping-status" });
+                                    }),
+                                    showNoData: false
+                                })]
+                            })
+                        ]
+                    })
+                ],
+                footer: new sap.m.Toolbar({
+                    content: [
+                        new sap.m.ToolbarSpacer(),
+                        new sap.m.Button({ text: "Close", press: function () { this._oTrendCarrierPopover.close(); }.bind(this) })
+                    ]
+                })
+            });
+
+            var oVizFrame = this.byId("aiTrendChart");
+            if (oTarget && oTarget.nodeType === 1) {
+                this._oTrendCarrierPopover.openBy(oTarget);
+            } else {
+                this._oTrendCarrierPopover.openBy(oVizFrame);
+            }
+        },
 
         /**
          * Navigate back to main view

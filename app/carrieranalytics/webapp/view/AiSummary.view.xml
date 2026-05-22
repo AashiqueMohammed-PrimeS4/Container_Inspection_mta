@@ -5,6 +5,9 @@
     xmlns:f="sap.f"
     xmlns:l="sap.ui.layout"
     xmlns:c="sap.ui.core"
+    xmlns:viz="sap.viz.ui5.controls"
+    xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds"
+    xmlns:viz.data="sap.viz.ui5.data"
     displayBlock="true"
     height="100%"
     busyIndicatorDelay="0"
@@ -288,8 +291,109 @@
                             class="sapUiSmallMargin"
                         />
                     </IconTabFilter>
-                    
-                
+
+                    <!-- ===== TAB 3: TREND ANALYSIS ===== -->
+                    <IconTabFilter
+                        id="trendTabFilter"
+                        key="trendAnalysis"
+                        text="Trend Analysis"
+                        icon="sap-icon://trend-up"
+                    >
+                        <VBox class="sapUiSmallMargin">
+                            <!-- Chart Type Toggle -->
+                            <Toolbar class="sapUiSmallMarginTop">
+                                <Title text="Daily Inspection Trends" level="H3"/>
+                                <ToolbarSpacer/>
+                                <SegmentedButton
+                                    selectedKey="{viewModel>/trendChartType}"
+                                    selectionChange="onTrendChartTypeChange"
+                                    visible="{viewModel>/trendShowChart}"
+                                >
+                                    <items>
+                                        <SegmentedButtonItem key="line" icon="sap-icon://line-chart" text="Line Chart"/>
+                                        <SegmentedButtonItem key="column" icon="sap-icon://horizontal-bar-chart" text="Bar Chart"/>
+                                    </items>
+                                </SegmentedButton>
+                            </Toolbar>
+                            <!-- Loading -->
+                            <BusyIndicator
+                                visible="{viewModel>/trendIsLoading}"
+                                text="Fetching trend data..."
+                                class="sapUiMediumMargin"
+                            />
+                            <!-- Chart Container -->
+                            <VBox visible="{viewModel>/trendShowChart}" class="sapUiSmallMargin">
+                                <ScrollContainer horizontal="true" vertical="false" height="450px" width="100%">
+                                    <viz:VizFrame
+                                        id="aiTrendChart"
+                                        uiConfig="{ applicationSet: 'fiori' }"
+                                        height="400px"
+                                        width="100%"
+                                        vizType="{viewModel>/trendChartType}"
+                                        selectData="onTrendChartBarSelect"
+                                        vizProperties="{
+                                            plotArea: {
+                                                dataLabel: { visible: true }
+                                            },
+                                            title: { visible: false },
+                                            legend: { visible: true },
+                                            interaction: {
+                                                selectability: { mode: 'SINGLE' }
+                                            }
+                                        }"
+                                    >
+                                        <viz:dataset>
+                                            <viz.data:FlattenedDataset data="{viewModel>/trendChartData}">
+                                                <viz.data:dimensions>
+                                                    <viz.data:DimensionDefinition name="Date" value="{viewModel>date}"/>
+                                                </viz.data:dimensions>
+                                                <viz.data:measures>
+                                                    <viz.data:MeasureDefinition name="Accepted" value="{viewModel>accepted}"/>
+                                                    <viz.data:MeasureDefinition name="Rejected" value="{viewModel>rejected}"/>
+                                                </viz.data:measures>
+                                            </viz.data:FlattenedDataset>
+                                        </viz:dataset>
+                                        <viz:feeds>
+                                            <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Date"/>
+                                            <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Accepted,Rejected"/>
+                                        </viz:feeds>
+                                    </viz:VizFrame>
+                                </ScrollContainer>
+                                <!-- Summary Stats -->
+                                <l:Grid defaultSpan="L3 M6 S12" hSpacing="1" vSpacing="1" containerQuery="true" class="sapUiMediumMarginTop">
+                                    <VBox alignItems="Center" class="sapUiSmallMarginBottom">
+                                        <layoutData><l:GridData span="L3 M6 S12"/></layoutData>
+                                        <Label text="Total Accepted" design="Bold"/>
+                                        <Text text="{viewModel>/trendTotalAccepted}" class="sapUiTinyMarginTop"/>
+                                    </VBox>
+                                    <VBox alignItems="Center" class="sapUiSmallMarginBottom">
+                                        <layoutData><l:GridData span="L3 M6 S12"/></layoutData>
+                                        <Label text="Total Rejected" design="Bold"/>
+                                        <Text text="{viewModel>/trendTotalRejected}" class="sapUiTinyMarginTop"/>
+                                    </VBox>
+                                    <VBox alignItems="Center" class="sapUiSmallMarginBottom">
+                                        <layoutData><l:GridData span="L3 M6 S12"/></layoutData>
+                                        <Label text="Avg. Daily Accepted" design="Bold"/>
+                                        <Text text="{viewModel>/trendAvgAccepted}" class="sapUiTinyMarginTop"/>
+                                    </VBox>
+                                    <VBox alignItems="Center" class="sapUiSmallMarginBottom">
+                                        <layoutData><l:GridData span="L3 M6 S12"/></layoutData>
+                                        <Label text="Avg. Daily Rejected" design="Bold"/>
+                                        <Text text="{viewModel>/trendAvgRejected}" class="sapUiTinyMarginTop"/>
+                                    </VBox>
+                                </l:Grid>
+                            </VBox>
+                            <!-- No Data -->
+                            <MessageStrip
+                                text="No trend data available for the selected date range."
+                                type="Information"
+                                showIcon="true"
+                                visible="{viewModel>/trendShowNoData}"
+                                class="sapUiSmallMargin"
+                            />
+                        </VBox>
+                    </IconTabFilter>
+
             </items>
         </IconTabBar>
     </content>
