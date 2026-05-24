@@ -6,6 +6,10 @@
     {
       "name": "uaa.user",
       "description": "UAA"
+    },
+    {
+      "name": "$XSAPPNAME.WorkzoneUser.Access",
+      "description": "Generic access for Work Zone site visibility"
     }
   ],
   "role-templates": [
@@ -15,6 +19,19 @@
       "scope-references": [
         "uaa.user"
       ]
+    },
+    {
+      "name": "WorkzoneUser_Access",
+      "description": "Generic role for SAP Build Work Zone site access",
+      "scope-references": [
+        "$XSAPPNAME.WorkzoneUser.Access"
+      ]
     }
-  ]
+  ],
+  "oauth2-configuration": {
+    "credential-types": [
+      "binding-secret",
+      "x509"
+    ]
+  }
 }

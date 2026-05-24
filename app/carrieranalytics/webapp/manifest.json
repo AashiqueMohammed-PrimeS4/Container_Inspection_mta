@@ -25,6 +25,21 @@
           "odataVersion": "2.0"
         }
       }
+    },
+    "crossNavigation": {
+      "inbounds": {
+        "carrieranalytics-display": {
+          "semanticObject": "carrieranalytics",
+          "action": "display",
+          "title": "{{carrieranalytics-display.flpTitle}}",
+          "subTitle": "{{carrieranalytics-display.flpSubtitle}}",
+          "icon": "sap-icon://bar-chart",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
+        }
+      }
     }
   },
   "sap.ui": {

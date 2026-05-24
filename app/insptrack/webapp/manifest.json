@@ -49,6 +49,21 @@
           "localUri": "localService/DefectDet/metadata.xml"
         }
       }
+    },
+    "crossNavigation": {
+      "inbounds": {
+        "insptrack-create": {
+          "semanticObject": "insptrack",
+          "action": "create",
+          "title": "{{insptrack-create.flpTitle}}",
+          "subTitle": "{{insptrack-create.flpSubtitle}}",
+          "icon": "sap-icon://camera",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
+        }
+      }
     }
   },
   "sap.ui": {

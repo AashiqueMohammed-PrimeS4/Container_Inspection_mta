@@ -13,11 +13,11 @@ modules:
     build-result: resources
     requires:
     - artifacts:
-      - insptrack.zip
+        - insptrack.zip
       name: insptrack
       target-path: resources/
     - artifacts:
-      - carrieranalytics.zip
+        - carrieranalytics.zip
       name: carrieranalytics
       target-path: resources/
 - name: insptrack
