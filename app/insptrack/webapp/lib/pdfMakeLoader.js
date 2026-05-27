@@ -1,7 +1,23 @@
-sap.ui.define([
-    "sap/ui/thirdparty/jquery"
-], function(jQuery) {
+sap.ui.define([], function() {
     "use strict";
+
+    /**
+     * Load a script by injecting a <script src> tag.
+     * Unlike jQuery.ajax dataType:"script", this is NOT subject to CSP unsafe-inline
+     * because the browser treats external <script src> as a non-inline script,
+     * which is permitted by 'script-src *'.
+     */
+    function loadScriptTag(url) {
+        return new Promise(function(resolve, reject) {
+            var script = document.createElement("script");
+            script.src = url;
+            script.onload = resolve;
+            script.onerror = function() {
+                reject(new Error("Failed to load script: " + url));
+            };
+            document.head.appendChild(script);
+        });
+    }
 
     /**
      * Module for loading pdfMake library
@@ -23,96 +39,72 @@ sap.ui.define([
                     return;
                 }
 
-                // Get the base URL for the library path
                 var sLibPath = sap.ui.require.toUrl("insptrack/lib");
 
-                // Load pdfMake core library
-                // Force UMD to use window by temporarily removing module/define
+                // Suppress AMD/CommonJS so both libraries attach to window globals.
+                // Must stay suppressed across both loads — vfs_fonts loaded with
+                // window.define active would register via AMD (async) and never
+                // set window.pdfMake.vfs before the onload callback fires.
                 var tempModule = window.module;
                 var tempDefine = window.define;
                 var tempExports = window.exports;
-
-                // delete window.module;
-                // delete window.define;
-                // delete window.exports;
                 window.module = undefined;
                 window.define = undefined;
                 window.exports = undefined;
 
-                jQuery.ajax({
-                    url: sLibPath + "/pdfmake.min.js",
-                    dataType: "script",
-                    cache: false,
-                    success: function() {
-                        // Restore module/define/exports
+                loadScriptTag(sLibPath + "/pdfmake.min.js").then(function() {
+                    console.log("pdfmake.min.js loaded, createPdf:", typeof window.pdfMake?.createPdf);
+
+                    var pdfMakeLib = window.pdfMake;
+
+                    return loadScriptTag(sLibPath + "/vfs_fonts.js").then(function() {
+                        // Restore module system after both scripts executed
                         if (tempModule) window.module = tempModule;
                         if (tempDefine) window.define = tempDefine;
                         if (tempExports) window.exports = tempExports;
 
-                        console.log("pdfmake.min.js loaded");
-                        console.log("window.pdfMake after load:", typeof window.pdfMake);
-                        console.log("window keys containing 'pdf':", Object.keys(window).filter(function(k) { return k.toLowerCase().includes('pdf'); }));
+                        console.log("vfs_fonts.js loaded");
 
-                        // Store the pdfMake library reference BEFORE loading vfs_fonts
-                        var pdfMakeLib = window.pdfMake;
+                        var vfsData = null;
 
-                        // Load vfs_fonts library
-                        jQuery.ajax({
-                            url: sLibPath + "/vfs_fonts.js",
-                            dataType: "script",
-                            cache: false,
-                            success: function() {
-                                console.log("vfs_fonts.js loaded");
+                        // vfs_fonts may overwrite window.pdfMake with just {vfs:...}
+                        if (window.pdfMake && window.pdfMake.vfs && !window.pdfMake.createPdf) {
+                            console.log("Restoring pdfMake core overwritten by vfs_fonts...");
+                            vfsData = window.pdfMake.vfs;
+                            window.pdfMake = pdfMakeLib;
+                        } else if (window.pdfMake && window.pdfMake.vfs) {
+                            vfsData = window.pdfMake.vfs;
+                        }
 
-                                // pdfMake library should already be on window from the first script
-                                // vfs_fonts might overwrite window.pdfMake with just {vfs: ...}
-                                // so we need to restore the actual library and attach vfs to it
+                        // Fallback: check pdfFonts global
+                        if (!vfsData && window.pdfFonts) {
+                            vfsData = (window.pdfFonts.pdfMake && window.pdfFonts.pdfMake.vfs)
+                                || window.pdfFonts.vfs;
+                        }
 
-                                var vfsData = null;
+                        // Always prefer the captured core reference
+                        if (!window.pdfMake || typeof window.pdfMake.createPdf !== "function") {
+                            window.pdfMake = pdfMakeLib;
+                        }
+                        if (vfsData) {
+                            window.pdfMake.vfs = vfsData;
+                        }
 
-                                // Check if window.pdfMake got overwritten with just vfs
-                                if (window.pdfMake && window.pdfMake.vfs && !window.pdfMake.createPdf) {
-                                    console.log("window.pdfMake was overwritten with just vfs, restoring...");
-                                    vfsData = window.pdfMake.vfs;
-                                    window.pdfMake = pdfMakeLib; // Restore the actual library
-                                }
+                        console.log("pdfMake.createPdf:", typeof window.pdfMake?.createPdf);
+                        console.log("pdfMake.vfs:", window.pdfMake?.vfs ? "YES" : "NO");
 
-                                // Check pdfFonts global
-                                if (window.pdfFonts) {
-                                    if (window.pdfFonts.pdfMake && window.pdfFonts.pdfMake.vfs) {
-                                        vfsData = window.pdfFonts.pdfMake.vfs;
-                                    } else if (window.pdfFonts.vfs) {
-                                        vfsData = window.pdfFonts.vfs;
-                                    }
-                                }
-
-                                // Attach vfs to the actual pdfMake library
-                                if (vfsData && window.pdfMake) {
-                                    window.pdfMake.vfs = vfsData;
-                                }
-
-                                console.log("Final pdfMake loaded successfully");
-                                console.log("pdfMake type:", typeof window.pdfMake);
-                                console.log("pdfMake.createPdf type:", typeof window.pdfMake?.createPdf);
-                                console.log("pdfMake.vfs available:", window.pdfMake?.vfs ? "YES" : "NO");
-
-                                if (!window.pdfMake || typeof window.pdfMake.createPdf !== "function") {
-                                    reject(new Error("pdfMake library did not load properly - createPdf function not found"));
-                                    return;
-                                }
-
-                                resolve(window.pdfMake);
-                            },
-                            error: function(jqXHR, textStatus, errorThrown) {
-                                console.error("Failed to load vfs_fonts.js:", textStatus, errorThrown);
-                                reject(new Error("Failed to load vfs_fonts: " + textStatus));
-                            }
-                        });
-                    },
-                    error: function(jqXHR, textStatus, errorThrown) {
-                        console.error("Failed to load pdfmake.min.js:", textStatus, errorThrown);
-                        reject(new Error("Failed to load pdfMake: " + textStatus));
-                    }
+                        if (!window.pdfMake || typeof window.pdfMake.createPdf !== "function") {
+                            reject(new Error("pdfMake library did not load properly - createPdf function not found"));
+                            return;
+                        }
+                        resolve(window.pdfMake);
+                    });
+                }).catch(function(err) {
+                    if (tempModule) window.module = tempModule;
+                    if (tempDefine) window.define = tempDefine;
+                    if (tempExports) window.exports = tempExports;
+                    console.error("Script load error:", err);
+                    reject(err);
                 });
             });
         },

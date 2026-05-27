@@ -34,6 +34,7 @@
           "title": "{{carrieranalytics-display.flpTitle}}",
           "subTitle": "{{carrieranalytics-display.flpSubtitle}}",
           "icon": "sap-icon://bar-chart",
+          "info" : "Powered by WarehouseX",
           "signature": {
             "parameters": {},
             "additionalParameters": "allowed"
@@ -41,6 +42,10 @@
         }
       }
     }
+  },
+  "sap.cloud": {
+    "public": true,
+    "service": "Container_router"
   },
   "sap.ui": {
     "technology": "UI5",

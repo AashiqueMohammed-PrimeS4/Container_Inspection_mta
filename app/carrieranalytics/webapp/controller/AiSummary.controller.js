@@ -29,7 +29,7 @@ sap.ui.define([
                 selectedStartDate: null,
                 selectedEndDate: null,
                 // Trend Analysis tab
-                trendChartType: "line",
+                trendChartType: "column",
                 trendShowChart: false,
                 trendIsLoading: false,
                 trendShowNoData: false,

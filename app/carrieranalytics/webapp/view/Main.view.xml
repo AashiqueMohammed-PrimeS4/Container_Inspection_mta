@@ -61,7 +61,7 @@
                                             src="sap-icon://SAP-icons-TNT/robot"
                                             displaySize="XS"
                                             displayShape="Square"
-                                            backgroundColor="Accent3"
+                                            backgroundColor="Accent9"
                                             visible="{= ${chatModel>sender} !== 'Me' }"
                                             class="sapUiTinyMarginEnd"
                                         />
@@ -138,12 +138,13 @@
             <OverflowToolbar>
                 <ToolbarSpacer />
                 <Button
-                text="PRIVA Assist"
+                    text="PRIVA Assist"
                     id="floatingActionBtn"
                     icon="sap-icon://da-2"
                     type="Transparent"
                     tooltip="PRIVA Assists"
                     press="onFloatingPress"
+                    class="privaAssistBtn"
                 />
             </OverflowToolbar>
         </headerContent>

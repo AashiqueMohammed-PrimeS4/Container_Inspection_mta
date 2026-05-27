@@ -1,1 +1,15 @@
-/* Enter your custom styles here */
+/* PRIVA Assist button - Joule purple (#6A28C7) for icon and text */
+.privaAssistBtn.sapMBtn .sapMBtnIcon,
+.privaAssistBtn.sapMBtn .sapUiIcon {
+    color: #a228c7 !important;
+}
+
+.privaAssistBtn.sapMBtn .sapMBtnContent {
+    color: #a228c7 !important;
+}
+
+.privaAssistBtn.sapMBtn:hover .sapMBtnIcon,
+.privaAssistBtn.sapMBtn:hover .sapUiIcon,
+.privaAssistBtn.sapMBtn:hover .sapMBtnContent {
+    color: #a228c7 !important;
+}

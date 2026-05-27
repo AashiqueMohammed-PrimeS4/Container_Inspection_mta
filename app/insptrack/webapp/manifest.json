@@ -58,6 +58,7 @@
           "title": "{{insptrack-create.flpTitle}}",
           "subTitle": "{{insptrack-create.flpSubtitle}}",
           "icon": "sap-icon://camera",
+          "info": "Powered by WarehouseX",
           "signature": {
             "parameters": {},
             "additionalParameters": "allowed"
@@ -65,6 +66,10 @@
         }
       }
     }
+  },
+  "sap.cloud": {
+    "public": true,
+    "service": "Container_router"
   },
   "sap.ui": {
     "technology": "UI5",
