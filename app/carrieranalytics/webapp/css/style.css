@@ -1,3 +1,48 @@
+/* PRIVA Summary tile icon - purple */
+.privaTile .sapMImageContentIcon,
+.privaTile .sapMImageContent .sapUiIcon {
+    color: #a228c7 !important;
+}
+
+
+/* Accepted & Rejected inspection tile - inventory icon SAP blue */
+.inspectionTile .sapMNCIconImage,
+.inspectionTile .sapMNC .sapUiIcon {
+    color: #0064d9 !important;
+}
+
+/* Inspection Reports tile icon - teal */
+.reportTile .sapMImageContentIcon,
+.reportTile .sapMImageContent .sapUiIcon {
+    color: #0aa6a0 !important;
+}
+
+/* Chat bubble base */
+.chatBubble {
+    padding: 8px 12px;
+    border-radius: 12px;
+    max-width: 70%;
+    border: 1px solid;
+}
+
+/* Bot bubble - dark green (Start-aligned HBox) */
+.privaChatList .sapMFlexBoxJustifyStart .chatBubble {
+    background-color: #2aca2a !important;
+    border-color: #0d3d0d !important;
+}
+.privaChatList .sapMFlexBoxJustifyStart .chatBubbleText {
+    color: #ffffff !important;
+}
+
+/* User bubble - dark blue (End-aligned HBox) */
+.privaChatList .sapMFlexBoxJustifyEnd .chatBubble {
+    background-color: #1a62a1 !important;
+    border-color: #061f38 !important;
+}
+.privaChatList .sapMFlexBoxJustifyEnd .chatBubbleText {
+    color: #ffffff !important;
+}
+
 /* PRIVA Assist button - Joule purple (#6A28C7) for icon and text */
 .privaAssistBtn.sapMBtn .sapMBtnIcon,
 .privaAssistBtn.sapMBtn .sapUiIcon {

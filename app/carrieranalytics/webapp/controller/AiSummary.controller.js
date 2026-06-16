@@ -150,6 +150,7 @@ sap.ui.define([
             var iPrevRejectionRate = oSummary.PrevRejectionRate || 0;
             var iRejectionRateDelta = oSummary.RejectionRateDelta || 0;
             var sTopRejectedReason = oSummary.TopRejectedReason || "N/A";
+            
             var sTopRejectedCarrierLine = oSummary.TopRejectedCarrierLine || "N/A";
 
             // Determine if rejection rate increased or decreased

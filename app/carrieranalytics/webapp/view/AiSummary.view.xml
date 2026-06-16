@@ -27,6 +27,7 @@
                 <items>
                     <!-- ===== TAB 1: AI SUMMARY ===== -->
                     <IconTabFilter
+                        id="aiSummaryTab"
                         key="aiSummary"
                         text="AI Summary"
                         icon="sap-icon://ai"
@@ -333,7 +334,8 @@
                                         selectData="onTrendChartBarSelect"
                                         vizProperties="{
                                             plotArea: {
-                                                dataLabel: { visible: true }
+                                                dataLabel: { visible: true },
+                                                colorPalette: ['#32d277', '#df3636']
                                             },
                                             title: { visible: false },
                                             legend: { visible: true },

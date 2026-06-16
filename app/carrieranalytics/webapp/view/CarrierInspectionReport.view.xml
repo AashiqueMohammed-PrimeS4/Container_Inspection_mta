@@ -7,7 +7,7 @@
     displayBlock="true">
 
     <Page id="carrierReportPage"
-          title="Carrier Inspection Report"
+          title="Inspection Summary "
           showNavButton="true"
           navButtonPress="onNavBack">
         <content>
