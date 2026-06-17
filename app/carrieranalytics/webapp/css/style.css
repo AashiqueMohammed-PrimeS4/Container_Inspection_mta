@@ -17,29 +17,87 @@
     color: #0aa6a0 !important;
 }
 
-/* Chat bubble base */
-.chatBubble {
+/* Popover plain white background */
+.privaPopover .sapMPopoverCont {
+    background: #ffffff !important;
+}
+
+/* Chat container */
+.privaChat {
+    padding: 0;
+    width: 100%;
+}
+
+/* Message row padding */
+.privaMsgRow {
+    padding: 6px 12px;
+}
+
+/* Avatar vertical alignment */
+.privaAvatar {
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+/* Bot bubble - success green (same color as MessageStrip Success) */
+.privaBotBubble {
+    background-color: #f1fdf6;
+    border: 1px solid #107e3e;
+    border-radius: 0 12px 12px 12px;
     padding: 8px 12px;
-    border-radius: 12px;
-    max-width: 70%;
-    border: 1px solid;
+    max-width: 78%;
 }
 
-/* Bot bubble - dark green (Start-aligned HBox) */
-.privaChatList .sapMFlexBoxJustifyStart .chatBubble {
-    background-color: #2aca2a !important;
-    border-color: #0d3d0d !important;
-}
-.privaChatList .sapMFlexBoxJustifyStart .chatBubbleText {
-    color: #ffffff !important;
+.privaBotText {
+    color: #000000;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
 }
 
-/* User bubble - dark blue (End-aligned HBox) */
-.privaChatList .sapMFlexBoxJustifyEnd .chatBubble {
-    background-color: #1a62a1 !important;
-    border-color: #061f38 !important;
+/* User bubble - info light blue (same color as MessageStrip Information) */
+.privaUserBubble {
+    background-color: #e8f4fd;
+    border: 1px solid #0064d9;
+    border-radius: 12px 0 12px 12px;
+    padding: 8px 12px;
+    max-width: 72%;
 }
-.privaChatList .sapMFlexBoxJustifyEnd .chatBubbleText {
+
+.privaUserText {
+    color: #000000;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+/* Suggestion chips area */
+.privaSuggestions {
+    padding: 6px 12px 4px 12px;
+    border-top: 1px solid #f0e8fa;
+}
+
+.privaSuggestionBtn.sapMBtn {
+    border-color: #a228c7 !important;
+    color: #a228c7 !important;
+    border-radius: 16px !important;
+    font-size: 0.8rem !important;
+    height: auto !important;
+    padding: 2px 8px !important;
+    margin-bottom: 4px;
+}
+
+.privaSuggestionBtn.sapMBtn .sapMBtnContent {
+    color: #a228c7 !important;
+}
+
+/* Input bar */
+.privaInputBar.sapMTB {
+    border-top: 1px solid #e0e0e0 !important;
+    background: transparent !important;
+    padding: 6px 8px !important;
+}
+
+.privaBtn.sapMBtn .sapMBtnIcon {
     color: #ffffff !important;
 }
 

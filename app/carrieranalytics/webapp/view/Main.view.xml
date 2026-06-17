@@ -2,6 +2,7 @@
     controllerName="carrieranalytics.controller.Main"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
+    xmlns:core="sap.ui.core"
     xmlns:l="sap.ui.layout"
     xmlns:viz="sap.viz.ui5.controls"
     xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds"
@@ -12,9 +13,10 @@
     <mvc:dependents>
         <Popover
             id="chatDialog"
-            contentWidth="400px"
+            contentWidth="420px"
             placement="Left"
             afterOpen="onChatAfterOpen"
+            class="privaPopover"
         >
             <customHeader>
                 <Bar
@@ -22,6 +24,12 @@
                     titleAlignment="None"
                 >
                     <contentLeft>
+                        <core:Icon
+                            src="sap-icon://da-2"
+                            color="#a228c7"
+                            size="1.2rem"
+                            class="sapUiTinyMarginEnd"
+                        />
                         <Title text="PRIVA Assists" />
                     </contentLeft>
                     <contentRight>
@@ -34,87 +42,105 @@
                 </Bar>
             </customHeader>
             <content>
-                <VBox
-                    height="100%"
-                    justifyContent="SpaceBetween"
-                >
-                    <!-- Message Area -->
+                <VBox class="privaChat">
+                    <!-- Message Area — fixed height always, suggestions float inside -->
                     <ScrollContainer
                         id="chatScroll"
-                        height="300px"
+                        height="600px"
                         vertical="true"
+                        horizontal="false"
                         focusable="false"
                     >
-                        <List
-                            items="{chatModel>/messages}"
-                            showSeparators="None"
-                            class="privaChatList"
-                        >
-                            <items>
-                                <CustomListItem>
-                                    <HBox
-                                        justifyContent="{= ${chatModel>sender} === 'Me' ? 'End' : 'Start' }"
-                                        alignItems="End"
-                                        class="sapUiSmallMargin"
-                                    >
-                                        <!-- Bot Avatar (Left Side) -->
-                                        <Avatar
-                                            src="sap-icon://SAP-icons-TNT/robot"
-                                            displaySize="XS"
-                                            displayShape="Square"
-                                            backgroundColor="Accent9"
-                                            visible="{= ${chatModel>sender} !== 'Me' }"
-                                            class="sapUiTinyMarginEnd"
-                                        />
-                                        <!-- MessageStrip Bubble -->
-                                        <MessageStrip
-                                            text="{= ${chatModel>typing} === true ? '...' : ${chatModel>text} }"
-                                            type="{= ${chatModel>sender} === 'Me' ? 'Information' : 'Success' }"
-                                            showIcon="false"
-                                            class="sapUiTinyMarginTop sapUiTinyMarginBottom"
-                                        />
-                                        <!-- User Avatar (Right Side) -->
-                                        <Avatar
-                                            initials="{
-                                                path: 'chatModel>/userName',
-                                                formatter: '.formatInitial'
-                                            }"
-                                            displaySize="XS"
-                                            displayShape="Square"
-                                            backgroundColor="Accent6"
-                                            visible="{= ${chatModel>sender} === 'Me' }"
-                                            class="sapUiTinyMarginBegin"
-                                        />
-                                    </HBox>
-                                </CustomListItem>
-                            </items>
-                        </List>
+                        <VBox class="privaChatInner">
+                            <List
+                                items="{chatModel>/messages}"
+                                showSeparators="None"
+                                class="privaChatList"
+                            >
+                                <items>
+                                    <CustomListItem>
+                                        <HBox
+                                            justifyContent="{= ${chatModel>sender} === 'Me' ? 'End' : 'Start' }"
+                                            alignItems="Start"
+                                            class="privaMsgRow"
+                                        >
+                                            <!-- Bot Avatar -->
+                                            <Avatar
+                                                src="sap-icon://da-2"
+                                                displaySize="XS"
+                                                displayShape="Circle"
+                                                backgroundColor="Accent9"
+                                                visible="{= ${chatModel>sender} !== 'Me' }"
+                                                class="sapUiTinyMarginEnd privaAvatar"
+                                            />
+                                            <!-- Bot Bubble -->
+                                            <VBox
+                                                visible="{= ${chatModel>sender} !== 'Me' }"
+                                                class="privaBotBubble"
+                                            >
+                                                <Text
+                                                    text="{= ${chatModel>typing} === true ? '...' : ${chatModel>text} }"
+                                                    wrapping="true"
+                                                    class="privaBotText"
+                                                />
+                                            </VBox>
+                                            <!-- User Bubble -->
+                                            <VBox
+                                                visible="{= ${chatModel>sender} === 'Me' }"
+                                                class="privaUserBubble"
+                                            >
+                                                <Text
+                                                    text="{chatModel>text}"
+                                                    wrapping="true"
+                                                    class="privaUserText"
+                                                />
+                                            </VBox>
+                                            <!-- User Avatar -->
+                                            <Avatar
+                                                initials="{
+                                                    path: 'chatModel>/userName',
+                                                    formatter: '.formatInitial'
+                                                }"
+                                                displaySize="XS"
+                                                displayShape="Circle"
+                                                backgroundColor="Accent6"
+                                                visible="{= ${chatModel>sender} === 'Me' }"
+                                                class="sapUiTinyMarginBegin privaAvatar"
+                                            />
+                                        </HBox>
+                                    </CustomListItem>
+                                </items>
+                            </List>
+                            <!-- Suggestion Chips — inside scroll area, disappear on first message -->
+                            <HBox
+                                id="suggestionBox"
+                                items="{chatModel>/suggestions}"
+                                wrap="Wrap"
+                                visible="{chatModel>/showSuggestions}"
+                                class="privaSuggestions"
+                            >
+                                <Button
+                                    text="{chatModel>title}"
+                                    type="Ghost"
+                                    press="onSuggestionItemPress"
+                                    class="sapUiTinyMarginEnd sapUiTinyMarginBottom privaSuggestionBtn"
+                                />
+                            </HBox>
+                        </VBox>
                     </ScrollContainer>
-                    <!-- Suggestion Chips -->
-                    <HBox
-                        items="{chatModel>/suggestions}"
-                        wrap="Wrap"
-                        class="sapUiTinyMarginBegin sapUiTinyMarginEnd sapUiTinyMarginBottom"
-                    >
-                        <Button
-                            text="{chatModel>title}"
-                            type="Ghost"
-                            press="onSuggestionItemPress"
-                            class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
-                        />
-                    </HBox>
                     <!-- Input Section -->
-                    <Toolbar>
+                    <Toolbar class="privaInputBar">
                         <Input
                             id="chatInput"
                             width="100%"
-                            placeholder="Ask PRIVA"
+                            placeholder="Ask PRIVA anything..."
                             submit="onPostMessage"
                         />
                         <Button
                             icon="sap-icon://paper-plane"
                             type="Emphasized"
                             press="onPostMessage"
+                            class="privaBtn"
                         />
                     </Toolbar>
                 </VBox>

@@ -31,6 +31,7 @@ sap.ui.define([
             const oChatModel = new JSONModel({
                 messages: [],
                 userName: "User",
+                showSuggestions: true,
                 suggestions: [
                     { title: "Get Total Inspections" },
                     { title: "Get accepted & rejected Count" },
@@ -336,138 +337,35 @@ sap.ui.define([
         },
 
         postMessage(sValue) {
-
-            const oView = this.getView();
-            const oChatModel = oView.getModel("chatModel");
-            const oViewModel = this.getView().getModel("viewModel");
-            const sStartDate = oViewModel.getProperty("/selectedStartDate");
-            const sEndDate = oViewModel.getProperty("/selectedEndDate");
-            console.log(sStartDate);
-            console.log(sEndDate);
+            const oChatModel = this.getView().getModel("chatModel");
             const aMessages = oChatModel.getProperty("/messages");
 
-            //  Add User Message (Right side)
-            aMessages.push({
-                sender: "Me",
-                text: sValue
-            });
-            // Add temporary typing message
-            aMessages.push({
-                sender: "AI Assistant",
-                typing: true
-            });
-
-
+            aMessages.push({ sender: "Me", text: sValue });
+            aMessages.push({ sender: "AI Assistant", typing: true });
             oChatModel.setProperty("/messages", aMessages);
+            oChatModel.setProperty("/showSuggestions", false);
             this._scrollToBottom();
 
-            const oDialog = this.byId("chatDialog");
-            // oDialog.setBusy(true);
-
-            const oODataModel = this.getOwnerComponent().getModel();
-
-            // // Hardcoded dates
-            // const sStartDate = "datetime'2025-11-07T00:00:00'";
-            // const sEndDate = "datetime'2025-11-30T00:00:00'";
-
-            const sFormattedStart = this._formatDateTimeForOData(sStartDate);
-            const sFormattedEnd = this._formatDateTimeForOData(sEndDate);
-
-            const sFilter =
-                "StartDate eq " + sFormattedStart +
-                " and EndDate eq " + sFormattedEnd;
-            oODataModel.read("/InspectionSummarySet", {
-                urlParameters: {
-                    "$filter": sFilter
-                },
+            const oInspectionModel = this.getOwnerComponent().getModel("inspectionModel");
+            oInspectionModel.create("/analyze", { question: sValue }, {
                 success: (oData) => {
-                    if (!oData.results || !oData.results.length) {
-                        this._removeTyping();
-                        this._addBotMessage("No data found.");
-                        // oDialog.setBusy(false);
-                        return;
-                    }
-
-                    const oSummary = oData.results[0];
-                    console.log(oSummary);
-                    let sResponse = this._buildResponse(sValue, oSummary);
-
                     this._removeTyping();
-
-                    this._addBotMessage(sResponse);
-
-                    // oDialog.setBusy(false);
+                    const oResult = oData.analyze.message
+                    const sMessage = oResult;
+                    console.log("oResult",oResult)
+                    console.log("sMessage:", sMessage);
+                    // ?.type === "error"
+                    //     ? "I'm having trouble processing that right now. Please try again."
+                    //     : (oResult?.message || "No response from agent.");
+                    this._addBotMessage(sMessage);
                     this._scrollToBottom();
                 },
                 error: () => {
                     this._removeTyping();
-                    this._addBotMessage("Backend error. Please try again.");
+                    this._addBotMessage("Agent error. Please try again.");
                     this._scrollToBottom();
                 }
             });
-        },
-        _formatDateTimeForOData: function (oDate) {
-            var sYear = oDate.getFullYear();
-            var sMonth = ("0" + (oDate.getMonth() + 1)).slice(-2);
-            var sDay = ("0" + oDate.getDate()).slice(-2);
-
-            return "datetime'" + sYear + "-" + sMonth + "-" + sDay + "T00:00:00'";
-        },
-
-        _buildResponse: function (sValue, oSummary) {
-
-            const sQuery = sValue.toLowerCase();
-
-            const total = oSummary.TotalInspections;
-            const accepted = oSummary.AcceptedCount;
-            const rejected = oSummary.RejectedCount;
-            const rate = oSummary.RejectionRate;
-            const prevRate = oSummary.PrevRejectionRate;
-            const delta = oSummary.RejectionRateDelta;
-            const reasons = oSummary.TopRejectedReason;
-            const carriers = oSummary.TopRejectedCarrierLine;
-
-            // Clean comma list to readable format
-            const formatList = (sText) => {
-                if (!sText) return "";
-                const arr = sText.split(",").map(s => s.trim());
-                if (arr.length === 1) return arr[0];
-                if (arr.length === 2) return arr.join(" and ");
-                return arr.slice(0, -1).join(", ") + ", and " + arr[arr.length - 1];
-            };
-
-            if (sQuery.includes("total")) {
-                return `A total of ${total} container inspections were carried out during the selected period, reflecting the operational throughput for this timeframe.`;
-            }
-
-            if (sQuery.includes("accepted") || sQuery.includes("rejected")) {
-                const compliance = rate <= 5 ? "a strong compliance rate" : rate <= 15 ? "a moderate compliance rate" : "a high rejection rate that warrants attention";
-                return `Out of ${total} inspections conducted, ${accepted} containers were accepted and ${rejected} were flagged as rejected — resulting in a ${rate}% rejection rate, indicating ${compliance}.`;
-            }
-
-            if (sQuery.includes("reason")) {
-                return `Analysis of rejection data reveals that ${formatList(reasons)} are the dominant failure categories this period. Addressing these recurring defects through targeted pre-inspection checks could significantly improve acceptance rates going forward.`;
-            }
-
-            if (sQuery.includes("carrier")) {
-                const carrierCount = carriers ? carriers.split(",").length : 0;
-                const carrierLabel = carrierCount === 1 ? "carrier line" : "carrier lines";
-                return `Inspection data highlights ${formatList(carriers)} as the leading ${carrierLabel} with the highest rejection activity during this period. A closer review of their shipments may help identify recurring non-compliance patterns.`;
-            }
-
-            if (sQuery.includes("previous") || sQuery.includes("rate")) {
-                const trend = delta > 0 ? "increased" : "decreased";
-                const adverb = Math.abs(delta) < 2 ? "slightly" : Math.abs(delta) < 5 ? "moderately" : "significantly";
-                const reasonPart = reasons ? `, primarily driven by recurring findings in ${formatList(reasons)}` : "";
-                return `Rejection rates ${trend} ${adverb} compared to the previous inspection period, moving from ${prevRate}% to ${rate}%${reasonPart}.`;
-            }
-
-            // Default full summary
-            return `For the selected period, ${total} inspections were completed.\n` +
-                `${accepted} were accepted and ${rejected} rejected (${rate}% rejection rate).\n` +
-                `Top rejection reasons: ${formatList(reasons)}.\n` +
-                `Top rejection carrier lines: ${formatList(carriers)}.\n` +
-                `Rejection rate changed from ${prevRate}% to ${rate}% (Δ ${delta}%).`;
         },
 
         _removeTyping() {
