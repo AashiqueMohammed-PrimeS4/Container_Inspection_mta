@@ -5,8 +5,9 @@ sap.ui.define([
     "sap/ui/model/FilterOperator",
     "sap/m/MessageBox",
     "sap/m/MessageToast",
-    "sap/ushell/Container"
-], function (Controller, JSONModel, Filter, FilterOperator, MessageBox, MessageToast, Container) {
+    "sap/ushell/Container",
+    "carrieranalytics/service/ODataService"
+], function (Controller, JSONModel, Filter, FilterOperator, MessageBox, MessageToast, Container, ODataService) {
     "use strict";
 
     return Controller.extend("carrieranalytics.controller.Main", {
@@ -30,15 +31,7 @@ sap.ui.define([
             this.getView().setModel(oViewModel, "viewModel");
             const oChatModel = new JSONModel({
                 messages: [],
-                userName: "User",
-                showSuggestions: true,
-                suggestions: [
-                    { title: "Get Total Inspections" },
-                    { title: "Get accepted & rejected Count" },
-                    { title: "Top rejection reasons" },
-                    { title: "Top rejection carrier lines" },
-                    { title: "Previous rejection rate" }
-                ]
+                userName: "User"
             });
             this._loadUserInfo();
             this.getView().setModel(oChatModel, "chatModel");
@@ -286,6 +279,30 @@ sap.ui.define([
         },
 
         onFloatingPress: function (oEvent) {
+            const oSource = oEvent.getSource();
+            const oDataModel = this.getOwnerComponent().getModel();
+
+            sap.ui.core.BusyIndicator.show(0);
+
+            ODataService.checkLicenseModule(oDataModel, "PrivaModule")
+                .then((bAllowed) => {
+                    sap.ui.core.BusyIndicator.hide();
+
+                    if (!bAllowed) {
+                        MessageBox.error("Your organization has not subscribed to the PRIVA Assist module. Please contact your administrator to upgrade your license.");
+                        return;
+                    }
+
+                    this._openPrivaAssist(oSource);
+                })
+                .catch((oError) => {
+                    sap.ui.core.BusyIndicator.hide();
+                    console.error("License check failed:", oError);
+                    MessageBox.error("Unable to verify your license. Please try again.");
+                });
+        },
+
+        _openPrivaAssist: function (oSource) {
             const oDialog = this.byId("chatDialog");
             const oModel = this.getView().getModel("chatModel");
 
@@ -296,23 +313,12 @@ sap.ui.define([
                 }]);
             }
 
-            oDialog.openBy(oEvent.getSource());
+            oDialog.openBy(oSource);
         },
 
         onCloseChat: function () {
             this.byId("chatDialog").close();
         },
-
-        onSuggestionItemPress: function (oEvent) {
-            const sText = oEvent.getSource().getText();
-            this.byId("chatInput").setValue(sText);
-        },
-
-        onOpenSuggestionPopover: function (oEvent) {
-            const oPopover = this.byId("suggestionPopover");
-            oPopover.openBy(oEvent.getSource());
-        },
-
 
         onPostMessage(oEvent) {
 
@@ -343,7 +349,6 @@ sap.ui.define([
             aMessages.push({ sender: "Me", text: sValue });
             aMessages.push({ sender: "AI Assistant", typing: true });
             oChatModel.setProperty("/messages", aMessages);
-            oChatModel.setProperty("/showSuggestions", false);
             this._scrollToBottom();
 
             const oInspectionModel = this.getOwnerComponent().getModel("inspectionModel");
@@ -352,12 +357,7 @@ sap.ui.define([
                     this._removeTyping();
                     const oResult = oData.analyze.message
                     const sMessage = oResult;
-                    console.log("oResult",oResult)
-                    console.log("sMessage:", sMessage);
-                    // ?.type === "error"
-                    //     ? "I'm having trouble processing that right now. Please try again."
-                    //     : (oResult?.message || "No response from agent.");
-                    this._addBotMessage(sMessage);
+                    this._addBotMessage(sMessage, oData.analyze.tokenUsage);
                     this._scrollToBottom();
                 },
                 error: () => {
@@ -375,14 +375,15 @@ sap.ui.define([
 
             oChatModel.setProperty("/messages", aMessages);
         },
-        _addBotMessage(sText) {
+        _addBotMessage(sText, oTokenUsage) {
 
             const oChatModel = this.getView().getModel("chatModel");
             const aMessages = oChatModel.getProperty("/messages");
 
             aMessages.push({
                 sender: "AI Assistant",
-                text: sText
+                text: sText,
+                tokenUsage: this.formatTokenUsage(oTokenUsage)
             });
 
             oChatModel.setProperty("/messages", aMessages);
@@ -398,6 +399,21 @@ sap.ui.define([
 
         onChatAfterOpen: function () {
             this._scrollToBottom();
+        },
+        formatTokenUsage: function (oTokenUsage) {
+            if (!oTokenUsage) {
+                return "";
+            }
+
+            if (typeof oTokenUsage === "number") {
+                return "Usage: " + oTokenUsage;
+            }
+
+            const iTotal = oTokenUsage.totalTokens ?? oTokenUsage.total_tokens
+                ?? ((oTokenUsage.promptTokens ?? oTokenUsage.prompt_tokens ?? 0)
+                    + (oTokenUsage.completionTokens ?? oTokenUsage.completion_tokens ?? 0));
+
+            return iTotal ? "Usage: " + iTotal : "";
         },
         formatInitial: function (sName) {
             if (!sName) {

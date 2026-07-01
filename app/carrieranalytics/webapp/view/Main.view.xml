@@ -83,6 +83,12 @@
                                                     wrapping="true"
                                                     class="privaBotText"
                                                 />
+                                                <Text
+                                                    text="{chatModel>tokenUsage}"
+                                                    visible="{= !!${chatModel>tokenUsage} }"
+                                                    class="privaTokenUsage"
+                                                    textAlign="End"
+                                                />
                                             </VBox>
                                             <!-- User Bubble -->
                                             <VBox
@@ -111,21 +117,6 @@
                                     </CustomListItem>
                                 </items>
                             </List>
-                            <!-- Suggestion Chips — inside scroll area, disappear on first message -->
-                            <HBox
-                                id="suggestionBox"
-                                items="{chatModel>/suggestions}"
-                                wrap="Wrap"
-                                visible="{chatModel>/showSuggestions}"
-                                class="privaSuggestions"
-                            >
-                                <Button
-                                    text="{chatModel>title}"
-                                    type="Ghost"
-                                    press="onSuggestionItemPress"
-                                    class="sapUiTinyMarginEnd sapUiTinyMarginBottom privaSuggestionBtn"
-                                />
-                            </HBox>
                         </VBox>
                     </ScrollContainer>
                     <!-- Input Section -->
@@ -133,7 +124,7 @@
                         <Input
                             id="chatInput"
                             width="100%"
-                            placeholder="Ask PRIVA anything..."
+                            placeholder="Ask PRIVA ..."
                             submit="onPostMessage"
                         />
                         <Button
@@ -168,7 +159,7 @@
                     text="PRIVA Assist"
                     id="floatingActionBtn"
                     icon="sap-icon://da-2"
-                    type="Ghost"
+                    type="Transparent"
                     tooltip="PRIVA Assists"
                     press="onFloatingPress"
                     class="privaAssistBtn"

@@ -70,26 +70,6 @@
     line-height: 1.5;
 }
 
-/* Suggestion chips area */
-.privaSuggestions {
-    padding: 6px 12px 4px 12px;
-    border-top: 1px solid #f0e8fa;
-}
-
-.privaSuggestionBtn.sapMBtn {
-    border-color: #a228c7 !important;
-    color: #a228c7 !important;
-    border-radius: 16px !important;
-    font-size: 0.8rem !important;
-    height: auto !important;
-    padding: 2px 8px !important;
-    margin-bottom: 4px;
-}
-
-.privaSuggestionBtn.sapMBtn .sapMBtnContent {
-    color: #a228c7 !important;
-}
-
 /* Input bar */
 .privaInputBar.sapMTB {
     border-top: 1px solid #e0e0e0 !important;
@@ -105,6 +85,14 @@
 .privaAssistBtn.sapMBtn .sapMBtnIcon,
 .privaAssistBtn.sapMBtn .sapUiIcon {
     color: #a228c7 !important;
+}
+
+/* Token usage label - bottom right corner of each bot bubble */
+.privaTokenUsage {
+    display: block;
+    font-size: 0.65rem;
+    color: #8c8c8c;
+    margin-top: 2px;
 }
 
 .privaAssistBtn.sapMBtn .sapMBtnContent {

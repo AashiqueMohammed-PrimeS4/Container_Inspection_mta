@@ -65,7 +65,15 @@ sap.ui.define([
                 savedCodes: [],
                 isAcceptButtonEnabled: true,
                 areCheckboxesEnabled: true,
-                showCarrierTypeCombo: true
+                showCarrierTypeCombo: true,
+                // Step 2 - container scan & defect tokenizer
+                containerImageSrc: "",
+                containerImageBase64: "",
+                showContainerImage: false,
+                isAnalyzing: false,
+                showDefectSection: false,
+                newDefectText: "",
+                isTokenizerEditable: true
             });
             this.getView().setModel(this.oModel);
             var oViewModel = new JSONModel({ hasPreview: false });
@@ -827,7 +835,7 @@ sap.ui.define([
 
                 const pdfBase64 = await PDFService.generatePDF(docDefinition);
                 const pdfBlob = PDFService.base64ToBlob(pdfBase64);
-                const slug = PDFService.generateSlug(oHeaderData.document, oHeaderData.carrier ,imageType);
+                const slug = PDFService.generateSlug(oHeaderData.document, oHeaderData.carrier, imageType);
 
                 console.log("Upload SLUG:", slug);
 
@@ -881,6 +889,21 @@ sap.ui.define([
             const oModel = this.getOwnerComponent().getModel();
 
             ODataService.updateHeaderFlags(oModel, aFilters, imageType)
+                .then((oRecord) => {
+                    ODataService.updateUsage(
+                        oModel,
+                        oRecord.Document,
+                        oRecord.Sequencenumber,
+                        oRecord.CarrierNumber,
+                        oRecord.InspectionDate
+                    ).then((sWarning) => {
+                        if (sWarning) {
+                            MessageBox.warning(sWarning);
+                        }
+                    }).catch((oError) => {
+                        MessageBox.error(this._parseErrorMessage(oError));
+                    });
+                })
                 .catch(() => {
                     MessageBox.error("Failed to update inspection flags");
                 });
@@ -1020,6 +1043,17 @@ sap.ui.define([
             this.oModel.setProperty("/savedCodes", []);
             this.oModel.setProperty("/isAcceptButtonEnabled", true);
             this.oModel.setProperty("/areCheckboxesEnabled", true);
+
+            // Clear Step 2 container scan & defect data
+            this.oModel.setProperty("/containerImageSrc", "");
+            this.oModel.setProperty("/containerImageBase64", "");
+            this.oModel.setProperty("/showContainerImage", false);
+            this.oModel.setProperty("/showDefectSection", false);
+            this.oModel.setProperty("/newDefectText", "");
+            this.oModel.setProperty("/isTokenizerEditable", true);
+            const oTokenizer = this.byId("defectTokenizer");
+            if (oTokenizer) oTokenizer.removeAllTokens();
+
             this._resetFlags();
 
             const oStep1 = this.byId("DocumentDetailsStep");
@@ -1288,6 +1322,31 @@ sap.ui.define([
         },
 
         onCaptureCarrierNo: function () {
+            const oModel = this.getOwnerComponent().getModel();
+            sap.ui.core.BusyIndicator.show(0);
+
+            ODataService.checkLicenseModule(oModel, "OcrModule")
+                .then((bAllowed) => {
+                    sap.ui.core.BusyIndicator.hide();
+
+                    if (!bAllowed) {
+                        if (this._cameraDialog) {
+                            this._cameraDialog.close();
+                        }
+                        MessageBox.error("Your organization has not subscribed to the OCR module. Please contact your administrator to upgrade your license.");
+                        return;
+                    }
+
+                    this._scanAndDetectContainer();
+                })
+                .catch((oError) => {
+                    sap.ui.core.BusyIndicator.hide();
+                    console.error("License check failed:", oError);
+                    MessageBox.error("Unable to verify your license. Please try again.");
+                });
+        },
+
+        _scanAndDetectContainer: function () {
 
             const video = this._videoElement;
             if (!video) {
@@ -1310,7 +1369,7 @@ sap.ui.define([
 
             this._cameraDialog.close();
             sap.ui.core.BusyIndicator.show(0);
-            
+
             const oCropModel = this.getOwnerComponent().getModel("catalog");
 
             /* ================= STEP 1: CROP ================= */

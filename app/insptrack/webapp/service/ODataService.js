@@ -1,8 +1,45 @@
 sap.ui.define([
     "sap/ui/model/Filter",
-    "sap/ui/model/FilterOperator"
-], (Filter, FilterOperator) => {
+    "sap/ui/model/FilterOperator",
+    "sap/ui/model/odata/v2/ODataModel"
+], (Filter, FilterOperator, ODataModel) => {
     "use strict";
+
+    let oNonBatchModel;
+
+    /**
+     * Non-batched model instance for entities whose backend redefinition
+     * only supports plain GET, not requests wrapped inside $batch
+     * @param {sap.ui.model.odata.v2.ODataModel} oDataModel - main OData model (used for its service URL)
+     * @returns {sap.ui.model.odata.v2.ODataModel} non-batched model
+     */
+    function getNonBatchModel(oDataModel) {
+        if (!oNonBatchModel) {
+            oNonBatchModel = new ODataModel(oDataModel.sServiceUrl, {
+                useBatch: false
+            });
+        }
+        return oNonBatchModel;
+    }
+
+    /**
+     * Extract the backend-raised message (e.g. usage % warning) from the
+     * sap-message response header, if present
+     * @param {object} oResponse - response object passed to a model success callback
+     * @returns {string|null} message text, or null if no sap-message header was sent
+     */
+    function extractSapMessage(oResponse) {
+        const sHeader = oResponse && oResponse.headers && oResponse.headers["sap-message"];
+        if (!sHeader) {
+            return null;
+        }
+        try {
+            return JSON.parse(sHeader).message || null;
+        } catch (e) {
+            console.error("Failed to parse sap-message header:", e);
+            return null;
+        }
+    }
 
     return {
         /**
@@ -55,7 +92,7 @@ sap.ui.define([
         loadInspectionCodes(oDataModel) {
             return new Promise((resolve, reject) => {
                 console.log("=== LOADING INSPECTION CODES ===");
-                oDataModel.read("/InspectCodesSet", {
+                oDataModel.read("/InspectCodeSet", {
                     success: (oData) => {
                         console.log("SUCCESS - Inspection codes loaded");
                         if (!oData.results || oData.results.length === 0) {
@@ -106,6 +143,35 @@ sap.ui.define([
                         reject(oError);
                     }
                 });
+            });
+        },
+
+        /**
+         * Check whether the active license entitles the org to a given module
+         * @param {sap.ui.model.odata.v2.ODataModel} oDataModel - OData model
+         * @param {string} sModuleField - License module flag to check (e.g. "OcrModule", "PrivaModule")
+         * @returns {Promise<boolean>} Promise resolving with true/false entitlement
+         */
+        checkLicenseModule(oDataModel, sModuleField) {
+            return new Promise((resolve, reject) => {
+                // main model's metadata is already loaded - use it to build the key
+                const sKey = oDataModel.createKey("/SI_LicenseSet", {
+                    InspectionDate: new Date()
+                });
+
+                const oModel = getNonBatchModel(oDataModel);
+                oModel.metadataLoaded().then(() => {
+                    oModel.read("/" + sKey, {
+                        success: (oData) => {
+                            console.log("License check response:", oData);
+                            resolve(!!oData[sModuleField]);
+                        },
+                        error: (oError) => {
+                            console.error("Error checking license module:", oError);
+                            reject(oError);
+                        }
+                    });
+                }).catch(reject);
             });
         },
 
@@ -214,7 +280,7 @@ sap.ui.define([
                             oDataModel.update(sKey, oUpdateData, {
                                 success: () => {
                                     console.log("Header flags updated successfully");
-                                    resolve();
+                                    resolve(oRecord);
                                 },
                                 error: (oError) => {
                                     console.error("Failed to update header flags:", oError);
@@ -231,6 +297,48 @@ sap.ui.define([
                         reject(oError);
                     }
                 });
+            });
+        },
+
+        /**
+         * Update license usage balance for an inspection (increments inspections_used
+         * on the backend based on the header's Status/HasAfterImg)
+         * @param {sap.ui.model.odata.v2.ODataModel} oDataModel - OData model
+         * @param {string} sDocument - Document number
+         * @param {string} sSequence - Sequence number
+         * @param {string} sCarrier - Carrier number
+         * @param {Date} dInspectionDate - Inspection date (key)
+         * @returns {Promise} Promise resolving when usage update is complete
+         */
+        updateUsage(oDataModel, sDocument, sSequence, sCarrier, dInspectionDate) {
+            return new Promise((resolve, reject) => {
+                // main model's metadata is already loaded - use it to build the key
+                const sKey = oDataModel.createKey("/SI_UsageSet", {
+                    Document: sDocument,
+                    Sequencenumber: sSequence,
+                    CarrierNumber: sCarrier,
+                    InspectionDate: dInspectionDate
+                });
+
+                const oModel = getNonBatchModel(oDataModel);
+                oModel.metadataLoaded().then(() => {
+                    // backend logic only reads the keys and ignores the body.
+                    // merge:false forces PUT instead of MERGE, so Gateway calls UPDATE_ENTITY
+                    // directly instead of first doing an implicit GET_ENTITY (not implemented
+                    // for this write-only entity) to compute the merge.
+                    oModel.update("/" + sKey, {}, {
+                        merge: false,
+                        success: (oData, oResponse) => {
+                            console.log("Usage updated successfully");
+                            console.log("oResponse",oResponse);
+                            resolve(extractSapMessage(oResponse));
+                        },
+                        error: (oError) => {
+                            console.error("Failed to update usage:", oError);
+                            reject(oError);
+                        }
+                    });
+                }).catch(reject);
             });
         },
 

@@ -779,7 +779,7 @@ sap.ui.define([
             oViewModel.setProperty("/codeReference", []);
             oViewModel.setProperty("/allCodeReference", []);
 
-            var sPath = "/InspectCodesSet";
+            var sPath = "/InspectCodeSet";
 
             console.log("_fetchInspectionCodes - Path:", sPath);
 

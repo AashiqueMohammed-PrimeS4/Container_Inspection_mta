@@ -187,7 +187,7 @@ sap.ui.define([
 
             oViewModel.setProperty("/isLoading", true);
 
-            oModel.read("/InspectionInsight2Set", {
+            oModel.read("/InspectionInsightSet", {
                 urlParameters: {
                     "$filter":
                         "StartDate ge datetime'" + sStartDate + "T00:00:00' and " +

@@ -4,7 +4,7 @@
     "generatorPlatform": "SAP Business Application Studio",
     "serviceType": "SAP System (ABAP On-Premise)",
     "metadataFilename": "",
-    "serviceUrl": "http://s4hanasrv1.local.com:50000/sap/opu/odata/sap/ZINSPECTION_APP_SRV",
+    "serviceUrl": "http://s4hanasrv1.local.com:50000/sap/opu/odata/PWXSI/INSPECTION_ANALYTIC_APP_SRV",
     "appName": "carrieranalytics",
     "appTitle": "Carrier Analytics APP",
     "appDescription": "An SAP Fiori application.",

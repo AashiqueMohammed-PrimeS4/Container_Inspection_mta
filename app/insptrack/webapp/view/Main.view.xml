@@ -47,7 +47,7 @@
                                       maxLength="6"/>
                                
                                 <Label id="_IDGenLabel1" text="Carrier Number" required="true"/>
-                                <HBox alignItems="Center" justifyContent="Start">
+                                <HBox id="_IDGenHBoxCarrier" alignItems="Center" justifyContent="Start">
                                     <Input id="carrierInput"
                                         change="onDocumentDetailsChange"
                                         placeholder="carrier number"
@@ -83,7 +83,7 @@
                         </WizardStep>
                        
                         <!-- Step 2: Inspection Codes -->
-                        <WizardStep id="InspectionCodesStep"
+                         <WizardStep id="InspectionCodesStep"
                                     title="Inspection Codes"
                                     nextStep="ImageUploadStep"
                                     validated="false">

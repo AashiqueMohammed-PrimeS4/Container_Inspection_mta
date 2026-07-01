@@ -1,382 +1,398 @@
 <?xml version="1.0" encoding="utf-8"?>
-<edmx:Edmx Version="1.0" xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:sap="http://www.sap.com/Protocols/SAPData">
-    <edmx:Reference Uri="/sap/opu/odata/iwfnd/catalogservice;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_ODM',Version='0001',SAP__Origin='')/$value" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
-        <edmx:Include Namespace="com.sap.vocabularies.ODM.v1" Alias="SAP__ODM"/>
-    </edmx:Reference>
-    <edmx:DataServices m:DataServiceVersion="2.0">
-        <Schema Namespace="ZINSPECTION_APP_SRV" xml:lang="en" sap:schema-version="1" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">
-            <EntityType Name="Attachment" m:HasStream="true" sap:content-version="1">
-                <Key>
-                    <PropertyRef Name="BusinessKey"/>
-                    <PropertyRef Name="Filename"/>
-                </Key>
-                <Property Name="BusinessKey" Type="Edm.String" Nullable="false" MaxLength="10" sap:unicode="false" sap:label="Sales Document"/>
-                <Property Name="Filename" Type="Edm.String" Nullable="false" MaxLength="50" sap:unicode="false"/>
-                <Property Name="Mimetype" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="Value" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-            </EntityType>
-            <EntityType Name="InspectionHeader" sap:content-version="1">
-                <Key>
-                    <PropertyRef Name="Document"/>
-                    <PropertyRef Name="Sequencenumber"/>
-                    <PropertyRef Name="CarrierNumber"/>
-                    <PropertyRef Name="InspectionDate"/>
-                </Key>
-                <Property Name="Document" Type="Edm.String" Nullable="false" MaxLength="10" sap:unicode="false" sap:label="DocumentNo" sap:updatable="false"/>
-                <Property Name="Sequencenumber" Type="Edm.String" Nullable="false" MaxLength="6" sap:unicode="false" sap:label="SequenceNo" sap:updatable="false"/>
-                <Property Name="CarrierNumber" Type="Edm.String" Nullable="false" MaxLength="15" sap:unicode="false" sap:label="Carrier Number" sap:updatable="false"/>
-                <Property Name="InspectionDate" Type="Edm.DateTime" Nullable="false" Precision="7" sap:unicode="false" sap:label="Current Date" sap:updatable="false"/>
-                <Property Name="CarrierTyCode" Type="Edm.String" Nullable="false" MaxLength="2" sap:unicode="false" sap:label="Carrier Type Code" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="CarrierLineCode" Type="Edm.String" Nullable="false" MaxLength="2" sap:unicode="false" sap:label="Carrier Line Code" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="Status" Type="Edm.String" Nullable="false" MaxLength="1" sap:unicode="false" sap:label="Status (Accept/Reject)" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="HasBeforeImg" Type="Edm.Boolean" Nullable="false" sap:unicode="false" sap:label="Checkbox" sap:creatable="false"/>
-                <Property Name="HasAfterImg" Type="Edm.Boolean" Nullable="false" sap:unicode="false" sap:label="Checkbox" sap:creatable="false"/>
-                <Property Name="CreatedBy" Type="Edm.String" Nullable="false" MaxLength="30" sap:unicode="false" sap:label="User name" sap:creatable="false" sap:updatable="false"/>
-                <Property Name="CreatedOn" Type="Edm.DateTime" Nullable="false" Precision="7" sap:unicode="false" sap:label="Current Date" sap:creatable="false" sap:updatable="false"/>
-                <Property Name="ChangedBy" Type="Edm.String" Nullable="false" MaxLength="30" sap:unicode="false" sap:label="User name" sap:creatable="false" sap:updatable="false"/>
-                <Property Name="ChangedOn" Type="Edm.DateTime" Nullable="false" Precision="7" sap:unicode="false" sap:label="Current Date" sap:creatable="false" sap:updatable="false"/>
-                <Property Name="CreatedAt" Type="Edm.Time" Nullable="false" Precision="0" sap:unicode="false" sap:label="Created Time" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <NavigationProperty Name="np_on_Codes" Relationship="ZINSPECTION_APP_SRV.Assoc_Header_Codes" FromRole="FromRole_Assoc_Header_Codes" ToRole="ToRole_Assoc_Header_Codes"/>
-            </EntityType>
-            <EntityType Name="DefectCode" sap:content-version="1">
-                <Key>
-                    <PropertyRef Name="Document"/>
-                    <PropertyRef Name="Sequencenumber"/>
-                    <PropertyRef Name="CarrierNumber"/>
-                    <PropertyRef Name="InspectionDate"/>
-                    <PropertyRef Name="CodeSeq"/>
-                </Key>
-                <Property Name="Document" Type="Edm.String" Nullable="false" MaxLength="10" sap:unicode="false" sap:label="DocumentNo" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="Sequencenumber" Type="Edm.String" Nullable="false" MaxLength="6" sap:unicode="false" sap:label="SequenceNo" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="CarrierNumber" Type="Edm.String" Nullable="false" MaxLength="15" sap:unicode="false" sap:label="Carrier Number" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="InspectionDate" Type="Edm.DateTime" Nullable="false" Precision="7" sap:unicode="false" sap:label="Current Date" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="CodeSeq" Type="Edm.String" Nullable="false" MaxLength="2" sap:unicode="false" sap:label="Two-digit no." sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="CodeValue" Type="Edm.String" Nullable="false" MaxLength="2" sap:unicode="false" sap:label="Component of the Version Number" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="CodeText" Type="Edm.String" Nullable="false" MaxLength="100" sap:unicode="false" sap:label="Character 100" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="CreatedOn" Type="Edm.DateTime" Nullable="false" Precision="7" sap:unicode="false" sap:label="Current Date" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="CreatedBy" Type="Edm.String" Nullable="false" MaxLength="30" sap:unicode="false" sap:label="User name" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="CreatedAt" Type="Edm.Time" Nullable="false" Precision="0" sap:unicode="false" sap:label="Created Time" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-            </EntityType>
-            <EntityType Name="CarrierInspReport" sap:content-version="1">
-                <Key>
-                    <PropertyRef Name="CarrierNumber"/>
-                    <PropertyRef Name="Sequencenumber"/>
-                </Key>
-                <Property Name="CarrierNumber" Type="Edm.String" Nullable="false" MaxLength="15" sap:unicode="false" sap:label="Carrier Number" sap:sortable="false"/>
-                <Property Name="CodeValue" Type="Edm.String" Nullable="false" sap:unicode="false" sap:sortable="false"/>
-                <Property Name="CarrierTypeCodeText" Type="Edm.String" Nullable="false" MaxLength="100" sap:unicode="false" sap:label="Carrier Type Text" sap:sortable="false"/>
-                <Property Name="InspectionDate" Type="Edm.DateTime" Nullable="false" Precision="0" sap:unicode="false" sap:label="Current Date" sap:sortable="false"/>
-                <Property Name="CreatedBy" Type="Edm.String" Nullable="false" MaxLength="30" sap:unicode="false" sap:label="User name" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="Status" Type="Edm.String" Nullable="false" MaxLength="1" sap:unicode="false" sap:label="Status (Accept/Reject)" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="DocumentNo" Type="Edm.String" Nullable="false" MaxLength="10" sap:unicode="false" sap:label="DocumentNo" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="CarrierLine" Type="Edm.String" Nullable="false" MaxLength="100" sap:unicode="false" sap:label="Carr line code text" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="Sequencenumber" Type="Edm.String" Nullable="false" MaxLength="6" sap:unicode="false" sap:label="SequenceNo" sap:updatable="false"/>
-            </EntityType>
-            <EntityType Name="VH_Carrierline" sap:content-version="1">
-                <Key>
-                    <PropertyRef Name="CarrierLineCode"/>
-                </Key>
-                <Property Name="CarrierLineCode" Type="Edm.String" Nullable="false" MaxLength="2" sap:unicode="false" sap:label="Carrier Line Code" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="CarrierLineCodeText" Type="Edm.String" Nullable="false" MaxLength="100" sap:unicode="false" sap:label="Carr line code text" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-            </EntityType>
-            <EntityType Name="InspectionSummary" sap:content-version="1">
-                <Key>
-                    <PropertyRef Name="SummaryID"/>
-                </Key>
-                <Property Name="SummaryID" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="TotalInspections" Type="Edm.Int32" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="AcceptedCount" Type="Edm.Int32" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="RejectedCount" Type="Edm.Int32" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="RejectionRate" Type="Edm.Int32" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="PrevRejectionRate" Type="Edm.Int32" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="RejectionRateDelta" Type="Edm.Int32" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="StartDate" Type="Edm.DateTime" Precision="0" sap:unicode="false" sap:label="Current Date" sap:creatable="false" sap:updatable="false" sap:sortable="false"/>
-                <Property Name="EndDate" Type="Edm.DateTime" Precision="0" sap:unicode="false" sap:label="Current Date" sap:creatable="false" sap:updatable="false" sap:sortable="false"/>
-                <Property Name="TopRejectedReason" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="TopRejectedCarrierLine" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-            </EntityType>
-            <EntityType Name="InspectionInsight" sap:content-version="1">
-                <Key>
-                    <PropertyRef Name="InsightId"/>
-                </Key>
-                <Property Name="InsightId" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="InsightType" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="Headline" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="Evidence" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="RejectionCount" Type="Edm.Int32" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="RejectionRate" Type="Edm.Int32" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="Severity" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="PeriodType" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="StartDate" Type="Edm.DateTime" Precision="0" sap:unicode="false" sap:label="Time Stamp" sap:creatable="false" sap:updatable="false" sap:sortable="false"/>
-                <Property Name="EndDate" Type="Edm.DateTime" Precision="0" sap:unicode="false" sap:label="Time Stamp" sap:creatable="false" sap:updatable="false" sap:sortable="false"/>
-            </EntityType>
-            <EntityType Name="InspectionInsight2" sap:content-version="1">
-                <Key>
-                    <PropertyRef Name="InsightId"/>
-                </Key>
-                <Property Name="InsightId" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="InsightType" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="PeriodType" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="KeyText" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="KeyId" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="RejectionCount" Type="Edm.Int32" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="TotalRejections" Type="Edm.Int32" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="RejectionRate" Type="Edm.Decimal" Nullable="false" Precision="31" Scale="0" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="Severity" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="StartDate" Type="Edm.DateTime" Precision="0" sap:unicode="false" sap:label="Time Stamp" sap:creatable="false" sap:updatable="false" sap:sortable="false"/>
-                <Property Name="EndDate" Type="Edm.DateTime" Precision="0" sap:unicode="false" sap:label="Time Stamp" sap:creatable="false" sap:updatable="false" sap:sortable="false"/>
-            </EntityType>
-            <EntityType Name="Chatbot" sap:content-version="1">
-                <Key>
-                    <PropertyRef Name="ID"/>
-                </Key>
-                <Property Name="ID" Type="Edm.String" Nullable="false" sap:unicode="false"/>
-                <Property Name="Tags" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="Label" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="Dim1Type" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="Dim1" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="Dim1Text" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="Document" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="Sequence" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="Date" Type="Edm.DateTime" Precision="0" sap:unicode="false" sap:label="Time Stamp"/>
-                <Property Name="Week" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="Month" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="Hour" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="Value" Type="Edm.Decimal" Precision="31" Scale="0" sap:unicode="false"/>
-                <Property Name="Value2" Type="Edm.Decimal" Precision="31" Scale="0" sap:unicode="false"/>
-                <Property Name="Percent" Type="Edm.Decimal" Precision="31" Scale="0" sap:unicode="false"/>
-                <Property Name="Note" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="FromDate" Type="Edm.DateTime" Precision="0" sap:unicode="false" sap:label="Time Stamp"/>
-                <Property Name="ToDate" Type="Edm.DateTime" Precision="0" sap:unicode="false" sap:label="Time Stamp"/>
-            </EntityType>
-            <EntityType Name="InspectionGlobalMetrics" sap:content-version="1">
-                <Key>
-                    <PropertyRef Name="Id"/>
-                    <PropertyRef Name="StartDate"/>
-                    <PropertyRef Name="EndDate"/>
-                </Key>
-                <Property Name="Id" Type="Edm.String" Nullable="false" sap:unicode="false"/>
-                <Property Name="InspectionDate" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="Status" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="Inspector" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="InspectionTime" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="CarrierNumber" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="CarrierTypeCode" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="CarrierType" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="CarrierLineCode" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="CarrierLineText" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="InspectionHours" Type="Edm.Decimal" Precision="10" Scale="2" sap:unicode="false"/>
-                <Property Name="Document" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="SequenceNumber" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="StartDate" Type="Edm.DateTime" Nullable="false" Precision="0" sap:unicode="false" sap:label="Time Stamp"/>
-                <Property Name="EndDate" Type="Edm.DateTime" Nullable="false" Precision="0" sap:unicode="false" sap:label="Time Stamp"/>
-            </EntityType>
-            <EntityType Name="InspectionDetail" sap:content-version="1">
-                <Key>
-                    <PropertyRef Name="Id"/>
-                </Key>
-                <Property Name="Id" Type="Edm.String" Nullable="false" sap:unicode="false"/>
-                <Property Name="InspectionDate" Type="Edm.DateTime" Precision="0" sap:unicode="false" sap:label="Time Stamp"/>
-                <Property Name="Status" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="CarrierNumber" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="CarrierTypeCode" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="CarrierType" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="CarrierLineCode" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="CarrierLineText" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="Inspector" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="Document" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="SequenceNumber" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="StartDate" Type="Edm.DateTime" Precision="0" sap:unicode="false" sap:label="Time Stamp"/>
-                <Property Name="EndDate" Type="Edm.DateTime" Precision="0" sap:unicode="false" sap:label="Time Stamp"/>
-                <Property Name="CarrierId" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="InspectorFilter" Type="Edm.String" sap:unicode="false"/>
-            </EntityType>
-            <EntityType Name="DefectAnalysisSet" sap:content-version="1">
-                <Key>
-                    <PropertyRef Name="Id"/>
-                </Key>
-                <Property Name="Id" Type="Edm.String" Nullable="false" sap:unicode="false"/>
-                <Property Name="InspectionDate" Type="Edm.DateTime" Precision="0" sap:unicode="false" sap:label="Time Stamp"/>
-                <Property Name="Status" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="CarrierNumber" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="Inspector" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="Document" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="SequenceNumber" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="DefectCode" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="DefectText" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="CarrierTypeCode" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="CarrierLineCode" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="StartDate" Type="Edm.DateTime" Precision="0" sap:unicode="false" sap:label="Time Stamp"/>
-                <Property Name="EndDate" Type="Edm.DateTime" Precision="0" sap:unicode="false" sap:label="Time Stamp"/>
-                <Property Name="DefectType" Type="Edm.String" sap:unicode="false"/>
-            </EntityType>
-            <EntityType Name="ContainerHistory" sap:content-version="1">
-                <Key>
-                    <PropertyRef Name="Id"/>
-                    <PropertyRef Name="ContainerId"/>
-                    <PropertyRef Name="StartDate"/>
-                    <PropertyRef Name="EndDate"/>
-                </Key>
-                <Property Name="Id" Type="Edm.String" Nullable="false" sap:unicode="false"/>
-                <Property Name="InspectionDate" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="ContainerId" Type="Edm.String" Nullable="false" sap:unicode="false"/>
-                <Property Name="Status" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="Inspector" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="Document" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="SequenceNumber" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="DefectSummary" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="StartDate" Type="Edm.DateTime" Nullable="false" Precision="0" sap:unicode="false" sap:label="Time Stamp"/>
-                <Property Name="EndDate" Type="Edm.DateTime" Nullable="false" Precision="0" sap:unicode="false" sap:label="Time Stamp"/>
-                <Property Name="StatusFilter" Type="Edm.String" sap:unicode="false"/>
-            </EntityType>
-            <EntityType Name="InspectionHeadGlobal" sap:content-version="1">
-                <Key>
-                    <PropertyRef Name="StartDate"/>
-                    <PropertyRef Name="EndDate"/>
-                </Key>
-                <Property Name="StartDate" Type="Edm.DateTime" Nullable="false" Precision="0" sap:unicode="false" sap:label="Time Stamp"/>
-                <Property Name="EndDate" Type="Edm.DateTime" Nullable="false" Precision="0" sap:unicode="false" sap:label="Time Stamp"/>
-                <Property Name="TotalInspections" Type="Edm.Int32" sap:unicode="false"/>
-                <Property Name="AcceptedCount" Type="Edm.Int32" sap:unicode="false"/>
-                <Property Name="RejectedCount" Type="Edm.Int32" sap:unicode="false"/>
-                <Property Name="AcceptedRate" Type="Edm.Int32" sap:unicode="false"/>
-                <Property Name="RejectedRate" Type="Edm.Int32" sap:unicode="false"/>
-                <Property Name="PreviousRejectionRate" Type="Edm.Int32" sap:unicode="false"/>
-                <Property Name="RejectionRateDelta" Type="Edm.Int32" sap:unicode="false"/>
-                <Property Name="Severity" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="TopAcceptingInspector" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="TopRejectingInspector" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="InspectorSpeedSummary" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="CarrierWithHighestAcceptionRate" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="CarrierWithHighestRejectionRate" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="CarrierAcceptanceSummary" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="CarrierRejectionSummary" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="CarrierImprovementTrend" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="ContainerTypeRejectionSummary" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="ContainerTypeAcceptanceSummary" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="TopRejectedReason" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="DefectTrendSummary" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="RejectionPatternSummary" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="TopRejectedCarrierLine" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="TopRejectedVendor" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="TopAcceptedVendor" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="DailyVolumeTrend" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="HourlyVolumeTrend" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="MonthlyRejectionTrend" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="MonthlyAcceptionTrend" Type="Edm.String" sap:unicode="false"/>
-                <NavigationProperty Name="To_InspGlobal" Relationship="ZINSPECTION_APP_SRV.Assoc_InspHeader_InspectionGlobal" FromRole="FromRole_Assoc_InspHeader_InspectionGlobal" ToRole="ToRole_Assoc_InspHeader_InspectionGlobal"/>
-            </EntityType>
-            <EntityType Name="ContainerGlobal" sap:content-version="1">
-                <Key>
-                    <PropertyRef Name="ContainerId"/>
-                    <PropertyRef Name="StartDate"/>
-                    <PropertyRef Name="EndDate"/>
-                </Key>
-                <Property Name="ContainerId" Type="Edm.String" Nullable="false" sap:unicode="false"/>
-                <Property Name="TotalHistoricalInspections" Type="Edm.Int32" sap:unicode="false"/>
-                <Property Name="TimesPreviouslyRejected" Type="Edm.Int32" sap:unicode="false"/>
-                <Property Name="TopDefects" Type="Edm.String" sap:unicode="false"/>
-                <Property Name="StartDate" Type="Edm.DateTime" Nullable="false" Precision="0" sap:unicode="false" sap:label="Time Stamp"/>
-                <Property Name="EndDate" Type="Edm.DateTime" Nullable="false" Precision="0" sap:unicode="false" sap:label="Time Stamp"/>
-                <NavigationProperty Name="To_ContHistory" Relationship="ZINSPECTION_APP_SRV.Assoc_ContainerGlobal_ContainerHistory" FromRole="FromRole_Assoc_ContainerGlobal_ContainerHistory" ToRole="ToRole_Assoc_ContainerGlobal_ContainerHistory"/>
-            </EntityType>
-            <EntityType Name="VH_CarrierType" sap:content-version="1">
-                <Key>
-                    <PropertyRef Name="CarrierTypeCode"/>
-                </Key>
-                <Property Name="CarrierTypeCode" Type="Edm.String" Nullable="false" MaxLength="2" sap:unicode="false" sap:label="CARRIER_TYPE_CODE" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="CarrierTypeCodeText" Type="Edm.String" Nullable="false" MaxLength="100" sap:unicode="false" sap:label="CARRIER_TYPE_CODE_TEXT" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-            </EntityType>
-            <EntityType Name="InspectCodes" sap:content-version="1">
-                <Key>
-                    <PropertyRef Name="InspectionCode"/>
-                </Key>
-                <Property Name="InspectionCode" Type="Edm.String" Nullable="false" MaxLength="2" sap:unicode="false" sap:label="INSPECTION_CODE" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="InspectionCodeText" Type="Edm.String" Nullable="false" MaxLength="100" sap:unicode="false" sap:label="INSPECTION_CODE_TEXT" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-            </EntityType>
-            <Association Name="Assoc_InspHeader_InspectionGlobal" sap:content-version="1">
-                <End Type="ZINSPECTION_APP_SRV.InspectionHeadGlobal" Multiplicity="1" Role="FromRole_Assoc_InspHeader_InspectionGlobal"/>
-                <End Type="ZINSPECTION_APP_SRV.InspectionGlobalMetrics" Multiplicity="*" Role="ToRole_Assoc_InspHeader_InspectionGlobal"/>
-                <ReferentialConstraint>
-                    <Principal Role="FromRole_Assoc_InspHeader_InspectionGlobal">
-                        <PropertyRef Name="EndDate"/>
-                        <PropertyRef Name="StartDate"/>
-                    </Principal>
-                    <Dependent Role="ToRole_Assoc_InspHeader_InspectionGlobal">
-                        <PropertyRef Name="EndDate"/>
-                        <PropertyRef Name="StartDate"/>
-                    </Dependent>
-                </ReferentialConstraint>
-            </Association>
-            <Association Name="Assoc_Header_Codes" sap:content-version="1">
-                <End Type="ZINSPECTION_APP_SRV.InspectionHeader" Multiplicity="1" Role="FromRole_Assoc_Header_Codes"/>
-                <End Type="ZINSPECTION_APP_SRV.DefectCode" Multiplicity="*" Role="ToRole_Assoc_Header_Codes"/>
-                <ReferentialConstraint>
-                    <Principal Role="FromRole_Assoc_Header_Codes">
-                        <PropertyRef Name="Document"/>
-                        <PropertyRef Name="Sequencenumber"/>
-                        <PropertyRef Name="CarrierNumber"/>
-                        <PropertyRef Name="InspectionDate"/>
-                    </Principal>
-                    <Dependent Role="ToRole_Assoc_Header_Codes">
-                        <PropertyRef Name="Document"/>
-                        <PropertyRef Name="Sequencenumber"/>
-                        <PropertyRef Name="CarrierNumber"/>
-                        <PropertyRef Name="InspectionDate"/>
-                    </Dependent>
-                </ReferentialConstraint>
-            </Association>
-            <Association Name="Assoc_ContainerGlobal_ContainerHistory" sap:content-version="1">
-                <End Type="ZINSPECTION_APP_SRV.ContainerGlobal" Multiplicity="1" Role="FromRole_Assoc_ContainerGlobal_ContainerHistory"/>
-                <End Type="ZINSPECTION_APP_SRV.ContainerHistory" Multiplicity="*" Role="ToRole_Assoc_ContainerGlobal_ContainerHistory"/>
-                <ReferentialConstraint>
-                    <Principal Role="FromRole_Assoc_ContainerGlobal_ContainerHistory">
-                        <PropertyRef Name="EndDate"/>
-                        <PropertyRef Name="StartDate"/>
-                        <PropertyRef Name="ContainerId"/>
-                    </Principal>
-                    <Dependent Role="ToRole_Assoc_ContainerGlobal_ContainerHistory">
-                        <PropertyRef Name="EndDate"/>
-                        <PropertyRef Name="StartDate"/>
-                        <PropertyRef Name="ContainerId"/>
-                    </Dependent>
-                </ReferentialConstraint>
-            </Association>
-            <EntityContainer Name="ZINSPECTION_APP_SRV_Entities" m:IsDefaultEntityContainer="true" sap:supported-formats="atom json xlsx">
-                <EntitySet Name="AttachmentSet" EntityType="ZINSPECTION_APP_SRV.Attachment" sap:content-version="1"/>
-                <EntitySet Name="InspectionHeaderSet" EntityType="ZINSPECTION_APP_SRV.InspectionHeader" sap:content-version="1"/>
-                <EntitySet Name="DefectCodeSet" EntityType="ZINSPECTION_APP_SRV.DefectCode" sap:content-version="1"/>
-                <EntitySet Name="CarrierInspReportSet" EntityType="ZINSPECTION_APP_SRV.CarrierInspReport" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1"/>
-                <EntitySet Name="VH_CarrierlineSet" EntityType="ZINSPECTION_APP_SRV.VH_Carrierline" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:content-version="1"/>
-                <EntitySet Name="InspectionSummarySet" EntityType="ZINSPECTION_APP_SRV.InspectionSummary" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1"/>
-                <EntitySet Name="InspectionInsightSet" EntityType="ZINSPECTION_APP_SRV.InspectionInsight" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1"/>
-                <EntitySet Name="InspectionInsight2Set" EntityType="ZINSPECTION_APP_SRV.InspectionInsight2" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1"/>
-                <EntitySet Name="ChatbotSet" EntityType="ZINSPECTION_APP_SRV.Chatbot" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1"/>
-                <EntitySet Name="InspectionGlobalMetricsSet" EntityType="ZINSPECTION_APP_SRV.InspectionGlobalMetrics" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1"/>
-                <EntitySet Name="InspectionDetailSet" EntityType="ZINSPECTION_APP_SRV.InspectionDetail" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1"/>
-                <EntitySet Name="DefectAnalysisSetSet" EntityType="ZINSPECTION_APP_SRV.DefectAnalysisSet" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1"/>
-                <EntitySet Name="ContainerHistorySet" EntityType="ZINSPECTION_APP_SRV.ContainerHistory" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1"/>
-                <EntitySet Name="InspectionHeadGlobalSet" EntityType="ZINSPECTION_APP_SRV.InspectionHeadGlobal" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1"/>
-                <EntitySet Name="ContainerGlobalSet" EntityType="ZINSPECTION_APP_SRV.ContainerGlobal" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1"/>
-                <EntitySet Name="VH_CarrierTypeSet" EntityType="ZINSPECTION_APP_SRV.VH_CarrierType" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:content-version="1"/>
-                <EntitySet Name="InspectCodesSet" EntityType="ZINSPECTION_APP_SRV.InspectCodes" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:content-version="1"/>
-                <AssociationSet Name="Assoc_InspHeader_InspectionGlobalSet" Association="ZINSPECTION_APP_SRV.Assoc_InspHeader_InspectionGlobal" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
-                    <End EntitySet="InspectionHeadGlobalSet" Role="FromRole_Assoc_InspHeader_InspectionGlobal"/>
-                    <End EntitySet="InspectionGlobalMetricsSet" Role="ToRole_Assoc_InspHeader_InspectionGlobal"/>
-                </AssociationSet>
-                <AssociationSet Name="Assoc_Header_CodesSet" Association="ZINSPECTION_APP_SRV.Assoc_Header_Codes" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
-                    <End EntitySet="InspectionHeaderSet" Role="FromRole_Assoc_Header_Codes"/>
-                    <End EntitySet="DefectCodeSet" Role="ToRole_Assoc_Header_Codes"/>
-                </AssociationSet>
-                <AssociationSet Name="Assoc_ContainerGlobal_ContainerHistorSet" Association="ZINSPECTION_APP_SRV.Assoc_ContainerGlobal_ContainerHistory" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
-                    <End EntitySet="ContainerGlobalSet" Role="FromRole_Assoc_ContainerGlobal_ContainerHistory"/>
-                    <End EntitySet="ContainerHistorySet" Role="ToRole_Assoc_ContainerGlobal_ContainerHistory"/>
-                </AssociationSet>
-            </EntityContainer>
-            <Annotation Term="Core.SchemaVersion" String="1.0.0" xmlns="http://docs.oasis-open.org/odata/ns/edm"/>
-            <Annotations Target="ZINSPECTION_APP_SRV.ZINSPECTION_APP_SRV_Entities" xmlns="http://docs.oasis-open.org/odata/ns/edm"/>
-            <atom:link rel="self" href="/sap/opu/odata/sap/ZINSPECTION_APP_SRV/$metadata" xmlns:atom="http://www.w3.org/2005/Atom"/>
-            <atom:link rel="latest-version" href="/sap/opu/odata/sap/ZINSPECTION_APP_SRV/$metadata" xmlns:atom="http://www.w3.org/2005/Atom"/>
-        </Schema>
-    </edmx:DataServices>
+<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:sap="http://www.sap.com/Protocols/SAPData" Version="1.0">
+<edmx:DataServices m:DataServiceVersion="2.0">
+<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="PWXSI.INSPECTION_ANALYTIC_APP_SRV" xml:lang="en" sap:schema-version="1">
+<EntityType Name="DefectCode" sap:content-version="1">
+<Key>
+<PropertyRef Name="Document"/>
+<PropertyRef Name="Sequencenumber"/>
+<PropertyRef Name="CarrierNumber"/>
+<PropertyRef Name="InspectionDate"/>
+<PropertyRef Name="CodeSeq"/>
+</Key>
+<Property Name="Document" Type="Edm.String" Nullable="false" MaxLength="10" sap:unicode="false" sap:label="DocumentNo" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="Sequencenumber" Type="Edm.String" Nullable="false" MaxLength="6" sap:unicode="false" sap:label="SequenceNo" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="CarrierNumber" Type="Edm.String" Nullable="false" MaxLength="15" sap:unicode="false" sap:label="Carrier Number" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="InspectionDate" Type="Edm.DateTime" Nullable="false" Precision="7" sap:unicode="false" sap:label="Inspection Date" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="CodeSeq" Type="Edm.String" Nullable="false" MaxLength="2" sap:unicode="false" sap:label="Code Sequence" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="CodeValue" Type="Edm.String" Nullable="false" MaxLength="2" sap:unicode="false" sap:label="Defect Code Value" sap:sortable="false" sap:filterable="false"/>
+<Property Name="CodeText" Type="Edm.String" Nullable="false" MaxLength="100" sap:unicode="false" sap:label="Defect Code Text" sap:sortable="false" sap:filterable="false"/>
+<Property Name="CreatedOn" Type="Edm.DateTime" Nullable="false" Precision="7" sap:unicode="false" sap:label="Inspected Date" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="CreatedBy" Type="Edm.String" Nullable="false" MaxLength="30" sap:unicode="false" sap:label="Insp By(Before Img)" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="CreatedAt" Type="Edm.Time" Nullable="false" Precision="0" sap:unicode="false" sap:label="Created Time" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+</EntityType>
+<EntityType Name="InspectCodes" sap:content-version="1">
+<Key>
+<PropertyRef Name="InspectionCode"/>
+</Key>
+<Property Name="InspectionCode" Type="Edm.String" Nullable="false" MaxLength="2" sap:unicode="false" sap:label="Inspection Code" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="InspectionCodeText" Type="Edm.String" Nullable="false" MaxLength="100" sap:unicode="false" sap:label="Inspection Code Text" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+</EntityType>
+<EntityType Name="InspectionHeader" sap:content-version="1">
+<Key>
+<PropertyRef Name="Document"/>
+<PropertyRef Name="Sequencenumber"/>
+<PropertyRef Name="CarrierNumber"/>
+<PropertyRef Name="InspectionDate"/>
+</Key>
+<Property Name="Document" Type="Edm.String" Nullable="false" MaxLength="10" sap:unicode="false" sap:label="DocumentNo" sap:updatable="false"/>
+<Property Name="Sequencenumber" Type="Edm.String" Nullable="false" MaxLength="6" sap:unicode="false" sap:label="SequenceNo" sap:updatable="false"/>
+<Property Name="CarrierNumber" Type="Edm.String" Nullable="false" MaxLength="15" sap:unicode="false" sap:label="Carrier Number" sap:updatable="false"/>
+<Property Name="InspectionDate" Type="Edm.DateTime" Nullable="false" Precision="7" sap:unicode="false" sap:label="Inspection Date" sap:updatable="false"/>
+<Property Name="CarrierTyCode" Type="Edm.String" Nullable="false" MaxLength="2" sap:unicode="false" sap:label="Carrier Type Code" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="CarrierLineCode" Type="Edm.String" Nullable="false" MaxLength="2" sap:unicode="false" sap:label="Carrier Line Code" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="Status" Type="Edm.String" Nullable="false" MaxLength="1" sap:unicode="false" sap:label="Status" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="HasBeforeImg" Type="Edm.Boolean" Nullable="false" sap:unicode="false" sap:label="Has Before Image" sap:creatable="false"/>
+<Property Name="HasAfterImg" Type="Edm.Boolean" Nullable="false" sap:unicode="false" sap:label="Has After Image" sap:creatable="false"/>
+<Property Name="CreatedBy" Type="Edm.String" Nullable="false" MaxLength="30" sap:unicode="false" sap:label="Insp By(Before Img)" sap:creatable="false" sap:updatable="false"/>
+<Property Name="CreatedOn" Type="Edm.DateTime" Nullable="false" Precision="7" sap:unicode="false" sap:label="Insp on(Before Img)" sap:creatable="false" sap:updatable="false"/>
+<Property Name="ChangedBy" Type="Edm.String" Nullable="false" MaxLength="30" sap:unicode="false" sap:label="Insp By(After Image)" sap:creatable="false" sap:updatable="false"/>
+<Property Name="ChangedOn" Type="Edm.DateTime" Nullable="false" Precision="7" sap:unicode="false" sap:label="Insp on(After Image)" sap:creatable="false" sap:updatable="false"/>
+<Property Name="CreatedAt" Type="Edm.Time" Nullable="false" Precision="0" sap:unicode="false" sap:label="Created Time" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="ChangedAt" Type="Edm.Time" Nullable="false" Precision="0" sap:unicode="false" sap:label="Changed At" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<NavigationProperty Name="np_on_Codes" Relationship="PWXSI.INSPECTION_ANALYTIC_APP_SRV.Assoc_Header_Codes" FromRole="FromRole_Assoc_Header_Codes" ToRole="ToRole_Assoc_Header_Codes"/>
+</EntityType>
+<EntityType Name="VH_Carrierline" sap:content-version="1">
+<Key>
+<PropertyRef Name="CarrierLineCode"/>
+</Key>
+<Property Name="CarrierLineCode" Type="Edm.String" Nullable="false" MaxLength="2" sap:unicode="false" sap:label="Carrier Line Code" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="CarrierLineCodeText" Type="Edm.String" Nullable="false" MaxLength="100" sap:unicode="false" sap:label="Carr line code text" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+</EntityType>
+<EntityType Name="VH_CarrierType" sap:content-version="1">
+<Key>
+<PropertyRef Name="CarrierTypeCode"/>
+</Key>
+<Property Name="CarrierTypeCode" Type="Edm.String" Nullable="false" MaxLength="2" sap:unicode="false" sap:label="Carrier Type Code" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="CarrierTypeCodeText" Type="Edm.String" Nullable="false" MaxLength="100" sap:unicode="false" sap:label="Carrier Type Text" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+</EntityType>
+<EntityType Name="CarrierInspReport" sap:content-version="1">
+<Key>
+<PropertyRef Name="CarrierNumber"/>
+<PropertyRef Name="Sequencenumber"/>
+</Key>
+<Property Name="CarrierNumber" Type="Edm.String" Nullable="false" MaxLength="15" sap:unicode="false" sap:label="Carrier Number"/>
+<Property Name="CodeValue" Type="Edm.String" Nullable="false" sap:unicode="false"/>
+<Property Name="CarrierTypeCodeText" Type="Edm.String" Nullable="false" MaxLength="100" sap:unicode="false" sap:label="Carrier Type Text"/>
+<Property Name="InspectionDate" Type="Edm.DateTime" Nullable="false" Precision="0" sap:unicode="false" sap:label="Current Date"/>
+<Property Name="CreatedBy" Type="Edm.String" Nullable="false" MaxLength="30" sap:unicode="false" sap:label="User name" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="Status" Type="Edm.String" Nullable="false" MaxLength="1" sap:unicode="false" sap:label="Status" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="DocumentNo" Type="Edm.String" Nullable="false" MaxLength="10" sap:unicode="false" sap:label="DocumentNo" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="CarrierLine" Type="Edm.String" Nullable="false" MaxLength="100" sap:unicode="false" sap:label="Carr line code text" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="Sequencenumber" Type="Edm.String" Nullable="false" MaxLength="6" sap:unicode="false" sap:label="SequenceNo"/>
+</EntityType>
+<EntityType Name="Chatbot" sap:content-version="1">
+<Key>
+<PropertyRef Name="ID"/>
+</Key>
+<Property Name="ID" Type="Edm.String" Nullable="false" sap:unicode="false"/>
+<Property Name="Tags" Type="Edm.String" sap:unicode="false"/>
+<Property Name="Label" Type="Edm.String" sap:unicode="false"/>
+<Property Name="Dim1Type" Type="Edm.String" sap:unicode="false"/>
+<Property Name="Dim1" Type="Edm.String" sap:unicode="false"/>
+<Property Name="Dim1Text" Type="Edm.String" sap:unicode="false"/>
+<Property Name="Document" Type="Edm.String" sap:unicode="false"/>
+<Property Name="Sequence" Type="Edm.String" sap:unicode="false"/>
+<Property Name="Date" Type="Edm.DateTime" Precision="0" sap:unicode="false" sap:label="Time Stamp"/>
+<Property Name="Week" Type="Edm.String" sap:unicode="false"/>
+<Property Name="Month" Type="Edm.String" sap:unicode="false"/>
+<Property Name="Hour" Type="Edm.String" sap:unicode="false"/>
+<Property Name="Value" Type="Edm.Decimal" Precision="31" Scale="0" sap:unicode="false"/>
+<Property Name="Value2" Type="Edm.Decimal" Precision="31" Scale="0" sap:unicode="false"/>
+<Property Name="Percent" Type="Edm.Decimal" Precision="31" Scale="0" sap:unicode="false"/>
+<Property Name="Note" Type="Edm.String" sap:unicode="false"/>
+<Property Name="FromDate" Type="Edm.DateTime" Precision="0" sap:unicode="false" sap:label="Time Stamp"/>
+<Property Name="ToDate" Type="Edm.DateTime" Precision="0" sap:unicode="false" sap:label="Time Stamp"/>
+</EntityType>
+<EntityType Name="InspectionInsight" sap:content-version="1">
+<Key>
+<PropertyRef Name="InsightId"/>
+</Key>
+<Property Name="InsightId" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="InsightType" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="PeriodType" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="KeyText" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="KeyId" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="RejectionCount" Type="Edm.Int32" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="TotalRejections" Type="Edm.Int32" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="RejectionRate" Type="Edm.Decimal" Nullable="false" Precision="31" Scale="0" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="Severity" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="StartDate" Type="Edm.DateTime" Precision="0" sap:unicode="false" sap:label="Time Stamp" sap:creatable="false" sap:updatable="false" sap:sortable="false"/>
+<Property Name="EndDate" Type="Edm.DateTime" Precision="0" sap:unicode="false" sap:label="Time Stamp" sap:creatable="false" sap:updatable="false" sap:sortable="false"/>
+</EntityType>
+<EntityType Name="InspectionSummary" sap:content-version="1">
+<Key>
+<PropertyRef Name="SummaryID"/>
+</Key>
+<Property Name="SummaryID" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="TotalInspections" Type="Edm.Int32" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="AcceptedCount" Type="Edm.Int32" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="RejectedCount" Type="Edm.Int32" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="RejectionRate" Type="Edm.Int32" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="PrevRejectionRate" Type="Edm.Int32" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="RejectionRateDelta" Type="Edm.Int32" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="StartDate" Type="Edm.DateTime" Precision="0" sap:unicode="false" sap:label="Current Date" sap:creatable="false" sap:updatable="false" sap:sortable="false"/>
+<Property Name="EndDate" Type="Edm.DateTime" Precision="0" sap:unicode="false" sap:label="Current Date" sap:creatable="false" sap:updatable="false" sap:sortable="false"/>
+<Property Name="TopRejectedReason" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="TopRejectedCarrierLine" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+</EntityType>
+<EntityType Name="ContainerGlobal" sap:content-version="1">
+<Key>
+<PropertyRef Name="ContainerId"/>
+<PropertyRef Name="StartDate"/>
+<PropertyRef Name="EndDate"/>
+</Key>
+<Property Name="ContainerId" Type="Edm.String" Nullable="false" sap:unicode="false"/>
+<Property Name="TotalHistoricalInspections" Type="Edm.Int32" sap:unicode="false"/>
+<Property Name="TimesPreviouslyRejected" Type="Edm.Int32" sap:unicode="false"/>
+<Property Name="TopDefects" Type="Edm.String" sap:unicode="false"/>
+<Property Name="StartDate" Type="Edm.DateTime" Nullable="false" Precision="0" sap:unicode="false" sap:label="Time Stamp"/>
+<Property Name="EndDate" Type="Edm.DateTime" Nullable="false" Precision="0" sap:unicode="false" sap:label="Time Stamp"/>
+<NavigationProperty Name="To_ContHistory" Relationship="PWXSI.INSPECTION_ANALYTIC_APP_SRV.Assoc_ContainerGlobal_ContainerHistory" FromRole="FromRole_Assoc_ContainerGlobal_ContainerHistory" ToRole="ToRole_Assoc_ContainerGlobal_ContainerHistory"/>
+</EntityType>
+<EntityType Name="ContainerHistory" sap:content-version="1">
+<Key>
+<PropertyRef Name="Id"/>
+<PropertyRef Name="ContainerId"/>
+<PropertyRef Name="StartDate"/>
+<PropertyRef Name="EndDate"/>
+</Key>
+<Property Name="Id" Type="Edm.String" Nullable="false" sap:unicode="false"/>
+<Property Name="InspectionDate" Type="Edm.String" sap:unicode="false"/>
+<Property Name="ContainerId" Type="Edm.String" Nullable="false" sap:unicode="false"/>
+<Property Name="Status" Type="Edm.String" sap:unicode="false"/>
+<Property Name="Inspector" Type="Edm.String" sap:unicode="false"/>
+<Property Name="Document" Type="Edm.String" sap:unicode="false"/>
+<Property Name="SequenceNumber" Type="Edm.String" sap:unicode="false"/>
+<Property Name="DefectSummary" Type="Edm.String" sap:unicode="false"/>
+<Property Name="StartDate" Type="Edm.DateTime" Nullable="false" Precision="0" sap:unicode="false" sap:label="Time Stamp"/>
+<Property Name="EndDate" Type="Edm.DateTime" Nullable="false" Precision="0" sap:unicode="false" sap:label="Time Stamp"/>
+<Property Name="StatusFilter" Type="Edm.String" sap:unicode="false"/>
+</EntityType>
+<EntityType Name="DefectAnalysisSet" sap:content-version="1">
+<Key>
+<PropertyRef Name="Id"/>
+</Key>
+<Property Name="Id" Type="Edm.String" Nullable="false" sap:unicode="false"/>
+<Property Name="InspectionDate" Type="Edm.DateTime" Precision="0" sap:unicode="false" sap:label="Time Stamp"/>
+<Property Name="Status" Type="Edm.String" sap:unicode="false"/>
+<Property Name="CarrierNumber" Type="Edm.String" sap:unicode="false"/>
+<Property Name="Inspector" Type="Edm.String" sap:unicode="false"/>
+<Property Name="Document" Type="Edm.String" sap:unicode="false"/>
+<Property Name="SequenceNumber" Type="Edm.String" sap:unicode="false"/>
+<Property Name="DefectCode" Type="Edm.String" sap:unicode="false"/>
+<Property Name="DefectText" Type="Edm.String" sap:unicode="false"/>
+<Property Name="CarrierTypeCode" Type="Edm.String" sap:unicode="false"/>
+<Property Name="CarrierLineCode" Type="Edm.String" sap:unicode="false"/>
+<Property Name="StartDate" Type="Edm.DateTime" Precision="0" sap:unicode="false" sap:label="Time Stamp"/>
+<Property Name="EndDate" Type="Edm.DateTime" Precision="0" sap:unicode="false" sap:label="Time Stamp"/>
+<Property Name="DefectType" Type="Edm.String" sap:unicode="false"/>
+</EntityType>
+<EntityType Name="InspectionDetail" sap:content-version="1">
+<Key>
+<PropertyRef Name="Id"/>
+</Key>
+<Property Name="Id" Type="Edm.String" Nullable="false" sap:unicode="false"/>
+<Property Name="InspectionDate" Type="Edm.DateTime" Precision="0" sap:unicode="false" sap:label="Time Stamp"/>
+<Property Name="Status" Type="Edm.String" sap:unicode="false"/>
+<Property Name="CarrierNumber" Type="Edm.String" sap:unicode="false"/>
+<Property Name="CarrierTypeCode" Type="Edm.String" sap:unicode="false"/>
+<Property Name="CarrierType" Type="Edm.String" sap:unicode="false"/>
+<Property Name="CarrierLineCode" Type="Edm.String" sap:unicode="false"/>
+<Property Name="CarrierLineText" Type="Edm.String" sap:unicode="false"/>
+<Property Name="Inspector" Type="Edm.String" sap:unicode="false"/>
+<Property Name="Document" Type="Edm.String" sap:unicode="false"/>
+<Property Name="SequenceNumber" Type="Edm.String" sap:unicode="false"/>
+<Property Name="StartDate" Type="Edm.DateTime" Precision="0" sap:unicode="false" sap:label="Time Stamp"/>
+<Property Name="EndDate" Type="Edm.DateTime" Precision="0" sap:unicode="false" sap:label="Time Stamp"/>
+<Property Name="CarrierId" Type="Edm.String" sap:unicode="false"/>
+<Property Name="InspectorFilter" Type="Edm.String" sap:unicode="false"/>
+</EntityType>
+<EntityType Name="InspectionGlobalMetrics" sap:content-version="1">
+<Key>
+<PropertyRef Name="Id"/>
+<PropertyRef Name="StartDate"/>
+<PropertyRef Name="EndDate"/>
+</Key>
+<Property Name="Id" Type="Edm.String" Nullable="false" sap:unicode="false"/>
+<Property Name="InspectionDate" Type="Edm.String" sap:unicode="false"/>
+<Property Name="Status" Type="Edm.String" sap:unicode="false"/>
+<Property Name="Inspector" Type="Edm.String" sap:unicode="false"/>
+<Property Name="InspectionTime" Type="Edm.String" sap:unicode="false"/>
+<Property Name="CarrierNumber" Type="Edm.String" sap:unicode="false"/>
+<Property Name="CarrierTypeCode" Type="Edm.String" sap:unicode="false"/>
+<Property Name="CarrierType" Type="Edm.String" sap:unicode="false"/>
+<Property Name="CarrierLineCode" Type="Edm.String" sap:unicode="false"/>
+<Property Name="CarrierLineText" Type="Edm.String" sap:unicode="false"/>
+<Property Name="InspectionHours" Type="Edm.Decimal" Precision="10" Scale="2" sap:unicode="false"/>
+<Property Name="Document" Type="Edm.String" sap:unicode="false"/>
+<Property Name="SequenceNumber" Type="Edm.String" sap:unicode="false"/>
+<Property Name="StartDate" Type="Edm.DateTime" Nullable="false" Precision="0" sap:unicode="false" sap:label="Time Stamp"/>
+<Property Name="EndDate" Type="Edm.DateTime" Nullable="false" Precision="0" sap:unicode="false" sap:label="Time Stamp"/>
+</EntityType>
+<EntityType Name="InspectionHeadGlobal" sap:content-version="1">
+<Key>
+<PropertyRef Name="StartDate"/>
+<PropertyRef Name="EndDate"/>
+</Key>
+<Property Name="StartDate" Type="Edm.DateTime" Nullable="false" Precision="0" sap:unicode="false" sap:label="Time Stamp"/>
+<Property Name="EndDate" Type="Edm.DateTime" Nullable="false" Precision="0" sap:unicode="false" sap:label="Time Stamp"/>
+<Property Name="TotalInspections" Type="Edm.Int32" sap:unicode="false"/>
+<Property Name="AcceptedCount" Type="Edm.Int32" sap:unicode="false"/>
+<Property Name="RejectedCount" Type="Edm.Int32" sap:unicode="false"/>
+<Property Name="AcceptedRate" Type="Edm.Int32" sap:unicode="false"/>
+<Property Name="RejectedRate" Type="Edm.Int32" sap:unicode="false"/>
+<Property Name="PreviousRejectionRate" Type="Edm.Int32" sap:unicode="false"/>
+<Property Name="RejectionRateDelta" Type="Edm.Int32" sap:unicode="false"/>
+<Property Name="Severity" Type="Edm.String" sap:unicode="false"/>
+<Property Name="TopAcceptingInspector" Type="Edm.String" sap:unicode="false"/>
+<Property Name="TopRejectingInspector" Type="Edm.String" sap:unicode="false"/>
+<Property Name="InspectorSpeedSummary" Type="Edm.String" sap:unicode="false"/>
+<Property Name="CarrierWithHighestAcceptionRate" Type="Edm.String" sap:unicode="false"/>
+<Property Name="CarrierWithHighestRejectionRate" Type="Edm.String" sap:unicode="false"/>
+<Property Name="CarrierAcceptanceSummary" Type="Edm.String" sap:unicode="false"/>
+<Property Name="CarrierRejectionSummary" Type="Edm.String" sap:unicode="false"/>
+<Property Name="CarrierImprovementTrend" Type="Edm.String" sap:unicode="false"/>
+<Property Name="ContainerTypeRejectionSummary" Type="Edm.String" sap:unicode="false"/>
+<Property Name="ContainerTypeAcceptanceSummary" Type="Edm.String" sap:unicode="false"/>
+<Property Name="TopRejectedReason" Type="Edm.String" sap:unicode="false"/>
+<Property Name="DefectTrendSummary" Type="Edm.String" sap:unicode="false"/>
+<Property Name="RejectionPatternSummary" Type="Edm.String" sap:unicode="false"/>
+<Property Name="TopRejectedCarrierLine" Type="Edm.String" sap:unicode="false"/>
+<Property Name="TopRejectedVendor" Type="Edm.String" sap:unicode="false"/>
+<Property Name="TopAcceptedVendor" Type="Edm.String" sap:unicode="false"/>
+<Property Name="DailyVolumeTrend" Type="Edm.String" sap:unicode="false"/>
+<Property Name="HourlyVolumeTrend" Type="Edm.String" sap:unicode="false"/>
+<Property Name="MonthlyRejectionTrend" Type="Edm.String" sap:unicode="false"/>
+<Property Name="MonthlyAcceptionTrend" Type="Edm.String" sap:unicode="false"/>
+<NavigationProperty Name="To_InspGlobal" Relationship="PWXSI.INSPECTION_ANALYTIC_APP_SRV.Assoc_InspHeader_InspectionGlobal" FromRole="FromRole_Assoc_InspHeader_InspectionGlobal" ToRole="ToRole_Assoc_InspHeader_InspectionGlobal"/>
+</EntityType>
+<EntityType Name="Attachment" m:HasStream="true" sap:content-version="1">
+<Key>
+<PropertyRef Name="BusinessKey"/>
+<PropertyRef Name="Filename"/>
+</Key>
+<Property Name="BusinessKey" Type="Edm.String" Nullable="false" MaxLength="10" sap:unicode="false" sap:label="Sales Document"/>
+<Property Name="Filename" Type="Edm.String" Nullable="false" MaxLength="100" sap:unicode="false"/>
+<Property Name="Mimetype" Type="Edm.String" Nullable="false" sap:unicode="false"/>
+<Property Name="Value" Type="Edm.Binary" Nullable="false" sap:unicode="false"/>
+</EntityType>
+<EntityType Name="SI_Usage" sap:content-version="1">
+<Key>
+<PropertyRef Name="Document"/>
+<PropertyRef Name="Sequencenumber"/>
+<PropertyRef Name="CarrierNumber"/>
+<PropertyRef Name="InspectionDate"/>
+</Key>
+<Property Name="LicenseKey" Type="Edm.String" Nullable="false" MaxLength="30" sap:unicode="false" sap:label="License Key"/>
+<Property Name="Period" Type="Edm.String" MaxLength="7" sap:unicode="false" sap:label="Period"/>
+<Property Name="InspectionsIncluded" Type="Edm.Int32" sap:unicode="false" sap:label="Inspections Included"/>
+<Property Name="InspectionsUsed" Type="Edm.Int32" sap:unicode="false" sap:label="Inspections used"/>
+<Property Name="Balance" Type="Edm.Int32" sap:unicode="false" sap:label="Inspections Balance"/>
+<Property Name="Document" Type="Edm.String" Nullable="false" MaxLength="10" sap:unicode="false" sap:label="DocumentNo" sap:updatable="false"/>
+<Property Name="Sequencenumber" Type="Edm.String" Nullable="false" MaxLength="6" sap:unicode="false" sap:label="SequenceNo" sap:updatable="false"/>
+<Property Name="CarrierNumber" Type="Edm.String" Nullable="false" MaxLength="15" sap:unicode="false" sap:label="Carrier Number" sap:updatable="false"/>
+<Property Name="InspectionDate" Type="Edm.DateTime" Nullable="false" Precision="7" sap:unicode="false" sap:label="Inspection Date" sap:updatable="false"/>
+</EntityType>
+<EntityType Name="SI_License" sap:content-version="1">
+<Key>
+<PropertyRef Name="InspectionDate"/>
+</Key>
+<Property Name="LicenseKey" Type="Edm.String" Nullable="false" MaxLength="30" sap:unicode="false" sap:label="License Key"/>
+<Property Name="Customer" Type="Edm.String" MaxLength="100" sap:unicode="false" sap:label="Customer"/>
+<Property Name="LicensePackage" Type="Edm.String" MaxLength="50" sap:unicode="false" sap:label="Package"/>
+<Property Name="StartDate" Type="Edm.DateTime" Precision="7" sap:unicode="false" sap:label="Start Date"/>
+<Property Name="EndDate" Type="Edm.DateTime" Precision="7" sap:unicode="false" sap:label="End Date"/>
+<Property Name="InspectionsIncluded" Type="Edm.Int32" sap:unicode="false" sap:label="Inspections Included"/>
+<Property Name="OcrModule" Type="Edm.Boolean" sap:unicode="false" sap:label="OCR Module"/>
+<Property Name="PrivaModule" Type="Edm.Boolean" sap:unicode="false" sap:label="PRIVA MODULE"/>
+<Property Name="JouleModule" Type="Edm.Boolean" sap:unicode="false" sap:label="JOULE MODULE"/>
+<Property Name="ClaimsModule" Type="Edm.Boolean" sap:unicode="false" sap:label="CLAIMS MODULE"/>
+<Property Name="InspectionDate" Type="Edm.DateTime" Nullable="false" Precision="0" sap:unicode="false" sap:label="InspectionDate"/>
+</EntityType>
+<Association Name="Assoc_InspHeader_InspectionGlobal" sap:content-version="1">
+<End Type="PWXSI.INSPECTION_ANALYTIC_APP_SRV.InspectionHeadGlobal" Multiplicity="1" Role="FromRole_Assoc_InspHeader_InspectionGlobal"/>
+<End Type="PWXSI.INSPECTION_ANALYTIC_APP_SRV.InspectionGlobalMetrics" Multiplicity="*" Role="ToRole_Assoc_InspHeader_InspectionGlobal"/>
+<ReferentialConstraint>
+<Principal Role="FromRole_Assoc_InspHeader_InspectionGlobal">
+<PropertyRef Name="StartDate"/>
+<PropertyRef Name="EndDate"/>
+</Principal>
+<Dependent Role="ToRole_Assoc_InspHeader_InspectionGlobal">
+<PropertyRef Name="StartDate"/>
+<PropertyRef Name="EndDate"/>
+</Dependent>
+</ReferentialConstraint>
+</Association>
+<Association Name="Assoc_Header_Codes" sap:content-version="1">
+<End Type="PWXSI.INSPECTION_ANALYTIC_APP_SRV.InspectionHeader" Multiplicity="1" Role="FromRole_Assoc_Header_Codes"/>
+<End Type="PWXSI.INSPECTION_ANALYTIC_APP_SRV.DefectCode" Multiplicity="*" Role="ToRole_Assoc_Header_Codes"/>
+<ReferentialConstraint>
+<Principal Role="FromRole_Assoc_Header_Codes">
+<PropertyRef Name="Document"/>
+<PropertyRef Name="Sequencenumber"/>
+<PropertyRef Name="CarrierNumber"/>
+<PropertyRef Name="InspectionDate"/>
+</Principal>
+<Dependent Role="ToRole_Assoc_Header_Codes">
+<PropertyRef Name="Document"/>
+<PropertyRef Name="Sequencenumber"/>
+<PropertyRef Name="CarrierNumber"/>
+<PropertyRef Name="InspectionDate"/>
+</Dependent>
+</ReferentialConstraint>
+</Association>
+<Association Name="Assoc_ContainerGlobal_ContainerHistory" sap:content-version="1">
+<End Type="PWXSI.INSPECTION_ANALYTIC_APP_SRV.ContainerGlobal" Multiplicity="1" Role="FromRole_Assoc_ContainerGlobal_ContainerHistory"/>
+<End Type="PWXSI.INSPECTION_ANALYTIC_APP_SRV.ContainerHistory" Multiplicity="*" Role="ToRole_Assoc_ContainerGlobal_ContainerHistory"/>
+<ReferentialConstraint>
+<Principal Role="FromRole_Assoc_ContainerGlobal_ContainerHistory">
+<PropertyRef Name="ContainerId"/>
+<PropertyRef Name="StartDate"/>
+<PropertyRef Name="EndDate"/>
+</Principal>
+<Dependent Role="ToRole_Assoc_ContainerGlobal_ContainerHistory">
+<PropertyRef Name="ContainerId"/>
+<PropertyRef Name="StartDate"/>
+<PropertyRef Name="EndDate"/>
+</Dependent>
+</ReferentialConstraint>
+</Association>
+<EntityContainer Name="PWXSI_INSPECTION_ANALYTIC_APP_SRV_Entities" m:IsDefaultEntityContainer="true" sap:supported-formats="atom json xlsx">
+<EntitySet Name="DefectCodeSet" EntityType="PWXSI.INSPECTION_ANALYTIC_APP_SRV.DefectCode" sap:content-version="1"/>
+<EntitySet Name="InspectCodeSet" EntityType="PWXSI.INSPECTION_ANALYTIC_APP_SRV.InspectCodes" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:content-version="1"/>
+<EntitySet Name="InspectionHeaderSet" EntityType="PWXSI.INSPECTION_ANALYTIC_APP_SRV.InspectionHeader" sap:content-version="1"/>
+<EntitySet Name="VH_CarrierlineSet" EntityType="PWXSI.INSPECTION_ANALYTIC_APP_SRV.VH_Carrierline" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:content-version="1"/>
+<EntitySet Name="VH_CarrierTypeSet" EntityType="PWXSI.INSPECTION_ANALYTIC_APP_SRV.VH_CarrierType" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:content-version="1"/>
+<EntitySet Name="CarrierInspReportSet" EntityType="PWXSI.INSPECTION_ANALYTIC_APP_SRV.CarrierInspReport" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1"/>
+<EntitySet Name="ChatbotSet" EntityType="PWXSI.INSPECTION_ANALYTIC_APP_SRV.Chatbot" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1"/>
+<EntitySet Name="InspectionInsightSet" EntityType="PWXSI.INSPECTION_ANALYTIC_APP_SRV.InspectionInsight" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1"/>
+<EntitySet Name="InspectionSummarySet" EntityType="PWXSI.INSPECTION_ANALYTIC_APP_SRV.InspectionSummary" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1"/>
+<EntitySet Name="ContainerGlobalSet" EntityType="PWXSI.INSPECTION_ANALYTIC_APP_SRV.ContainerGlobal" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1"/>
+<EntitySet Name="ContainerHistorySet" EntityType="PWXSI.INSPECTION_ANALYTIC_APP_SRV.ContainerHistory" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1"/>
+<EntitySet Name="DefectAnalysisSetSet" EntityType="PWXSI.INSPECTION_ANALYTIC_APP_SRV.DefectAnalysisSet" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1"/>
+<EntitySet Name="InspectionDetailSet" EntityType="PWXSI.INSPECTION_ANALYTIC_APP_SRV.InspectionDetail" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1"/>
+<EntitySet Name="InspectionGlobalMetricsSet" EntityType="PWXSI.INSPECTION_ANALYTIC_APP_SRV.InspectionGlobalMetrics" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1"/>
+<EntitySet Name="InspectionHeadGlobalSet" EntityType="PWXSI.INSPECTION_ANALYTIC_APP_SRV.InspectionHeadGlobal" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1"/>
+<EntitySet Name="AttachmentSet" EntityType="PWXSI.INSPECTION_ANALYTIC_APP_SRV.Attachment" sap:content-version="1"/>
+<EntitySet Name="SI_UsageSet" EntityType="PWXSI.INSPECTION_ANALYTIC_APP_SRV.SI_Usage" sap:content-version="1"/>
+<EntitySet Name="SI_LicenseSet" EntityType="PWXSI.INSPECTION_ANALYTIC_APP_SRV.SI_License" sap:content-version="1"/>
+<AssociationSet Name="Assoc_InspHeader_InspectionGlobalSet" Association="PWXSI.INSPECTION_ANALYTIC_APP_SRV.Assoc_InspHeader_InspectionGlobal" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+<End EntitySet="InspectionHeadGlobalSet" Role="FromRole_Assoc_InspHeader_InspectionGlobal"/>
+<End EntitySet="InspectionGlobalMetricsSet" Role="ToRole_Assoc_InspHeader_InspectionGlobal"/>
+</AssociationSet>
+<AssociationSet Name="Assoc_Header_CodesSet" Association="PWXSI.INSPECTION_ANALYTIC_APP_SRV.Assoc_Header_Codes" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+<End EntitySet="InspectionHeaderSet" Role="FromRole_Assoc_Header_Codes"/>
+<End EntitySet="DefectCodeSet" Role="ToRole_Assoc_Header_Codes"/>
+</AssociationSet>
+<AssociationSet Name="Assoc_ContainerGlobal_ContainerHistorSet" Association="PWXSI.INSPECTION_ANALYTIC_APP_SRV.Assoc_ContainerGlobal_ContainerHistory" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+<End EntitySet="ContainerGlobalSet" Role="FromRole_Assoc_ContainerGlobal_ContainerHistory"/>
+<End EntitySet="ContainerHistorySet" Role="ToRole_Assoc_ContainerGlobal_ContainerHistory"/>
+</AssociationSet>
+</EntityContainer>
+<Annotation xmlns="http://docs.oasis-open.org/odata/ns/edm" Term="Core.SchemaVersion" String="1.0.0"/>
+<atom:link xmlns:atom="http://www.w3.org/2005/Atom" rel="self" href="/sap/opu/odata/PWXSI/INSPECTION_ANALYTIC_APP_SRV/$metadata"/>
+<atom:link xmlns:atom="http://www.w3.org/2005/Atom" rel="latest-version" href="/sap/opu/odata/PWXSI/INSPECTION_ANALYTIC_APP_SRV/$metadata"/>
+</Schema>
+</edmx:DataServices>
 </edmx:Edmx>

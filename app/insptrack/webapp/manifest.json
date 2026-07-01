@@ -17,7 +17,7 @@
     },
     "dataSources": {
       "mainService": {
-        "uri": "/sap/opu/odata/sap/ZINSPECTION_APP_SRV/",
+        "uri": "/sap/opu/odata/PWXSI/INSPECTION_ANALYTIC_APP_SRV/",
         "type": "OData",
         "settings": {
           "annotations": [],

@@ -35,7 +35,7 @@ server:
       configuration:
         mountPath: /
         services:
-          - urlPath: /sap/opu/odata/sap/ZINSPECTION_APP_SRV
+          - urlPath: /sap/opu/odata/PWXSI/INSPECTION_ANALYTIC_APP_SRV
             metadataPath: ./webapp/localService/mainService/metadata.xml
             mockdataPath: ./webapp/localService/mainService/data
             generateMockData: true
