@@ -814,6 +814,7 @@ sap.ui.define([
                 };
 
                 const sCurrentUser = this._getCurrentUser();
+                console.log("sCurrentUser",sCurrentUser);
                 const docDefinition = PDFService.createPDFDefinition(
                     imageType,
                     aImages,

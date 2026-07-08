@@ -11,7 +11,7 @@ sap.ui.define([], () => {
             try {
                 if (sap.ushell && sap.ushell.Container) {
                     const oUserInfo = sap.ushell.Container.getService("UserInfo");
-                    return oUserInfo.getId();
+                    return oUserInfo.getFullName() || oUserInfo.getId();
                 }
             } catch (error) {
                 console.warn("UserInfo service not available:", error);
