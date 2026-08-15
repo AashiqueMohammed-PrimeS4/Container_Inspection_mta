@@ -224,9 +224,7 @@ sap.ui.define([
                 }catch(err){
                     reject(err);
                 }
-                
             });
-
             console.log("PDF created successfully, length:", pdfBase64.length);
             return pdfBase64;
         },

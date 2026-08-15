@@ -162,6 +162,13 @@ sap.ui.define([
                 const oModel = getNonBatchModel(oDataModel);
                 oModel.metadataLoaded().then(() => {
                     oModel.read("/" + sKey, {
+                        // Force a live round-trip every time - never let the browser or an
+                        // intermediate proxy serve back a stale cached license entity
+                        urlParameters: ["_=" + Date.now()],
+                        headers: {
+                            "Cache-Control": "no-cache, no-store, must-revalidate",
+                            "Pragma": "no-cache"
+                        },
                         success: (oData) => {
                             console.log("License check response:", oData);
                             resolve(!!oData[sModuleField]);

@@ -24,6 +24,7 @@ sap.ui.define([
             this._loadCarrierLines();
             this._loadCarrierTypes();
             this._loadInspectionCodes();
+            this._checkDefectModuleLicense();
             this._wizard.attachStepActivate(this.onWizardStepActivate, this);
         },
 
@@ -73,7 +74,10 @@ sap.ui.define([
                 isAnalyzing: false,
                 showDefectSection: false,
                 newDefectText: "",
-                isTokenizerEditable: true
+                isTokenizerEditable: true,
+                aiTokenUsage: null,
+                defectModuleEnabled: false,
+                isCheckingDefectLicense: false
             });
             this.getView().setModel(this.oModel);
             var oViewModel = new JSONModel({ hasPreview: false });
@@ -447,12 +451,249 @@ sap.ui.define([
             } else {
                 console.log("NORMAL FLOW: Setting next step to InspectionCodesStep");
                 docStep.setNextStep(inspStep);
+                this._checkDefectModuleLicense();
             }
         },
 
         // ========================================
         // STEP 2: INSPECTION CODES
         // ========================================
+
+        _checkDefectModuleLicense() {
+            if (this.oModel.getProperty("/isAccepted")) {
+                // Codes already saved for this record - don't flip the UI under the user
+                return;
+            }
+
+            console.log("=== Checking DefectModule license (SI_LicenseSet) ===");
+            const oModel = this.getOwnerComponent().getModel();
+            this.oModel.setProperty("/isCheckingDefectLicense", true);
+
+            ODataService.checkLicenseModule(oModel, "DefectModule")
+                .then((bAllowed) => {
+                    console.log("DefectModule entitlement:", bAllowed);
+                    this.oModel.setProperty("/isCheckingDefectLicense", false);
+                    this.oModel.setProperty("/defectModuleEnabled", bAllowed);
+                })
+                .catch((oError) => {
+                    console.error("Defect module license check failed:", oError);
+                    this.oModel.setProperty("/isCheckingDefectLicense", false);
+                    this.oModel.setProperty("/defectModuleEnabled", false);
+                });
+        },
+
+        onScanContainer() {
+            if (!this.oModel.getProperty("/isAcceptButtonEnabled")) {
+                MessageBox.warning("Codes have already been accepted and cannot be changed.");
+                return;
+            }
+
+            if (this._containerScanDialog) {
+                this._containerScanDialog.destroy();
+                this._containerScanDialog = null;
+            }
+
+            var that = this;
+            this._containerScanDialog = new sap.m.Dialog({
+                title: "Scan Container",
+                contentWidth: "600px",
+                contentHeight: "420px",
+                content: new sap.m.VBox({
+                    items: [
+                        new sap.m.VBox({
+                            id: "containerScanVideoContainer",
+                            width: "100%",
+                            height: "400px"
+                        })
+                    ]
+                }),
+                beginButton: new sap.m.Button({
+                    text: "Capture",
+                    type: "Emphasized",
+                    press: function () { that.onCaptureContainerImage(); }
+                }),
+                endButton: new sap.m.Button({
+                    text: "Cancel",
+                    press: function () { that._containerScanDialog.close(); }
+                }),
+                afterClose: function () {
+                    ImageService.cleanupCamera();
+                    ImageService.clearCameraContainer("containerScanVideoContainer");
+                }
+            });
+
+            this.getView().addDependent(this._containerScanDialog);
+            this._containerScanDialog.open();
+
+            setTimeout(function () {
+                var oContainer = sap.ui.getCore().byId("containerScanVideoContainer");
+                if (oContainer && oContainer.getDomRef()) {
+                    ImageService.initializeCamera(oContainer.getDomRef())
+                        .then(function (videoElement) {
+                            that._containerScanVideo = videoElement;
+                        })
+                        .catch(function (err) {
+                            MessageBox.error("Camera error: " + err.message);
+                        });
+                }
+            }, 300);
+        },
+
+        onCaptureContainerImage() {
+            if (!this._containerScanVideo) {
+                MessageBox.error("Camera not ready. Please wait a moment and try again.");
+                return;
+            }
+
+            const oImage = ImageService.captureImage(this._containerScanVideo, "B");
+
+            // Show full-res image in preview, but resize to max 640px for AI call
+            this.oModel.setProperty("/containerImageSrc", oImage.base64);
+            this.oModel.setProperty("/showContainerImage", true);
+            this.oModel.setProperty("/showDefectSection", false);
+            this.oModel.setProperty("/showAcceptRejectButtons", false);
+            this.oModel.setProperty("/aiTokenUsage", null);
+
+            this._containerScanDialog.close();
+
+            this._resizeImageForAI(oImage.base64, 640, 0.7, (sResizedDataUrl) => {
+                const sBase64 = sResizedDataUrl.split(",")[1];
+                this.oModel.setProperty("/containerImageBase64", sBase64);
+                this._analyzeContainerImage(sBase64, "image/jpeg");
+            });
+        },
+
+        _resizeImageForAI(sDataUrl, iMaxWidth, fQuality, fnCallback) {
+            var oImg = new window.Image();
+            oImg.onload = function () {
+                var iW = oImg.width;
+                var iH = oImg.height;
+                if (iW > iMaxWidth) {
+                    iH = Math.round(iH * iMaxWidth / iW);
+                    iW = iMaxWidth;
+                }
+                var oCanvas = document.createElement("canvas");
+                oCanvas.width = iW;
+                oCanvas.height = iH;
+                oCanvas.getContext("2d").drawImage(oImg, 0, 0, iW, iH);
+                fnCallback(oCanvas.toDataURL("image/jpeg", fQuality));
+            };
+            oImg.src = sDataUrl;
+        },
+
+        async _analyzeContainerImage(sBase64, sMimeType) {
+            this.oModel.setProperty("/isAnalyzing", true);
+
+            try {
+                const sRaw = this.getOwnerComponent().getModel("defect").sServiceUrl;
+                const sServiceUrl = sRaw.endsWith("/") ? sRaw : sRaw + "/";
+
+                // Fetch CSRF token first, then POST (same pattern as working defectanalysis app)
+                const oCsrfRes = await fetch(sServiceUrl, { headers: { "X-CSRF-Token": "Fetch" } });
+                const sToken = oCsrfRes.headers.get("x-csrf-token") || "";
+
+                const oResponse = await fetch(sServiceUrl + "analyzeImage", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json",
+                        "X-CSRF-Token": sToken
+                    },
+                    body: JSON.stringify({ imageData: sBase64, mimeType: sMimeType })
+                });
+
+                if (!oResponse.ok) {
+                    const sBody = await oResponse.text();
+                    throw new Error("HTTP " + oResponse.status + ": " + sBody);
+                }
+
+                const oData = await oResponse.json();
+                const vResult = (oData.d && oData.d.analyzeImage) != null
+                    ? oData.d.analyzeImage
+                    : (oData.analyzeImage || oData.value || "");
+
+                // Backend now returns { defects, tokenUsage, __metadata } instead of a plain string
+                const sDefectsText = (vResult && typeof vResult === "object")
+                    ? String(vResult.defects || "").trim()
+                    : String(vResult || "").trim();
+                const vTokenUsage = (vResult && typeof vResult === "object") ? vResult.tokenUsage : null;
+
+                this.oModel.setProperty("/aiTokenUsage", vTokenUsage);
+                this._populateDefectTokenizer(sDefectsText);
+            } catch (e) {
+                MessageBox.error("AI Analysis Failed:\n" + e.message);
+            } finally {
+                this.oModel.setProperty("/isAnalyzing", false);
+            }
+        },
+
+        _populateDefectTokenizer(sDefectsText) {
+            const oTokenizer = this.byId("defectTokenizer");
+            oTokenizer.removeAllTokens();
+
+            if (!sDefectsText || sDefectsText.toLowerCase().trim() === "none") {
+                this.oModel.setProperty("/showDefectSection", true);
+                this.oModel.setProperty("/showAcceptRejectButtons", false);
+                MessageToast.show("No defects detected. You can add defects manually.");
+                return;
+            }
+
+            const aDefects = sDefectsText.split(",").map(d => d.trim()).filter(d => d.length > 0);
+            aDefects.forEach(sDefect => {
+                oTokenizer.addToken(new sap.m.Token({ text: sDefect, key: sDefect }));
+            });
+
+            this.oModel.setProperty("/showDefectSection", true);
+            this.oModel.setProperty("/showAcceptRejectButtons", true);
+        },
+
+        onAddDefectToken() {
+            const sText = (this.oModel.getProperty("/newDefectText") || "").trim();
+            if (!sText) {
+                MessageToast.show("Please enter a defect name.");
+                return;
+            }
+            const oTokenizer = this.byId("defectTokenizer");
+            oTokenizer.addToken(new sap.m.Token({ text: sText, key: sText }));
+            this.oModel.setProperty("/newDefectText", "");
+            this.oModel.setProperty("/showAcceptRejectButtons", true);
+        },
+
+        onDefectTokenDelete(oEvent) {
+            const aDeletedTokens = oEvent.getParameter("tokens");
+            const oTokenizer = this.byId("defectTokenizer");
+            aDeletedTokens.forEach(oToken => {
+                oTokenizer.removeToken(oToken);
+                oToken.destroy();
+            });
+            if (oTokenizer.getTokens().length === 0) {
+                this.oModel.setProperty("/showAcceptRejectButtons", false);
+            }
+        },
+
+        _buildSelectedCodesFromTokenizer() {
+            const oTokenizer = this.byId("defectTokenizer");
+            const aTokens = oTokenizer.getTokens();
+
+            const oCurrentDate = new Date();
+            const sDocument = this.oModel.getProperty("/document");
+            const sSequence = this.oModel.getProperty("/sequenceNumber");
+            const sCarrier = this.oModel.getProperty("/carrierNumber");
+
+            const textToCodeMap = this._getTextToCodeMap();
+
+            return aTokens.map((oToken, index) => ({
+                Document: sDocument,
+                Sequencenumber: sSequence,
+                CarrierNumber: sCarrier,
+                InspectionDate: `/Date(${oCurrentDate.getTime()})/`,
+                CodeSeq: String(index + 1).padStart(2, "0"),
+                CodeValue: textToCodeMap[oToken.getText()] || String(index + 1).padStart(2, "0"),
+                CodeText: oToken.getText(),
+                CreatedOn: `/Date(${oCurrentDate.getTime()})/`,
+                CreatedBy: "USER"
+            }));
+        },
 
         onDefectCodeChange(oEvent) {
             const oCheckBox = oEvent.getSource();
@@ -480,9 +721,17 @@ sap.ui.define([
             console.log("Any selected:", bAnySelected);
         },
 
-        onAcceptCodes() {
+        _getCurrentSelectedCodeTexts() {
+            if (this.oModel.getProperty("/defectModuleEnabled")) {
+                const oTokenizer = this.byId("defectTokenizer");
+                return oTokenizer ? oTokenizer.getTokens().map(t => t.getText()) : [];
+            }
             const oDefectCodes = this.oModel.getProperty("/defectCodes");
-            const aCurrentSelectedCodes = Object.keys(oDefectCodes).filter(key => oDefectCodes[key]);
+            return Object.keys(oDefectCodes).filter(key => oDefectCodes[key]);
+        },
+
+        onAcceptCodes() {
+            const aCurrentSelectedCodes = this._getCurrentSelectedCodeTexts();
             const aSavedCodes = this.oModel.getProperty("/savedCodes") || [];
 
             if (ValidationService.areCodesSaved(aCurrentSelectedCodes, aSavedCodes)) {
@@ -497,9 +746,10 @@ sap.ui.define([
                     this.oModel.setProperty("/isRejectEnabled", false);
                     // Store the saved codes
                     this.oModel.setProperty("/savedCodes", aCurrentSelectedCodes);
-                    // Disable Accept button and checkboxes after accepting
+                    // Disable Accept button and checkboxes/tokenizer after accepting
                     this.oModel.setProperty("/isAcceptButtonEnabled", false);
                     this.oModel.setProperty("/areCheckboxesEnabled", false);
+                    this.oModel.setProperty("/isTokenizerEditable", false);
                     MessageToast.show("Inspection Code saved successfully! Click Step 3 to upload photos.");
                 }
             });
@@ -507,8 +757,7 @@ sap.ui.define([
 
         onRejectCodes() {
             // Get current selected codes before saving
-            const oDefectCodes = this.oModel.getProperty("/defectCodes");
-            const aCurrentSelectedCodes = Object.keys(oDefectCodes).filter(key => oDefectCodes[key]);
+            const aCurrentSelectedCodes = this._getCurrentSelectedCodeTexts();
 
             this._saveInspectionCodes('R', (success) => {
                 if (success) {
@@ -524,6 +773,7 @@ sap.ui.define([
                     this.oModel.setProperty("/isAcceptButtonEnabled", false);
                     this.oModel.setProperty("/isRejectEnabled", false);
                     this.oModel.setProperty("/areCheckboxesEnabled", false);
+                    this.oModel.setProperty("/isTokenizerEditable", false);
 
                     // Validate Step 2 so we can proceed to Step 3
                     this._wizard.validateStep(this.byId("InspectionCodesStep"));
@@ -571,8 +821,10 @@ sap.ui.define([
         _saveInspectionCodes(sStatus, callback) {
             console.log(`=== SAVING CODES (Status: ${sStatus}) ===`);
 
-            const oDefectCodes = this.oModel.getProperty("/defectCodes");
-            const aSelectedCodes = this._buildSelectedCodes(oDefectCodes);
+            const bDefectModuleEnabled = this.oModel.getProperty("/defectModuleEnabled");
+            const aSelectedCodes = bDefectModuleEnabled
+                ? this._buildSelectedCodesFromTokenizer()
+                : this._buildSelectedCodes(this.oModel.getProperty("/defectCodes"));
 
             if (aSelectedCodes.length === 0) {
                 if (sStatus === 'R') {
@@ -1052,6 +1304,7 @@ sap.ui.define([
             this.oModel.setProperty("/showDefectSection", false);
             this.oModel.setProperty("/newDefectText", "");
             this.oModel.setProperty("/isTokenizerEditable", true);
+            this.oModel.setProperty("/aiTokenUsage", null);
             const oTokenizer = this.byId("defectTokenizer");
             if (oTokenizer) oTokenizer.removeAllTokens();
 
@@ -1154,6 +1407,8 @@ sap.ui.define([
                     console.warn("No inspection codes loaded, reloading...");
                     this._loadInspectionCodes();
                 }
+
+                this._checkDefectModuleLicense();
 
                 // Re-validate step if codes were already accepted
                 const isAccepted = this.oModel.getProperty("/isAccepted");

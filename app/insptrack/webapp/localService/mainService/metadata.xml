@@ -308,6 +308,7 @@
 <Property Name="PrivaModule" Type="Edm.Boolean" sap:unicode="false" sap:label="PRIVA MODULE"/>
 <Property Name="JouleModule" Type="Edm.Boolean" sap:unicode="false" sap:label="JOULE MODULE"/>
 <Property Name="ClaimsModule" Type="Edm.Boolean" sap:unicode="false" sap:label="CLAIMS MODULE"/>
+<Property Name="DefectModule" Type="Edm.Boolean" sap:unicode="false" sap:label="DEFECT MODULE"/>
 <Property Name="InspectionDate" Type="Edm.DateTime" Nullable="false" Precision="0" sap:unicode="false" sap:label="InspectionDate"/>
 </EntityType>
 <Association Name="Assoc_InspHeader_InspectionGlobal" sap:content-version="1">
