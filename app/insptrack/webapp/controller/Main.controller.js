@@ -212,6 +212,7 @@ sap.ui.define([
                     this.oModel.setProperty("/CarrierLines", results);
                 })
                 .catch((oError) => {
+                    OC
                     MessageBox.error(this._parseErrorMessage(oError) || "Failed to load carrier lines");
                 });
         },
@@ -1066,7 +1067,7 @@ sap.ui.define([
                 };
 
                 const sCurrentUser = this._getCurrentUser();
-                console.log("sCurrentUser",sCurrentUser);
+                console.log("sCurrentUser", sCurrentUser);
                 const docDefinition = PDFService.createPDFDefinition(
                     imageType,
                     aImages,
@@ -1663,28 +1664,20 @@ sap.ui.define([
 
                             console.log("OCR response:", ocrData);
 
-                            let raw =
-                                ocrData.text ||
-                                ocrData.extractText?.text ||
-                                ocrData.d?.text ||
-                                "";
+                            // extractText now returns a structured ContainerResult
+                            // ({ ownerCode, serialNumber, checkDigit, containerNumber }) -
+                            // the backend already validated/reconstructed it (throws 422 via
+                            // the error callback if owner code/serial couldn't be read), so
+                            // just read containerNumber straight through, no re-validation.
+                            const oResult = ocrData.extractText ?? ocrData.d?.extractText ?? ocrData ?? {};
+                            const finalNumber = (oResult.containerNumber || "").toString().replace(/\s+/g, "");
 
-                            raw = raw.replace(/\s+/g, "");
-
-                            /* ===== USE YOUR ADVANCED VALIDATION ===== */
-
-                            const validation = this._validateAndReconstructContainerNumber({
-                                raw_container_number: raw
-                            });
-
-                            if (!validation.isValid) {
-                                MessageToast.show(validation.missingComponents.join("\n"));
+                            if (!finalNumber) {
+                                MessageToast.show("Could not read a container number — please scan again");
                                 return;
                             }
 
-                            const finalNumber = validation.finalContainerNumber;
-
-                            console.log("✅ Final container:", finalNumber);
+                            console.log("✅ Final container:", finalNumber, "(owner:", oResult.ownerCode, "serial:", oResult.serialNumber, "check:", oResult.checkDigit, ")");
 
                             this.byId("carrierInput").setValue(finalNumber);
                             this.oModel.setProperty("/carrierNumber", finalNumber);
@@ -1697,8 +1690,10 @@ sap.ui.define([
                         error: function (err) {
                             sap.ui.core.BusyIndicator.hide();
                             console.error("OCR failed:", err);
-                            MessageToast.show("OCR service failed");
-                        }
+                            console.error("OCR failed - responseText:", err.responseText);
+                            const sStatusPrefix = err.statusCode ? `${err.statusCode}: ` : "";
+                            MessageToast.show(sStatusPrefix + (this._parseErrorMessage(err) || "OCR service failed"));
+                        }.bind(this)
                     });
 
                 }.bind(this),
@@ -1706,8 +1701,9 @@ sap.ui.define([
                 error: function (err) {
                     sap.ui.core.BusyIndicator.hide();
                     console.error("Crop failed:", err);
-                    MessageToast.show("Crop service failed");
-                }
+                    const sStatusPrefix = err.statusCode ? `${err.statusCode}: ` : "";
+                    MessageToast.show(sStatusPrefix + (this._parseErrorMessage(err) || "Crop service failed"));
+                }.bind(this)
             });
         },
 
@@ -1766,155 +1762,6 @@ sap.ui.define([
             this.getView().addDependent(dialog);
             dialog.open();
         },
-
-        _validateAndReconstructContainerNumber(ocrResult) {
-            const missingComponents = [];
-
-            // FIRST PRIORITY: Use raw_container_number if available
-            if (ocrResult.raw_container_number && ocrResult.raw_container_number.trim().length > 0) {
-                const rawContainerNo = ocrResult.raw_container_number.replace(/ /g, '');
-                console.log(`   ✅ Using raw_container_number: "${ocrResult.raw_container_number}" -> "${rawContainerNo}"`);
-
-                if (rawContainerNo.length < 11) {
-                    return {
-                        isValid: false,
-                        missingComponents: [`Container number too short (${rawContainerNo.length} chars, expected at least 11)`],
-                        warnings: [],
-                        finalContainerNumber: rawContainerNo
-                    };
-                }
-
-                if (rawContainerNo.length === 15) {
-                    return {
-                        isValid: true,
-                        missingComponents: [],
-                        warnings: [],
-                        finalContainerNumber: rawContainerNo
-                    };
-                }
-
-                if (rawContainerNo.length !== 15) {
-                    console.log(`   ⚠️  Container number length is ${rawContainerNo.length}, reconstructing to 15 chars...`);
-
-                    const ownerCode = ocrResult.owner_code || '';
-                    const equipmentType = ocrResult.equipment_type || '';
-                    const serialNumber = ocrResult.serial_number || '';
-                    const checkDigit = ocrResult.check_digit || '';
-                    let sizeType = ocrResult.size_type || '';
-
-                    if (!ownerCode || ownerCode.length !== 3) {
-                        missingComponents.push('Owner Code (3 letters)');
-                    }
-                    if (!equipmentType || equipmentType.length !== 1) {
-                        missingComponents.push('Equipment Type (1 letter)');
-                    }
-                    if (!serialNumber || serialNumber.length !== 6) {
-                        missingComponents.push('Serial Number (6 digits)');
-                    }
-                    if (!checkDigit || checkDigit.length !== 1) {
-                        missingComponents.push('Check Digit (1 digit)');
-                    }
-
-                    if (!sizeType || sizeType.trim().length === 0) {
-                        const rawNoSpaces = ocrResult.raw_container_number.replace(/ /g, '');
-                        const sizeTypePattern = /(\d{2}[A-Z]\d|\d{2}[A-Z]{2})$/;
-                        const sizeTypeMatch = rawNoSpaces.match(sizeTypePattern);
-
-                        if (sizeTypeMatch) {
-                            sizeType = sizeTypeMatch[1];
-                        } else {
-                            missingComponents.push('Size/Type Code (ISO code like 22G1, 45G1)');
-                        }
-                    }
-
-                    if (missingComponents.length > 0) {
-                        return {
-                            isValid: false,
-                            missingComponents: missingComponents.map(c => `⚠️ ${c} is missing. Please retake by zooming or moving closer.`),
-                            warnings: [],
-                            finalContainerNumber: rawContainerNo
-                        };
-                    }
-
-                    const cleanSizeType = sizeType.replace(/ /g, '').substring(0, 4);
-                    const reconstructed = `${ownerCode}${equipmentType}${serialNumber}${checkDigit}${cleanSizeType}`;
-
-                    if (reconstructed.length !== 15) {
-                        return {
-                            isValid: false,
-                            missingComponents: [`⚠️ Container number incomplete (${reconstructed.length} chars, expected 15). Please retake by zooming or moving closer.`],
-                            warnings: [],
-                            finalContainerNumber: reconstructed
-                        };
-                    }
-
-                    return {
-                        isValid: true,
-                        missingComponents: [],
-                        warnings: [],
-                        finalContainerNumber: reconstructed
-                    };
-                }
-
-                return {
-                    isValid: true,
-                    missingComponents: [],
-                    warnings: [],
-                    finalContainerNumber: rawContainerNo
-                };
-            }
-
-            // FALLBACK: Reconstruct from individual components
-            const ownerCode = ocrResult.owner_code || '';
-            const equipmentType = ocrResult.equipment_type || '';
-            const serialNumber = ocrResult.serial_number || '';
-            const checkDigit = ocrResult.check_digit || '';
-            let sizeType = ocrResult.size_type || '';
-
-            if (!ownerCode || ownerCode.length !== 3) {
-                missingComponents.push('Owner Code (3 letters)');
-            }
-            if (!equipmentType || equipmentType.length !== 1) {
-                missingComponents.push('Equipment Type (1 letter)');
-            }
-            if (!serialNumber || serialNumber.length !== 6) {
-                missingComponents.push('Serial Number (6 digits)');
-            }
-            if (!checkDigit || checkDigit.length !== 1) {
-                missingComponents.push('Check Digit (1 digit)');
-            }
-            if (!sizeType || sizeType.trim().length === 0) {
-                missingComponents.push('Size/Type Code (ISO code like 22G1, 45G1)');
-            }
-
-            if (missingComponents.length > 0) {
-                return {
-                    isValid: false,
-                    missingComponents: missingComponents.map(c => `⚠️ ${c} is missing. Please retake by zooming or moving closer.`),
-                    warnings: [],
-                    finalContainerNumber: ''
-                };
-            }
-
-            const cleanSizeType = sizeType.replace(/ /g, '').substring(0, 4);
-            const finalContainerNumber = `${ownerCode}${equipmentType}${serialNumber}${checkDigit}${cleanSizeType}`;
-
-            if (finalContainerNumber.length !== 15) {
-                return {
-                    isValid: false,
-                    missingComponents: [`⚠️ Container number incomplete (${finalContainerNumber.length} chars, expected 15). Please retake by zooming or moving closer.`],
-                    warnings: [],
-                    finalContainerNumber: finalContainerNumber
-                };
-            }
-
-            return {
-                isValid: true,
-                missingComponents: [],
-                warnings: [],
-                finalContainerNumber: finalContainerNumber
-            };
-        }
 
     });
 });

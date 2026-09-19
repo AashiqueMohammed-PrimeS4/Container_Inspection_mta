@@ -97,3 +97,26 @@ Backend exposed two new OData entities on `PWXSI_INSPECTION_ANALYTIC_APP_SRV` (c
 **Open items for backend dev:**
 - `SI_LICENSESET_GET_ENTITY` currently raises a business exception ("Insufficient Balance") when `balance = 0` *before* returning the entity — this blocks the frontend from reading the `PrivaModule`/`OcrModule` flags even when the org is legitimately subscribed but has used up its quota. The balance check is redundant here (it is already enforced in `SI_USAGESET_UPDATE_ENTITY`). Remove the `SELECT balance / IF lv_balance = 0 RAISE EXCEPTION` block (lines 31–41 of the current ABAP) from `SI_LICENSESET_GET_ENTITY` — this entity should only validate the license date range and return module flags.
 - The usage-alert threshold in `SI_USAGESET_UPDATE_ENTITY` was changed from 50% to 95%, which means the warning only fires at the last inspection (e.g. 10/10 = 100%) when inspections_included is small — effectively useless as an early warning. Recommend lowering to 70–80% so users get a heads-up before hitting the hard limit.
+
+## Work log — AI defect scanning (DefectModule) in insptrack, Step 2 (this session)
+
+**Goal:** let Step 2 ("Inspection Codes") offer AI-powered defect detection (scan the container photo, LLM lists defects) for orgs entitled to a new `DefectModule`, while orgs without it keep the original manual checkbox list — same pattern as the existing `OcrModule` gating.
+
+**Backend:**
+- Added `DEFECT_MODULE` (CHAR1) field to `/PWXSI/I_LICENSE`, alongside the existing `OCR_MODULE`/`PRIVA_MODULE`/`JOULE_MODULE`/`CLAIMS_MODULE` flags.
+- Added the matching `DefectModule` (Edm.Boolean) property to the `SI_License` entity type in SEGW and regenerated the MPC.
+- `SI_LICENSESET_GET_ENTITY` now also maps `ls_entity-defect_module = ls_license-defect_module` alongside the other module flags.
+- Local mock `metadata.xml` (`insptrack/webapp/localService/mainService/metadata.xml`) updated with the same `DefectModule` property so mock runs stay in sync with the live schema.
+
+**CROP_SERVICE (separate CAPM project, `Croping_srv`):** new `DefectService.analyzeImage(imageData, mimeType)` action (`srv/Defect.cds`/`Defect.js`), exposed at `/odata/v2/defect/` (already wired in `xs-app.json`/`manifest.json` as the `DefectDet`/`defect` model, previously unused). Sends the captured image to Groq (`meta-llama/llama-4-scout-17b-16e-instruct`) with a defect-listing prompt, returns `{ defects: "<comma-separated list>", tokenUsage: <n> }` (initially a plain string during early testing, backend later changed the response shape to include token usage — frontend updated to match, see below).
+
+**insptrack frontend (`Main.controller.js` / `Main.view.xml`):**
+- New `/defectModuleEnabled` model flag, checked via `ODataService.checkLicenseModule(oModel, "DefectModule")` (same helper used for `OcrModule`) at three points: app start (`onInit`), the moment Step 1 hands off to Step 2 (`onDocumentDetailsComplete` — the reliable trigger), and Step 2's own step-activate as a backup.
+- Step 2 view now has two mutually-exclusive blocks bound to `/defectModuleEnabled`: the original checkbox list (`visible="{= !${/defectModuleEnabled} }"`, unchanged fallback) and a new AI-scan block — "Scan Container" button → camera capture → resized image POSTed to `DefectService.analyzeImage` → results populate an editable `sap.m.Tokenizer` (`defectTokenizer`) the user can add to/remove from before accepting.
+- New controller functions ported/wired for the scan flow: `onScanContainer`, `onCaptureContainerImage`, `_resizeImageForAI`, `_analyzeContainerImage`, `_populateDefectTokenizer`, `onAddDefectToken`, `onDefectTokenDelete`, `_buildSelectedCodesFromTokenizer`.
+- `onAcceptCodes`/`onRejectCodes`/`_saveInspectionCodes` now branch on `/defectModuleEnabled` via `_getCurrentSelectedCodeTexts()` — tokenizer-sourced codes when licensed, checkbox-sourced when not — both feeding the same existing deep-entity save path, so Step 3/PDF/backend save logic needed no changes.
+- `_analyzeContainerImage` parses the backend's `{ defects, tokenUsage }` object (previously assumed a plain string); `tokenUsage` is stored in `/aiTokenUsage` and shown as "AI analysis token usage: N" above the tokenizer in Step 2.
+
+**Gotchas hit and fixed:**
+- `analyzeImage` calls initially failed with `502 Bad Gateway` — traced to the Groq model reference in `Defect.js`, not a destination/routing problem (OCR calls through the same `CROP_SERVICE` destination worked fine throughout). Fixed by the backend swapping the Groq model.
+- License checks appeared to "stick" to a stale value — changing `DEFECT_MODULE` in the table and reloading the page (or even navigating Step 1 → Step 2 again) kept showing the old checkbox/scan view until the whole dev server (`npm run start`) was restarted, pointing at an HTTP-level cache (browser or intermediate proxy) serving back an identical `SI_LicenseSet` GET URL. Fixed in `ODataService.checkLicenseModule` by appending a `_=<timestamp>` cache-busting query param and sending `Cache-Control: no-cache, no-store, must-revalidate` / `Pragma: no-cache` headers on every call (applies to both the `OcrModule` and `DefectModule` checks, since they share this one function).
