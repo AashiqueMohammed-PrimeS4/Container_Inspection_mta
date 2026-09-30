@@ -1541,6 +1541,7 @@ sap.ui.define([
                         })
                     ]
                 }),
+
                 
                 beginButton: new sap.m.Button({
                     text: "Capture",
