@@ -299,6 +299,7 @@
                                             id="defectTokenizerInnerFlex"
                                             baseSize="100%"
                                             maxWidth="30rem"
+                                            minWidth="0"
                                         />
                                     </layoutData>
 
@@ -334,6 +335,7 @@
                                                     id="newDefectInputFlex"
                                                     growFactor="1"
                                                     baseSize="0"
+                                                    minWidth="0"
                                                 />
                                             </layoutData>
                                         </Input>
