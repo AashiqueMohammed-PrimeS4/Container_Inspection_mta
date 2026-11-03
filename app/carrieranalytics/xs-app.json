@@ -12,7 +12,7 @@
     {
       "source": "^/odata/v2/inspection/(.*)$",
       "target": "/odata/v2/inspection/$1",
-      "destination": "CROP_SERVICE",
+      "destination": "SmartInspect_Services_CAPM",
       "authenticationType": "xsuaa",
       "csrfProtection": false
     },

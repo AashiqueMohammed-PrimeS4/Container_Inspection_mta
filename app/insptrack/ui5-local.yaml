@@ -35,7 +35,7 @@ server:
             destination: DEV-100-PrincipalPropogation
           - path: /odata
             url: https://prime-s4-technologies--llc-primes4-sandbox-primes4-cropife4704c.cfapps.us30.hana.ondemand.com
-            destination: CROP_SERVICE
+            destination: SmartInspect_Services_CAPM
     - name: sap-fe-mockserver
     
       beforeMiddleware: csp

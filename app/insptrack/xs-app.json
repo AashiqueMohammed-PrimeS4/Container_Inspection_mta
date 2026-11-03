@@ -12,21 +12,21 @@
     {
       "source": "^/odata/v2/catalog/(.*)$",
       "target": "/odata/v2/catalog/$1",
-      "destination": "CROP_SERVICE",
+      "destination": "SmartInspect_Services_CAPM",
       "authenticationType": "xsuaa",
       "csrfProtection": false
     },
     {
       "source": "^/odata/v2/ocr/(.*)$",
       "target": "/odata/v2/ocr/$1",
-      "destination": "CROP_SERVICE",
+      "destination": "SmartInspect_Services_CAPM",
       "authenticationType": "xsuaa",
       "csrfProtection": false
     },
     {
       "source": "^/odata/v2/defect/(.*)$",
       "target": "/odata/v2/defect/$1",
-      "destination": "CROP_SERVICE",
+      "destination": "SmartInspect_Services_CAPM",
       "authenticationType": "xsuaa",
       "csrfProtection": false
     },
