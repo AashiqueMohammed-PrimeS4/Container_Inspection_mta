@@ -1,0 +1,23 @@
+{
+  "generationParameters": {
+    "generationDate": "Mon Oct 26 2026 15:15:42 GMT+0400 (Gulf Standard Time)",
+    "generatorPlatform": "CLI",
+    "serviceType": "OData URL",
+    "metadataFilename": "",
+    "serviceUrl": "http://localhost:4010/claims/",
+    "appName": "claims",
+    "appTitle": "Claims",
+    "appDescription": "Carrier claims ticket log",
+    "appNamespace": "",
+    "ui5Theme": "sap_horizon",
+    "ui5Version": "1.136.0",
+    "enableEslint": true,
+    "enableTypeScript": false,
+    "showMockDataInfo": true,
+    "generatorVersion": "1.33.0",
+    "template": "Basic V4",
+    "generatorName": "SAP Fiori Application Generator",
+    "entityRelatedConfig": [],
+    "launchText": "To launch the generated application, run the following from the generated application root folder:\n\n```\n    npm start\n```"
+  }
+}

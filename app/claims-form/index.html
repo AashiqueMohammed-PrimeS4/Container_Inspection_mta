@@ -1,0 +1,1017 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Report a carrier claim</title>
+    <!-- UI5 Web Components and the page code, bundled from src/main.ts by `npm run build:ui`. -->
+    <script type="module" src="./bundle.js"></script>
+    <style>
+      :root {
+        --brand: #1b3a5c;
+        --line: #d9dee3;
+        --muted: #556b82;
+        --bg: #f5f6f7;
+        --error: #aa0808;
+      }
+      body {
+        margin: 0;
+        font-family: "72", "72full", Arial, Helvetica, sans-serif;
+        background: var(--bg);
+        color: #1d2d3e;
+      }
+      .topbar {
+        background: var(--brand);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 24px;
+      }
+      .topbar .logo {
+        background: #e8eef5;
+        color: var(--brand);
+        font-weight: 700;
+        font-size: 11px;
+        padding: 10px 6px;
+        border-radius: 4px;
+      }
+      .topbar .client {
+        font-weight: 600;
+        font-size: 18px;
+        flex: 1;
+      }
+      .topbar a {
+        color: #fff;
+      }
+      main {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 24px 16px 48px;
+      }
+      .intro {
+        margin: 10px 0 30px;
+        color: #1d2d3e;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: 268px 1fr; /* room for "Photos and documents" plus its error count */
+        gap: 24px;
+        align-items: start;
+      }
+      aside {
+        position: sticky;
+        top: 16px;
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 16px 20px;
+      }
+      aside h4 {
+        margin: 0 0 8px;
+        font-size: 12px;
+        letter-spacing: 0.06em;
+        color: var(--muted);
+      }
+      aside ol {
+        margin: 0;
+        padding-left: 20px;
+        line-height: 1.9;
+      }
+      aside .req {
+        border-top: 1px solid var(--line);
+        margin-top: 10px;
+        padding-top: 10px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      section {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 20px 24px 24px;
+        margin-bottom: 16px;
+      }
+      section h2 {
+        margin: 0 0 4px;
+        font-size: 20px;
+      }
+      section .lead {
+        margin: 0 0 16px;
+        color: var(--muted);
+      }
+      .field {
+        display: grid;
+        gap: 4px;
+        margin-bottom: 14px;
+        align-content: start; /* an error line in one column must not stretch its neighbours */
+      }
+      .row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+      }
+      .row-2 {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .lookup {
+        background: #eaf1f8;
+        border-radius: 8px;
+        padding: 14px 16px;
+        margin-bottom: 16px;
+        display: grid;
+        grid-template-columns: 2fr 1fr 2fr auto;
+        gap: 12px;
+        align-items: start;
+      }
+      .lookup .field {
+        margin-bottom: 0;
+      }
+      .tiles {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+      .tile {
+        border: 1px dashed #b9c2cc;
+        border-radius: 8px;
+        padding: 18px 12px;
+        text-align: center;
+        background: #f8f9fa;
+      }
+      .tile ui5-icon {
+        color: var(--brand);
+        width: 24px;
+        height: 24px;
+      }
+      .tile .name {
+        display: block;
+        margin-top: 8px;
+      }
+      .tile .hint,
+      .tile .file {
+        display: block;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .tile input {
+        display: none;
+      }
+      .tile .count {
+        display: block;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .thumbs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+        margin: 8px 0 4px;
+      }
+      .thumb {
+        position: relative;
+        width: 56px;
+        height: 56px;
+      }
+      .thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 4px;
+      }
+      .thumb .open {
+        display: block;
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        border: 0;
+        background: none;
+        border-radius: 4px;
+        cursor: zoom-in;
+      }
+      .thumb .remove {
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 0;
+        background: #b00;
+        color: #fff;
+        font-size: 13px;
+        line-height: 20px;
+        padding: 0;
+        cursor: pointer;
+      }
+      .field .file {
+        margin: 0;
+        overflow-wrap: anywhere;
+      }
+      .field .file .doc {
+        display: block;
+      }
+      /* Lightbox (src/steps/preview.ts): the compressed photo fitted to the screen */
+      #preview::part(content) {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+      }
+      #previewImg {
+        display: block;
+        max-width: 100%;
+        max-height: min(90vh, calc(94vh - 13rem)); /* the dialog is at most 94vh: header, caption and footer stay on screen */
+        object-fit: contain;
+        border-radius: 4px;
+        background: #eef1f4;
+      }
+      #preview[stretch] #previewImg {
+        flex: 1 1 auto;
+        min-height: 0;
+        width: 100%;
+      }
+      .preview-caption {
+        width: 100%;
+        text-align: center;
+        font-size: 14px;
+        overflow-wrap: anywhere;
+      }
+      .preview-caption .hint {
+        margin: 2px 0 0;
+      }
+      .preview-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        width: 100%;
+        padding: 8px 0;
+      }
+      .preview-actions .spacer {
+        flex: 1;
+      }
+      #uploadFailed {
+        margin: 0 0 12px;
+        color: #b00;
+        font-size: 14px;
+      }
+      .actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        margin-top: 8px;
+      }
+      .hint {
+        font-size: 13px;
+        color: var(--muted);
+        margin: 0 0 12px;
+      }
+      ui5-input,
+      ui5-textarea,
+      ui5-select,
+      ui5-date-picker,
+      ui5-file-uploader {
+        width: 100%;
+      }
+      ui5-message-strip {
+        margin-bottom: 14px;
+      }
+      /* Inline field errors: one line under the control, set from src/lib/errors.ts */
+      .field-error {
+        display: block;
+        color: var(--error);
+        font-size: 13px;
+        line-height: 1.35;
+        overflow-wrap: anywhere;
+      }
+      .tiles + .field-error {
+        margin: -8px 0 16px;
+      }
+      aside .badge {
+        display: inline-block;
+        min-width: 18px;
+        padding: 0 5px;
+        border-radius: 9px;
+        background: var(--error);
+        color: #fff;
+        font-size: 11px;
+        font-weight: 700;
+        line-height: 18px;
+        text-align: center;
+        position: absolute;
+        right: 0;
+        top: 6px;
+      }
+      aside li {
+        position: relative;
+        padding-right: 34px; /* room for the error count */
+        width: fit-content; /* the count sits next to the name, also when the menu is full width */
+      }
+      .hp {
+        position: absolute;
+        left: -10000px;
+        top: auto;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      .receipt {
+        font-size: 28px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        margin: 8px 0 4px;
+      }
+      /* NFR-01: tablet, the menu stacks above the form, rows go to two columns, tiles to three */
+      @media (max-width: 900px) {
+        .layout {
+          grid-template-columns: minmax(0, 1fr);
+        }
+        .row,
+        .row-2 {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .tiles {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+        aside {
+          position: static;
+        }
+      }
+      /* phone: one column, photo tiles two per row, tighter padding */
+      @media (max-width: 600px) {
+        #preview[stretch] {
+          width: 100%;
+          height: 100%;
+          max-width: 100%;
+          max-height: 100%;
+          border-radius: 0;
+        }
+        .row,
+        .row-2,
+        .lookup {
+          grid-template-columns: minmax(0, 1fr);
+          row-gap: 0;
+        }
+        .tiles {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+        }
+        .topbar {
+          padding: 12px 16px;
+        }
+        .topbar a {
+          font-size: 14px;
+          text-align: right;
+        }
+        main {
+          padding: 16px 12px 40px;
+        }
+        section {
+          padding: 16px;
+        }
+        .actions {
+          flex-wrap: wrap;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="topbar">
+      <span class="logo">LOGO</span>
+      <span class="client">Client</span>
+      <a href="mailto:claims@primes4.com">Need help? Contact claims support</a>
+    </div>
+    <main>
+      <ui5-title level="H1" size="H2">Report a carrier claim</ui5-title>
+      <p class="intro">
+        Tell us what went wrong with your delivery. You'll get a case ID by
+        email as soon as you submit, and you can reply to that email with
+        anything you missed.
+      </p>
+
+      <!-- Gate: email, then code -->
+      <section id="step-email">
+        <p class="hint">
+          Enter the email address we should reply to. We send a 6 digit code to
+          confirm it is yours.
+        </p>
+        <ui5-message-strip
+          id="msg1"
+          design="Negative"
+          hidden
+        ></ui5-message-strip>
+        <div class="field">
+          <ui5-label for="email" required>Email</ui5-label>
+          <ui5-input
+            id="email"
+            type="Email"
+            maxlength="100"
+            placeholder="name@company.com"
+          ></ui5-input>
+        </div>
+        <div class="field" id="codeField" hidden>
+          <ui5-label for="code" required>Verification code</ui5-label>
+          <ui5-input
+            id="code"
+            maxlength="6"
+            placeholder="6 digits from the email we sent"
+          ></ui5-input>
+          <span class="hint"
+            >Didn't get it? <ui5-link id="btnResend">Send again</ui5-link></span
+          >
+        </div>
+        <div class="actions">
+          <ui5-button id="btnCode" design="Emphasized">Send code</ui5-button>
+          <ui5-button id="btnVerify" design="Emphasized" hidden
+            >Verify and continue</ui5-button
+          >
+        </div>
+      </section>
+
+      <div class="layout" id="step-claim" hidden>
+        <aside>
+          <h4>SECTIONS</h4>
+          <ol>
+            <li><a href="#s1">Contact details</a> <span class="badge" data-section="s1" hidden></span></li>
+            <li><a href="#s2">Order and shipment</a> <span class="badge" data-section="s2" hidden></span></li>
+            <li><a href="#s3">Claim details</a> <span class="badge" data-section="s3" hidden></span></li>
+            <li><a href="#s4">Quantity and value</a> <span class="badge" data-section="s4" hidden></span></li>
+            <li><a href="#s5">Photos and documents</a> <span class="badge" data-section="s5" hidden></span></li>
+            <li><a href="#s6">Review and submit</a> <span class="badge" data-section="s6" hidden></span></li>
+          </ol>
+          <div class="req">
+            <span style="color: #b00">*</span> Required field
+          </div>
+        </aside>
+        <div>
+          <ui5-message-strip
+            id="msg2"
+            design="Negative"
+            hidden
+          ></ui5-message-strip>
+          <section id="s1">
+            <h2>1. Contact details</h2>
+            <p class="lead">Who should we contact about this claim?</p>
+            <div class="row">
+              <div class="field">
+                <ui5-label for="companyName" required>Company name</ui5-label>
+                <ui5-input id="companyName" maxlength="25"></ui5-input>
+              </div>
+              <div class="field">
+                <ui5-label for="customerAccountNumber"
+                  >Customer account number</ui5-label
+                >
+                <ui5-input
+                  id="customerAccountNumber"
+                  maxlength="10"
+                ></ui5-input>
+              </div>
+              <div class="field">
+                <ui5-label for="contactName" required>Contact name</ui5-label>
+                <ui5-input id="contactName" maxlength="50"></ui5-input>
+              </div>
+            </div>
+            <div class="row">
+              <div class="field">
+                <ui5-label for="emailEcho" required>Email</ui5-label>
+                <ui5-input id="emailEcho" type="Email" maxlength="100" readonly></ui5-input>
+              </div>
+              <div class="field">
+                <ui5-label for="phone" required>Phone</ui5-label>
+                <ui5-input id="phone" type="Tel" maxlength="20"></ui5-input>
+              </div>
+              <div class="field">
+                <ui5-label for="preferredContactMethod"
+                  >Preferred contact method</ui5-label
+                >
+                <ui5-select id="preferredContactMethod">
+                  <ui5-option value="email" selected>Email</ui5-option>
+                  <ui5-option value="phone">Phone</ui5-option>
+                </ui5-select>
+              </div>
+            </div>
+            <div class="field">
+              <ui5-label for="ccEmails">CC emails</ui5-label>
+              <ui5-input
+                id="ccEmails"
+                maxlength="225"
+                placeholder="Separate addresses with commas"
+              ></ui5-input>
+            </div>
+          </section>
+          <section id="s2">
+            <h2>2. Order and shipment</h2>
+            <p class="lead">
+              Enter a sales order or delivery number and we'll fill in the
+              shipment details we have on file.
+            </p>
+            <div class="lookup">
+              <div class="field">
+                <ui5-label for="salesOrder" required
+                  >Sales order number</ui5-label
+                >
+                <ui5-input
+                  id="salesOrder"
+                  maxlength="10"
+                  placeholder="e.g. 700"
+                ></ui5-input>
+              </div>
+              <div class="field">
+                <ui5-label for="lineItem">Line item</ui5-label>
+                <ui5-input
+                  id="lineItem"
+                  maxlength="6"
+                  placeholder="e.g. 10"
+                ></ui5-input>
+              </div>
+              <div class="field">
+                <ui5-label for="delivery">or Delivery number</ui5-label>
+                <ui5-input id="delivery" maxlength="10"></ui5-input>
+              </div>
+              <div class="field">
+                <ui5-label>&nbsp;</ui5-label>
+                <ui5-button
+                  id="btnLookup"
+                  design="Emphasized"
+                  disabled
+                  title="Available after the SAP connection is set up"
+                  >Look up</ui5-button
+                >
+              </div>
+            </div>
+            <div class="row">
+              <div class="field">
+                <ui5-label for="lotBatchNumber" required
+                  >Batch number</ui5-label
+                >
+                <ui5-input id="lotBatchNumber" maxlength="10"></ui5-input>
+              </div>
+              <div class="field">
+                <ui5-label for="customerPoNumber">Your PO number</ui5-label>
+                <ui5-input id="customerPoNumber" maxlength="35"></ui5-input>
+              </div>
+              <div class="field">
+                <ui5-label for="carrierNumber" required
+                  >Carrier number</ui5-label
+                >
+                <ui5-input id="carrierNumber" maxlength="35"></ui5-input>
+              </div>
+            </div>
+            <div class="row">
+              <div class="field">
+                <ui5-label for="sealNumber" required
+                  >Seal number</ui5-label
+                >
+                <ui5-input id="sealNumber" maxlength="20"></ui5-input>
+              </div>
+              <div class="field">
+                <ui5-label for="shipment">Shipment number</ui5-label>
+                <ui5-input id="shipment" maxlength="35"></ui5-input>
+              </div>
+              <div class="field">
+                <ui5-label for="carrier_code" required
+                  >Carrier / shipping company</ui5-label
+                >
+                <ui5-select id="carrier_code"
+                  ><ui5-option value="">Select carrier</ui5-option></ui5-select
+                >
+              </div>
+            </div>
+            <div class="row">
+              <div class="field">
+                <ui5-label for="billOfLading"
+                  >Bill of lading / tracking number</ui5-label
+                >
+                <ui5-input id="billOfLading" maxlength="35"></ui5-input>
+              </div>
+              <div class="field">
+                <ui5-label for="deliveryLocation" required
+                  >Delivery location / plant</ui5-label
+                >
+                <ui5-input id="deliveryLocation" maxlength="40"></ui5-input>
+              </div>
+              <div class="field">
+                <ui5-label for="shipDate">Ship date</ui5-label>
+                <ui5-date-picker
+                  id="shipDate"
+                  format-pattern="yyyy-MM-dd"
+                ></ui5-date-picker>
+              </div>
+            </div>
+            <div class="field">
+              <ui5-label for="dateReceived" required
+                >Date received / unloaded</ui5-label
+              >
+              <ui5-date-picker
+                id="dateReceived"
+                format-pattern="yyyy-MM-dd"
+              ></ui5-date-picker>
+            </div>
+          </section>
+
+          <section id="s3">
+            <h2>3. Claim details</h2>
+            <p class="lead">What happened, and when did you find it?</p>
+            <div class="row row-2">
+              <div class="field">
+                <ui5-label for="reason" required>Reason for claim</ui5-label>
+                <ui5-select id="reason">
+                  <ui5-option value="">Select a reason</ui5-option>
+                  <ui5-option value="damaged_goods">Damaged goods</ui5-option>
+                  <ui5-option value="shortage">Shortage</ui5-option>
+                  <ui5-option value="overage">Overage</ui5-option>
+                  <ui5-option value="wrong_product">Wrong product</ui5-option>
+                  <ui5-option value="contamination">Contamination</ui5-option>
+                  <ui5-option value="temperature_deviation"
+                    >Temperature deviation</ui5-option
+                  >
+                  <ui5-option value="late_delivery">Late delivery</ui5-option>
+                  <ui5-option value="carrier_damage">Carrier damage</ui5-option>
+                  <ui5-option value="seal_broken"
+                    >Seal broken or missing</ui5-option
+                  >
+                  <ui5-option value="documentation_error"
+                    >Documentation error</ui5-option
+                  >
+                  <ui5-option value="other">Other</ui5-option>
+                </ui5-select>
+              </div>
+              <div class="field">
+                <ui5-label for="issueFoundWhen" required
+                  >When was the issue found</ui5-label
+                >
+                <ui5-select id="issueFoundWhen">
+                  <ui5-option value="">Select</ui5-option>
+                  <ui5-option value="at_unloading">At unloading</ui5-option>
+                  <ui5-option value="during_storage">During storage</ui5-option>
+                  <ui5-option value="during_production"
+                    >During production use</ui5-option
+                  >
+                </ui5-select>
+              </div>
+            </div>
+            <!-- CL-02: shown and required when reason = Other. -->
+            <div class="field" id="reasonOtherField" hidden>
+              <ui5-label for="reasonOther" required>Please specify</ui5-label>
+              <ui5-input id="reasonOther" maxlength="100"></ui5-input>
+            </div>
+            <div class="field">
+              <ui5-label for="description" required
+                >Description of the issue</ui5-label
+              >
+              <ui5-textarea
+                id="description"
+                rows="5"
+                maxlength="225"
+                show-exceeded-text
+                placeholder="What did you see? Which pallets, cartons or units are affected?"
+              ></ui5-textarea>
+            </div>
+            <div class="row row-2">
+              <div class="field" id="damageNotedOnReceipt">
+                <ui5-label required
+                  >Was damage noted on the delivery receipt?</ui5-label
+                >
+                <div>
+                  <ui5-radio-button
+                    name="damageNotedOnReceipt"
+                    text="Yes"
+                    value="true"
+                  ></ui5-radio-button>
+                  <ui5-radio-button
+                    name="damageNotedOnReceipt"
+                    text="No"
+                    value="false"
+                  ></ui5-radio-button>
+                </div>
+              </div>
+              <div class="field" id="carrierNotified">
+                <ui5-label>Was the carrier notified?</ui5-label>
+                <div>
+                  <ui5-radio-button
+                    name="carrierNotified"
+                    text="Yes"
+                    value="true"
+                  ></ui5-radio-button>
+                  <ui5-radio-button
+                    name="carrierNotified"
+                    text="No"
+                    value="false"
+                  ></ui5-radio-button>
+                </div>
+              </div>
+            </div>
+            <!-- CL-07: shown when carrier notified = Yes. -->
+            <div class="field" id="dateCarrierNotifiedField" hidden>
+              <ui5-label for="dateCarrierNotified"
+                >Date carrier notified</ui5-label
+              >
+              <ui5-date-picker
+                id="dateCarrierNotified"
+                format-pattern="yyyy-MM-dd"
+              ></ui5-date-picker>
+            </div>
+          </section>
+
+          <section id="s4">
+            <h2>4. Quantity and value</h2>
+            <p class="lead">
+              How much product is affected, and what would you like us to do?
+            </p>
+            <div class="row">
+              <div class="field">
+                <ui5-label for="materialNumber" required
+                  >Product / material number</ui5-label
+                >
+                <ui5-input id="materialNumber" maxlength="40"></ui5-input>
+              </div>
+              <div class="field">
+                <ui5-label for="quantityOrdered">Quantity ordered</ui5-label>
+                <ui5-input id="quantityOrdered" type="Number" step="1"></ui5-input>
+              </div>
+              <div class="field">
+                <ui5-label for="quantityAffected" required
+                  >Quantity affected</ui5-label
+                >
+                <ui5-input id="quantityAffected" type="Number" step="1"></ui5-input>
+              </div>
+            </div>
+            <div class="row">
+              <div class="field">
+                <ui5-label for="unitOfMeasure_code" required>Unit</ui5-label>
+                <ui5-select id="unitOfMeasure_code"
+                  ><ui5-option value="">Select</ui5-option></ui5-select
+                >
+              </div>
+              <div class="field">
+                <ui5-label for="estimatedClaimValue"
+                  >Estimated claim value</ui5-label
+                >
+                <div
+                  style="
+                    display: grid;
+                    grid-template-columns: 110px 1fr;
+                    gap: 8px;
+                  "
+                >
+                  <!-- QV-05: required when a value is entered. -->
+                  <ui5-select id="currency_code">
+                    <ui5-option value="">Currency</ui5-option>
+                    <ui5-option value="USD">USD</ui5-option>
+                    <ui5-option value="AED">AED</ui5-option>
+                    <ui5-option value="EUR">EUR</ui5-option>
+                  </ui5-select>
+                  <ui5-input id="estimatedClaimValue" type="Number"></ui5-input>
+                </div>
+              </div>
+              <div class="field">
+                <ui5-label for="requestedResolution" required
+                  >Requested resolution</ui5-label
+                >
+                <ui5-select id="requestedResolution">
+                  <ui5-option value="">Select</ui5-option>
+                  <ui5-option value="credit">Credit</ui5-option>
+                  <ui5-option value="replacement">Replacement</ui5-option>
+                  <ui5-option value="refund">Refund</ui5-option>
+                  <ui5-option value="product_return">Return</ui5-option>
+                  <ui5-option value="information_only"
+                    >Information only</ui5-option
+                  >
+                </ui5-select>
+              </div>
+            </div>
+            <div class="field">
+              <ui5-label for="productLocation" required
+                >Where is the product now?</ui5-label
+              >
+              <ui5-select id="productLocation">
+                <ui5-option value="">Select</ui5-option>
+                <ui5-option value="holding_for_inspection"
+                  >Holding for inspection</ui5-option
+                >
+                <ui5-option value="quarantined">Quarantined</ui5-option>
+                <ui5-option value="used">Used</ui5-option>
+                <ui5-option value="discarded">Discarded</ui5-option>
+                <ui5-option value="returned">Returned</ui5-option>
+              </ui5-select>
+            </div>
+          </section>
+
+          <section id="s5">
+            <h2>5. Photos and documents</h2>
+            <p class="lead">
+              Clear photos speed up your claim. Add at least one; the more of
+              these you can cover, the better.
+            </p>
+            <ui5-message-strip
+              id="msgFiles"
+              design="Information"
+              hidden
+            ></ui5-message-strip>
+            <div class="tiles" id="files">
+              <div class="tile" data-slot="EV_01">
+                <ui5-icon name="camera"></ui5-icon>
+                <span class="name">Carrier doors</span>
+                <span class="hint">Closed, with number visible</span>
+                <div class="thumbs"></div>
+                <span class="count">0 of 5</span>
+                <ui5-button design="Transparent" class="add">Add photos</ui5-button>
+                <input type="file" accept="image/jpeg,image/png" multiple hidden />
+              </div>
+              <div class="tile" data-slot="EV_02">
+                <ui5-icon name="camera"></ui5-icon>
+                <span class="name">Seal close-up</span>
+                <span class="hint">Seal number readable</span>
+                <div class="thumbs"></div>
+                <span class="count">0 of 5</span>
+                <ui5-button design="Transparent" class="add">Add photos</ui5-button>
+                <input type="file" accept="image/jpeg,image/png" multiple hidden />
+              </div>
+              <div class="tile" data-slot="EV_03">
+                <ui5-icon name="camera"></ui5-icon>
+                <span class="name">Carrier interior</span>
+                <span class="hint">As first opened</span>
+                <div class="thumbs"></div>
+                <span class="count">0 of 5</span>
+                <ui5-button design="Transparent" class="add">Add photos</ui5-button>
+                <input type="file" accept="image/jpeg,image/png" multiple hidden />
+              </div>
+              <div class="tile" data-slot="EV_04">
+                <ui5-icon name="camera"></ui5-icon>
+                <span class="name">Damaged product</span>
+                <span class="hint">Close-up of the issue</span>
+                <div class="thumbs"></div>
+                <span class="count">0 of 5</span>
+                <ui5-button design="Transparent" class="add">Add photos</ui5-button>
+                <input type="file" accept="image/jpeg,image/png" multiple hidden />
+              </div>
+              <div class="tile" data-slot="EV_05">
+                <ui5-icon name="camera"></ui5-icon>
+                <span class="name">Product label</span>
+                <span class="hint">Batch visible</span>
+                <div class="thumbs"></div>
+                <span class="count">0 of 5</span>
+                <ui5-button design="Transparent" class="add">Add photos</ui5-button>
+                <input type="file" accept="image/jpeg,image/png" multiple hidden />
+              </div>
+              <div class="tile" data-slot="EV_06">
+                <ui5-icon name="camera"></ui5-icon>
+                <span class="name">Packaging</span>
+                <span class="hint">Pallets, wrap, cartons</span>
+                <div class="thumbs"></div>
+                <span class="count">0 of 5</span>
+                <ui5-button design="Transparent" class="add">Add photos</ui5-button>
+                <input type="file" accept="image/jpeg,image/png" multiple hidden />
+              </div>
+            </div>
+            <div class="row">
+              <div class="field">
+                <ui5-label for="EV_07">Signed delivery note / POD</ui5-label>
+                <ui5-file-uploader
+                  id="EV_07"
+                  data-slot="EV_07"
+                  accept=".pdf,application/pdf,image/jpeg,image/png"
+                  multiple
+                  hide-input
+                >
+                  <ui5-button>Choose files</ui5-button>
+                </ui5-file-uploader>
+                <span class="file hint"></span>
+              </div>
+              <div class="field">
+                <ui5-label for="EV_08">Packing list / bill of lading</ui5-label>
+                <ui5-file-uploader
+                  id="EV_08"
+                  data-slot="EV_08"
+                  accept=".pdf,application/pdf,image/jpeg,image/png"
+                  multiple
+                  hide-input
+                >
+                  <ui5-button>Choose files</ui5-button>
+                </ui5-file-uploader>
+                <span class="file hint"></span>
+              </div>
+              <div class="field">
+                <ui5-label for="EV_10">Other documents</ui5-label>
+                <ui5-file-uploader
+                  id="EV_10"
+                  data-slot="EV_10"
+                  accept=".pdf,application/pdf,image/jpeg,image/png"
+                  multiple
+                  hide-input
+                >
+                  <ui5-button>Choose files</ui5-button>
+                </ui5-file-uploader>
+                <span class="file hint"></span>
+              </div>
+            </div>
+            <!-- EV-09: shown and required when reason = Temperature deviation. -->
+            <div class="field" id="EV_09Field" hidden>
+                <ui5-label for="EV_09" required>Temperature logger data</ui5-label>
+                <ui5-file-uploader
+                  id="EV_09"
+                  data-slot="EV_09"
+                  accept=".pdf,application/pdf,image/jpeg,image/png"
+                  hide-input
+                >
+                  <ui5-button>Choose file</ui5-button>
+                </ui5-file-uploader>
+                <span class="file hint"></span>
+            </div>
+            <p class="hint" id="filesHint">
+              Photos: JPG or PNG, up to 5 per category, made smaller in your
+              browser. Documents: PDF, JPG or PNG, up to 10 MB each. Files
+              upload right after you submit.
+            </p>
+          </section>
+
+          <section id="s6">
+            <h2>6. Review and submit</h2>
+            <div class="field">
+              <ui5-checkbox
+                id="accuracyDeclared"
+                text="I confirm the information in this claim is accurate to the best of my knowledge. *"
+              ></ui5-checkbox>
+              <ui5-checkbox
+                id="privacyConsented"
+                text="I agree to be contacted about this claim and have read the privacy notice. *"
+              ></ui5-checkbox>
+              <ui5-link href="#" id="privacyLink">Privacy notice</ui5-link>
+            </div>
+
+            <!-- honeypot, never shown -->
+            <div class="hp" aria-hidden="true">
+              <label for="website">Website</label>
+              <input
+                id="website"
+                name="website"
+                type="text"
+                tabindex="-1"
+                autocomplete="off"
+              />
+            </div>
+
+            <div class="actions">
+              <ui5-button id="btnSubmit" design="Emphasized"
+                >Submit claim</ui5-button
+              >
+              <ui5-button id="btnDraft" disabled title="Coming later"
+                >Save draft</ui5-button
+              >
+              <ui5-button id="btnBack">Change email</ui5-button>
+              <span class="hint" style="margin: 0"
+                >You'll receive your case ID by email right away.</span
+              >
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <!-- Step 3: receipt -->
+      <section id="step-done" hidden>
+        <ui5-message-strip design="Positive" hide-close-button
+          >Your claim is registered. A confirmation has been sent to your
+          email.</ui5-message-strip
+        >
+        <p class="hint">Your claim number</p>
+        <div class="receipt" id="caseId"></div>
+        <p class="hint">
+          Keep it for any follow up. Our team reviews the claim and replies by
+          email.
+        </p>
+        <p class="hint" id="uploadStatus" aria-live="polite"></p>
+        <ul id="uploadFailed" hidden></ul>
+        <div class="actions">
+          <ui5-button id="btnRetry" design="Emphasized" hidden
+            >Retry uploads</ui5-button
+          >
+          <ui5-button id="btnNew">File another claim</ui5-button>
+        </div>
+      </section>
+
+      <!-- Photo preview, opened from a thumbnail or a document's Preview link (src/steps/preview.ts). -->
+      <ui5-dialog id="preview" header-text="Photo">
+        <img id="previewImg" alt="" />
+        <div class="preview-caption">
+          <div id="previewName"></div>
+          <p class="hint" id="previewMeta"></p>
+        </div>
+        <div slot="footer" class="preview-actions">
+          <ui5-button id="previewPrev">Previous</ui5-button>
+          <ui5-button id="previewNext">Next</ui5-button>
+          <span class="spacer"></span>
+          <ui5-button id="previewRemove" design="Negative">Remove</ui5-button>
+          <ui5-button id="previewClose" design="Emphasized">Close</ui5-button>
+        </div>
+      </ui5-dialog>
+
+      <ui5-busy-indicator id="busy" size="M" hidden></ui5-busy-indicator>
+    </main>
+  </body>
+</html>

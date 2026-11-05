@@ -1,0 +1,25 @@
+.claimsThumb {
+    margin: 0 0.5rem 0.5rem 0;
+    border: 1px solid var(--sapList_BorderColor);
+    border-radius: 0.25rem;
+    cursor: zoom-in;
+}
+
+.claimsViewerFrame {
+    text-align: center;
+    min-height: 12rem;
+}
+
+.claimsViewerFit {
+    display: inline-block;
+    max-width: 100%;
+    max-height: 70vh;
+    object-fit: contain;
+    cursor: zoom-in;
+}
+
+.claimsViewerFull {
+    max-width: none;
+    max-height: none;
+    cursor: zoom-out;
+}

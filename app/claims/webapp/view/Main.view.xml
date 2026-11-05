@@ -1,0 +1,77 @@
+<mvc:View controllerName="claims.controller.Main"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:core="sap.ui.core"
+    xmlns:f="sap.f"
+    xmlns="sap.m">
+    <f:DynamicPage id="page" toggleHeaderOnTitleClick="false">
+        <f:title>
+            <f:DynamicPageTitle>
+                <f:heading>
+                    <Title text="{i18n>title}" level="H2"/>
+                </f:heading>
+            </f:DynamicPageTitle>
+        </f:title>
+        <f:content>
+            <VBox>
+                <MessageStrip id="msg" visible="false" showIcon="true" showCloseButton="true" class="sapUiSmallMarginBottom"/>
+                <Table id="table"
+                    mode="MultiSelect"
+                    growing="true"
+                    growingThreshold="50"
+                    sticky="HeaderToolbar,ColumnHeaders"
+                    noDataText="{i18n>noData}"
+                    selectionChange=".onSelectionChange"
+                    updateFinished=".onUpdateFinished"
+                    items="{
+                        path: '/Claims',
+                        parameters: { $orderby: 'submittedAt desc', $count: true },
+                        filters: { path: 'status', operator: 'NE', value1: 'Closed' }
+                    }">
+                    <headerToolbar>
+                        <OverflowToolbar>
+                            <Title id="count" text="{ path: 'view>/total', formatter: '.countText' }" level="H3"/>
+                            <ToolbarSpacer/>
+                            <SearchField id="search" width="18rem" placeholder="{i18n>searchPlaceholder}" search=".onSearch"/>
+                            <Select id="statusFilter" selectedKey="open" change=".onFilter">
+                                <core:Item key="open" text="{i18n>filterOpen}"/>
+                                <core:Item key="New" text="{i18n>status.New}"/>
+                                <core:Item key="InReview" text="{i18n>status.InReview}"/>
+                                <core:Item key="Responded" text="{i18n>status.Responded}"/>
+                                <core:Item key="Closed" text="{i18n>status.Closed}"/>
+                                <core:Item key="all" text="{i18n>filterAll}"/>
+                            </Select>
+                            <Button id="btnEvidence" text="{i18n>getEvidence}" type="Emphasized" enabled="{= ${view>/selected} > 0 }" press=".onGetEvidence"/>
+                            <Button id="btnRefresh" icon="sap-icon://refresh" text="{i18n>refresh}" press=".onRefresh"/>
+                        </OverflowToolbar>
+                    </headerToolbar>
+                    <columns>
+                        <Column width="9rem"><Text text="{i18n>colCaseId}"/></Column>
+                        <Column><Text text="{i18n>colCustomer}"/></Column>
+                        <Column width="9rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>colSoItem}"/></Column>
+                        <Column width="10rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>colCarrierNo}"/></Column>
+                        <Column width="11rem" minScreenWidth="Desktop" demandPopin="true"><Text text="{i18n>colReason}"/></Column>
+                        <Column width="8rem"><Text text="{i18n>colStatus}"/></Column>
+                        <Column width="15rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>colActions}"/></Column>
+                    </columns>
+                    <items>
+                        <ColumnListItem>
+                            <ObjectIdentifier title="{caseId}"/>
+                            <ObjectIdentifier title="{companyName}" text="{contactName}"/>
+                            <Text text="{ parts: [ {path: 'salesOrder'}, {path: 'lineItem'}, {path: 'delivery'} ], formatter: '.formatter.soItem' }"/>
+                            <Text text="{carrierNumber}"/>
+                            <Text text="{ parts: [ {path: 'reason'}, {path: 'reasonOther'} ], formatter: '.formatter.reason' }"/>
+                            <ObjectStatus
+                                text="{ path: 'status', formatter: '.formatter.statusText' }"
+                                state="{ path: 'status', formatter: '.formatter.statusState' }"/>
+                            <HBox wrap="Wrap">
+                                <Button text="{i18n>actOpen}" press=".onOpen" class="sapUiTinyMarginEnd"/>
+                                <Button text="{i18n>actReview}" press=".onReview" enabled="{= %{status} === 'New' }" class="sapUiTinyMarginEnd"/>
+                                <Button text="{i18n>actClose}" type="Transparent" press=".onClose" enabled="{= %{status} !== 'Closed' }"/>
+                            </HBox>
+                        </ColumnListItem>
+                    </items>
+                </Table>
+            </VBox>
+        </f:content>
+    </f:DynamicPage>
+</mvc:View>

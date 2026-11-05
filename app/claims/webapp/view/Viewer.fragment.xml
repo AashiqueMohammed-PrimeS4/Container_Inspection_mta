@@ -1,0 +1,41 @@
+<core:FragmentDefinition
+    xmlns:core="sap.ui.core"
+    xmlns="sap.m">
+    <Dialog id="viewer"
+        title="{files>/current/title}"
+        contentWidth="64rem"
+        resizable="true"
+        stretch="{device>/system/phone}"
+        afterClose=".onViewerAfterClose">
+        <content>
+            <VBox alignItems="Center" class="sapUiSmallMargin">
+                <ScrollContainer id="viewerFrame"
+                    width="100%"
+                    height="{= ${files>/zoom} ? '70vh' : 'auto' }"
+                    horizontal="true"
+                    vertical="true"
+                    busy="{files>/loading}"
+                    busyIndicatorDelay="0"
+                    class="claimsViewerFrame">
+                    <Image id="viewerImg"
+                        src="{files>/current/url}"
+                        alt="{files>/current/fileName}"
+                        decorative="false"
+                        press=".onZoom"
+                        load=".onViewerLoad"
+                        error=".onViewerError"
+                        class="claimsViewerFit"/>
+                </ScrollContainer>
+                <Text text="{files>/current/fileName}" class="sapUiTinyMarginTop"/>
+                <Text text="{files>/meta}" class="sapThemeText"/>
+            </VBox>
+        </content>
+        <buttons>
+            <Button text="{i18n>previous}" icon="sap-icon://navigation-left-arrow" enabled="{= ${files>/index} > 0 }" press=".onPrev"/>
+            <Button text="{i18n>next}" icon="sap-icon://navigation-right-arrow" iconFirst="false" enabled="{= ${files>/index} &lt; ${files>/photos}.length - 1 }" press=".onNext"/>
+            <ToggleButton text="{i18n>zoom}" icon="sap-icon://zoom-in" pressed="{files>/zoom}" press=".applyZoom"/>
+            <Button text="{i18n>download}" icon="sap-icon://download" press=".onDownload"/>
+            <Button text="{i18n>close}" type="Emphasized" press=".onViewerClose"/>
+        </buttons>
+    </Dialog>
+</core:FragmentDefinition>

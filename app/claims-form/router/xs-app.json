@@ -1,0 +1,20 @@
+{
+  "welcomeFile": "/claim/",
+  "authenticationMethod": "route",
+  "routes": [
+    {
+      "source": "^/claim/(.*)$",
+      "target": "$1",
+      "localDir": "resources/claim",
+      "authenticationType": "none",
+      "cacheControl": "no-cache, no-store, must-revalidate"
+    },
+    {
+      "source": "^/public/(.*)$",
+      "target": "/odata/v4/claims-public/$1",
+      "destination": "SmartInspect_Services_CAPM",
+      "authenticationType": "none",
+      "csrfProtection": false
+    }
+  ]
+}
