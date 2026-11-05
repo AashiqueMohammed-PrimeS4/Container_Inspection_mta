@@ -1,0 +1,153 @@
+<core:FragmentDefinition
+    xmlns:core="sap.ui.core"
+    xmlns:form="sap.ui.layout.form"
+    xmlns="sap.m">
+    <Dialog id="detail"
+        title="{ path: 'caseId', formatter: '.caseTitle' }"
+        contentWidth="56rem"
+        resizable="true"
+        draggable="true"
+        afterClose=".onDetailAfterClose">
+        <content>
+            <VBox class="sapUiSmallMargin">
+                <form:SimpleForm id="detailForm"
+                    editable="false"
+                    layout="ColumnLayout"
+                    columnsM="1"
+                    columnsL="2"
+                    columnsXL="2">
+                    <core:Title text="{i18n>secSystem}"/>
+                    <Label text="{i18n>lblStatus}"/>
+                    <Text text="{ parts: [ {path: 'status', targetType: 'any'} ], formatter: '.formatter.statusText' }"/>
+                    <Label text="{i18n>lblSubmitted}"/>
+                    <Text text="{ path: 'submittedAt', targetType: 'any', formatter: '.formatter.stamp' }"/>
+                    <Label text="{i18n>lblSource}"/>
+                    <Text text="{ path: 'source', targetType: 'any', formatter: '.formatter.code' }"/>
+                    <Label text="{i18n>lblReviewer}"/>
+                    <Text text="{ path: 'assignedReviewer', targetType: 'any', formatter: '.formatter.dash' }"/>
+                    <Label text="{i18n>lblResponded}"/>
+                    <Text text="{ path: 'respondedAt', targetType: 'any', formatter: '.formatter.stamp' }"/>
+                    <Label text="{i18n>lblDecision}"/>
+                    <Text text="{ path: 'decision', targetType: 'any', formatter: '.formatter.code' }"/>
+                    <Label text="{i18n>lblDecisionAmount}"/>
+                    <Text text="{ parts: [ {path: 'decisionAmount', targetType: 'any'}, {path: 'decisionCurrency_code', targetType: 'any'} ], formatter: '.formatter.amount' }"/>
+                    <Label text="{i18n>lblModified}"/>
+                    <Text text="{ parts: [ {path: 'modifiedAt', targetType: 'any'} ], formatter: '.formatter.stamp' }"/>
+                    <core:Title text="{i18n>secContact}"/>
+                    <Label text="{i18n>lblCompany}"/>
+                    <Text text="{ path: 'companyName', targetType: 'any', formatter: '.formatter.dash' }"/>
+                    <Label text="{i18n>lblAccount}"/>
+                    <Text text="{ path: 'customerAccountNumber', targetType: 'any', formatter: '.formatter.dash' }"/>
+                    <Label text="{i18n>lblContact}"/>
+                    <Text text="{ path: 'contactName', targetType: 'any', formatter: '.formatter.dash' }"/>
+                    <Label text="{i18n>lblEmail}"/>
+                    <Text text="{ path: 'email', targetType: 'any', formatter: '.formatter.dash' }"/>
+                    <Label text="{i18n>lblPhone}"/>
+                    <Text text="{ path: 'phone', targetType: 'any', formatter: '.formatter.dash' }"/>
+                    <Label text="{i18n>lblPreferredContact}"/>
+                    <Text text="{ path: 'preferredContactMethod', targetType: 'any', formatter: '.formatter.code' }"/>
+                    <Label text="{i18n>lblCcEmails}"/>
+                    <Text text="{ path: 'ccEmails', targetType: 'any', formatter: '.formatter.list' }"/>
+                    <core:Title text="{i18n>secOrder}"/>
+                    <Label text="{i18n>lblSalesOrder}"/>
+                    <Text text="{ path: 'salesOrder', targetType: 'any', formatter: '.formatter.dash' }"/>
+                    <Label text="{i18n>lblLineItem}"/>
+                    <Text text="{ path: 'lineItem', targetType: 'any', formatter: '.formatter.dash' }"/>
+                    <Label text="{i18n>lblDelivery}"/>
+                    <Text text="{ path: 'delivery', targetType: 'any', formatter: '.formatter.dash' }"/>
+                    <Label text="{i18n>lblLot}"/>
+                    <Text text="{ path: 'lotBatchNumber', targetType: 'any', formatter: '.formatter.dash' }"/>
+                    <Label text="{i18n>lblCustomerPo}"/>
+                    <Text text="{ path: 'customerPoNumber', targetType: 'any', formatter: '.formatter.dash' }"/>
+                    <Label text="{i18n>lblCarrierNo}"/>
+                    <Text text="{ path: 'carrierNumber', targetType: 'any', formatter: '.formatter.dash' }"/>
+                    <Label text="{i18n>lblSeal}"/>
+                    <Text text="{ path: 'sealNumber', targetType: 'any', formatter: '.formatter.dash' }"/>
+                    <Label text="{i18n>lblShipment}"/>
+                    <Text text="{ path: 'shipment', targetType: 'any', formatter: '.formatter.dash' }"/>
+                    <Label text="{i18n>lblCarrier}"/>
+                    <Text text="{ path: 'carrier_code', targetType: 'any', formatter: '.formatter.dash' }"/>
+                    <Label text="{i18n>lblBol}"/>
+                    <Text text="{ path: 'billOfLading', targetType: 'any', formatter: '.formatter.dash' }"/>
+                    <Label text="{i18n>lblDeliveryLocation}"/>
+                    <Text text="{ path: 'deliveryLocation', targetType: 'any', formatter: '.formatter.dash' }"/>
+                    <Label text="{i18n>lblShipDate}"/>
+                    <Text text="{ path: 'shipDate', targetType: 'any', formatter: '.formatter.day' }"/>
+                    <Label text="{i18n>lblDateReceived}"/>
+                    <Text text="{ path: 'dateReceived', targetType: 'any', formatter: '.formatter.day' }"/>
+                    <core:Title text="{i18n>secClaim}"/>
+                    <Label text="{i18n>lblReason}"/>
+                    <Text text="{ parts: [ {path: 'reason', targetType: 'any'}, {path: 'reasonOther', targetType: 'any'} ], formatter: '.formatter.reasonDetail' }"/>
+                    <Label text="{i18n>lblFound}"/>
+                    <Text text="{ path: 'issueFoundWhen', targetType: 'any', formatter: '.formatter.code' }"/>
+                    <Label text="{i18n>lblDescription}"/>
+                    <Text text="{ path: 'description', targetType: 'any', formatter: '.formatter.dash' }" renderWhitespace="true"/>
+                    <Label text="{i18n>lblDamageNoted}"/>
+                    <Text text="{ path: 'damageNotedOnReceipt', targetType: 'any', formatter: '.formatter.yesNo' }"/>
+                    <Label text="{i18n>lblCarrierNotified}"/>
+                    <Text text="{ path: 'carrierNotified', targetType: 'any', formatter: '.formatter.yesNo' }"/>
+                    <Label text="{i18n>lblDateCarrierNotified}"/>
+                    <Text text="{ path: 'dateCarrierNotified', targetType: 'any', formatter: '.formatter.day' }"/>
+                    <core:Title text="{i18n>secQuantity}"/>
+                    <Label text="{i18n>lblMaterial}"/>
+                    <Text text="{ path: 'materialNumber', targetType: 'any', formatter: '.formatter.dash' }"/>
+                    <Label text="{i18n>lblQtyOrdered}"/>
+                    <Text text="{ parts: [ {path: 'quantityOrdered', targetType: 'any'}, {path: 'unitOfMeasure_code', targetType: 'any'} ], formatter: '.formatter.quantity' }"/>
+                    <Label text="{i18n>lblQtyAffected}"/>
+                    <Text text="{ parts: [ {path: 'quantityAffected', targetType: 'any'}, {path: 'unitOfMeasure_code', targetType: 'any'} ], formatter: '.formatter.quantity' }"/>
+                    <Label text="{i18n>lblValue}"/>
+                    <Text text="{ parts: [ {path: 'estimatedClaimValue', targetType: 'any'}, {path: 'currency_code', targetType: 'any'} ], formatter: '.formatter.value' }"/>
+                    <Label text="{i18n>lblRequested}"/>
+                    <Text text="{ path: 'requestedResolution', targetType: 'any', formatter: '.formatter.code' }"/>
+                    <Label text="{i18n>lblProductNow}"/>
+                    <Text text="{ path: 'productLocation', targetType: 'any', formatter: '.formatter.code' }"/>
+                    <core:Title text="{i18n>secReview}"/>
+                    <Label text="{i18n>lblAccuracy}"/>
+                    <Text text="{ path: 'accuracyDeclared', targetType: 'any', formatter: '.formatter.yesNo' }"/>
+                    <Label text="{i18n>lblPrivacy}"/>
+                    <Text text="{ path: 'privacyConsented', targetType: 'any', formatter: '.formatter.yesNo' }"/>
+                    <Label text="{i18n>lblFileCount}"/>
+                    <Text text="{files>/count}"/>
+                </form:SimpleForm>
+                <Title text="{i18n>secFiles}" level="H4" class="sapUiSmallMarginTop sapUiSmallMarginBegin"/>
+                <Text text="{i18n>noFiles}" visible="{= ${files>/count} === 0 }" class="sapUiSmallMarginBegin"/>
+                <VBox items="{ path: 'files>/groups', templateShareable: false }" class="sapUiSmallMarginBegin">
+                    <VBox class="sapUiSmallMarginTop">
+                        <Label text="{files>title}"/>
+                        <HBox wrap="Wrap" items="{ path: 'files>photos', templateShareable: false }">
+                            <Image src="{files>url}" alt="{files>fileName}" tooltip="{files>info}"
+                                width="96px" height="96px" mode="Background" backgroundSize="cover"
+                                decorative="false" press=".onThumb" class="claimsThumb"/>
+                        </HBox>
+                        <VBox items="{ path: 'files>docs', templateShareable: false }">
+                            <Link text="{files>fileName}" href="{files>url}" target="_blank" tooltip="{files>info}"/>
+                        </VBox>
+                    </VBox>
+                </VBox>
+                <form:SimpleForm id="decisionForm"
+                    editable="true"
+                    layout="ColumnLayout"
+                    columnsM="1"
+                    columnsL="1"
+                    columnsXL="1"
+                    class="sapUiSmallMarginTop">
+                    <core:Title text="{i18n>secDecision}"/>
+                    <Label text="{i18n>lblDecision}" labelFor="decision" required="true"/>
+                    <Select id="decision" selectedKey="{decision}" forceSelection="false" change=".onDecisionInput">
+                        <core:Item key="" text="{i18n>decisionSelect}"/>
+                        <core:Item key="pay" text="{i18n>code.pay}"/>
+                        <core:Item key="not_pay" text="{i18n>code.not_pay}"/>
+                    </Select>
+                    <Label text="{ path: 'currency_code', formatter: '.formatter.amountLabel' }" labelFor="amount"/>
+                    <Input id="amount" value="{decisionAmount}"/>
+                    <Label text="{i18n>reasonLabel}" labelFor="decisionReason" required="true"/>
+                    <TextArea id="decisionReason" value="{decisionReason}" rows="4" maxLength="2000" width="100%" liveChange=".onDecisionInput"/>
+                </form:SimpleForm>
+            </VBox>
+        </content>
+        <buttons>
+            <Button id="respond" text="{i18n>markResponded}" type="Emphasized" enabled="{= %{status} !== 'Closed' }" press=".onRespond"/>
+            <Button text="{i18n>closeDialog}" press=".onDetailClose"/>
+        </buttons>
+    </Dialog>
+</core:FragmentDefinition>

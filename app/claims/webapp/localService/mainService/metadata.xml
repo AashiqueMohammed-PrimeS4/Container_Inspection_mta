@@ -1,0 +1,836 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+    <edmx:Reference Uri="https://oasis-tcs.github.io/odata-vocabularies/vocabularies/Org.OData.Capabilities.V1.xml">
+        <edmx:Include Alias="Capabilities" Namespace="Org.OData.Capabilities.V1"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="https://sap.github.io/odata-vocabularies/vocabularies/Common.xml">
+        <edmx:Include Alias="Common" Namespace="com.sap.vocabularies.Common.v1"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="https://oasis-tcs.github.io/odata-vocabularies/vocabularies/Org.OData.Core.V1.xml">
+        <edmx:Include Alias="Core" Namespace="Org.OData.Core.V1"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="https://sap.github.io/odata-vocabularies/vocabularies/UI.xml">
+        <edmx:Include Alias="UI" Namespace="com.sap.vocabularies.UI.v1"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="https://oasis-tcs.github.io/odata-vocabularies/vocabularies/Org.OData.Validation.V1.xml">
+        <edmx:Include Alias="Validation" Namespace="Org.OData.Validation.V1"/>
+    </edmx:Reference>
+    <edmx:DataServices>
+        <Schema Namespace="ClaimsService" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+            <Annotation Term="Core.Links">
+                <Collection>
+                    <Record>
+                        <PropertyValue Property="rel" String="author"/>
+                        <PropertyValue Property="href" String="https://cap.cloud.sap"/>
+                    </Record>
+                </Collection>
+            </Annotation>
+            <EntityContainer Name="EntityContainer">
+                <EntitySet Name="Claims" EntityType="ClaimsService.Claims">
+                    <NavigationPropertyBinding Path="decisionCurrency" Target="Currencies"/>
+                    <NavigationPropertyBinding Path="carrier" Target="Carriers"/>
+                    <NavigationPropertyBinding Path="unitOfMeasure" Target="UnitsOfMeasure"/>
+                    <NavigationPropertyBinding Path="currency" Target="Currencies"/>
+                    <NavigationPropertyBinding Path="files" Target="ClaimFiles"/>
+                    <NavigationPropertyBinding Path="notes" Target="ClaimNotes"/>
+                    <NavigationPropertyBinding Path="history" Target="ClaimHistory"/>
+                </EntitySet>
+                <EntitySet Name="ClaimFiles" EntityType="ClaimsService.ClaimFiles">
+                    <NavigationPropertyBinding Path="claim" Target="Claims"/>
+                </EntitySet>
+                <EntitySet Name="ClaimNotes" EntityType="ClaimsService.ClaimNotes">
+                    <NavigationPropertyBinding Path="claim" Target="Claims"/>
+                </EntitySet>
+                <EntitySet Name="ClaimHistory" EntityType="ClaimsService.ClaimHistory">
+                    <NavigationPropertyBinding Path="claim" Target="Claims"/>
+                </EntitySet>
+                <EntitySet Name="Carriers" EntityType="ClaimsService.Carriers">
+                    <NavigationPropertyBinding Path="texts" Target="Carriers_texts"/>
+                    <NavigationPropertyBinding Path="localized" Target="Carriers_texts"/>
+                </EntitySet>
+                <EntitySet Name="UnitsOfMeasure" EntityType="ClaimsService.UnitsOfMeasure">
+                    <NavigationPropertyBinding Path="texts" Target="UnitsOfMeasure_texts"/>
+                    <NavigationPropertyBinding Path="localized" Target="UnitsOfMeasure_texts"/>
+                </EntitySet>
+                <EntitySet Name="Currencies" EntityType="ClaimsService.Currencies">
+                    <NavigationPropertyBinding Path="texts" Target="Currencies_texts"/>
+                    <NavigationPropertyBinding Path="localized" Target="Currencies_texts"/>
+                </EntitySet>
+                <EntitySet Name="Carriers_texts" EntityType="ClaimsService.Carriers_texts"/>
+                <EntitySet Name="UnitsOfMeasure_texts" EntityType="ClaimsService.UnitsOfMeasure_texts"/>
+                <EntitySet Name="Currencies_texts" EntityType="ClaimsService.Currencies_texts"/>
+            </EntityContainer>
+            <EntityType Name="Claims">
+                <Key>
+                    <PropertyRef Name="ID"/>
+                </Key>
+                <Property Name="ID" Type="Edm.Guid" Nullable="false"/>
+                <Property Name="createdAt" Type="Edm.DateTimeOffset" Precision="7"/>
+                <Property Name="createdBy" Type="Edm.String" MaxLength="255"/>
+                <Property Name="modifiedAt" Type="Edm.DateTimeOffset" Precision="7"/>
+                <Property Name="modifiedBy" Type="Edm.String" MaxLength="255"/>
+                <Property Name="caseId" Type="Edm.String" MaxLength="10"/>
+                <Property Name="status" Type="Edm.String" MaxLength="20" DefaultValue="New"/>
+                <Property Name="submittedAt" Type="Edm.DateTimeOffset" Precision="7"/>
+                <Property Name="respondedAt" Type="Edm.DateTimeOffset" Precision="7"/>
+                <Property Name="assignedReviewer" Type="Edm.String" MaxLength="255"/>
+                <Property Name="source" Type="Edm.String" MaxLength="10" DefaultValue="web_form"/>
+                <Property Name="decision" Type="Edm.String" MaxLength="10"/>
+                <Property Name="decisionAmount" Type="Edm.Decimal" Precision="15" Scale="2"/>
+                <NavigationProperty Name="decisionCurrency" Type="ClaimsService.Currencies">
+                    <ReferentialConstraint Property="decisionCurrency_code" ReferencedProperty="code"/>
+                </NavigationProperty>
+                <Property Name="decisionCurrency_code" Type="Edm.String" MaxLength="3"/>
+                <Property Name="decisionReason" Type="Edm.String" MaxLength="2000"/>
+                <Property Name="companyName" Type="Edm.String" MaxLength="25"/>
+                <Property Name="customerAccountNumber" Type="Edm.String" MaxLength="10"/>
+                <Property Name="contactName" Type="Edm.String" MaxLength="50"/>
+                <Property Name="email" Type="Edm.String" MaxLength="100"/>
+                <Property Name="phone" Type="Edm.String" MaxLength="20"/>
+                <Property Name="preferredContactMethod" Type="Edm.String" MaxLength="10" DefaultValue="email"/>
+                <Property Name="ccEmails" Type="Edm.String" MaxLength="225"/>
+                <Property Name="salesOrder" Type="Edm.String" MaxLength="10"/>
+                <Property Name="lineItem" Type="Edm.String" MaxLength="6"/>
+                <Property Name="delivery" Type="Edm.String" MaxLength="10"/>
+                <Property Name="lotBatchNumber" Type="Edm.String" MaxLength="10"/>
+                <Property Name="customerPoNumber" Type="Edm.String" MaxLength="35"/>
+                <Property Name="carrierNumber" Type="Edm.String" MaxLength="35"/>
+                <Property Name="sealNumber" Type="Edm.String" MaxLength="20"/>
+                <Property Name="shipment" Type="Edm.String" MaxLength="35"/>
+                <NavigationProperty Name="carrier" Type="ClaimsService.Carriers">
+                    <ReferentialConstraint Property="carrier_code" ReferencedProperty="code"/>
+                </NavigationProperty>
+                <Property Name="carrier_code" Type="Edm.String" MaxLength="10"/>
+                <Property Name="billOfLading" Type="Edm.String" MaxLength="35"/>
+                <Property Name="deliveryLocation" Type="Edm.String" MaxLength="40"/>
+                <Property Name="shipDate" Type="Edm.Date"/>
+                <Property Name="dateReceived" Type="Edm.Date"/>
+                <Property Name="reason" Type="Edm.String" MaxLength="25"/>
+                <Property Name="reasonOther" Type="Edm.String" MaxLength="100"/>
+                <Property Name="issueFoundWhen" Type="Edm.String" MaxLength="20"/>
+                <Property Name="description" Type="Edm.String" MaxLength="225"/>
+                <Property Name="damageNotedOnReceipt" Type="Edm.Boolean"/>
+                <Property Name="carrierNotified" Type="Edm.Boolean"/>
+                <Property Name="dateCarrierNotified" Type="Edm.Date"/>
+                <Property Name="materialNumber" Type="Edm.String" MaxLength="40"/>
+                <Property Name="quantityOrdered" Type="Edm.Decimal" Precision="13" Scale="0"/>
+                <Property Name="quantityAffected" Type="Edm.Decimal" Precision="13" Scale="0"/>
+                <NavigationProperty Name="unitOfMeasure" Type="ClaimsService.UnitsOfMeasure">
+                    <ReferentialConstraint Property="unitOfMeasure_code" ReferencedProperty="code"/>
+                </NavigationProperty>
+                <Property Name="unitOfMeasure_code" Type="Edm.String" MaxLength="3"/>
+                <NavigationProperty Name="currency" Type="ClaimsService.Currencies">
+                    <ReferentialConstraint Property="currency_code" ReferencedProperty="code"/>
+                </NavigationProperty>
+                <Property Name="currency_code" Type="Edm.String" MaxLength="3"/>
+                <Property Name="estimatedClaimValue" Type="Edm.Decimal" Precision="14" Scale="3"/>
+                <Property Name="requestedResolution" Type="Edm.String" MaxLength="20"/>
+                <Property Name="productLocation" Type="Edm.String" MaxLength="25"/>
+                <Property Name="accuracyDeclared" Type="Edm.Boolean"/>
+                <Property Name="privacyConsented" Type="Edm.Boolean"/>
+                <NavigationProperty Name="files" Type="Collection(ClaimsService.ClaimFiles)" Partner="claim">
+                    <OnDelete Action="Cascade"/>
+                </NavigationProperty>
+                <NavigationProperty Name="notes" Type="Collection(ClaimsService.ClaimNotes)" Partner="claim">
+                    <OnDelete Action="Cascade"/>
+                </NavigationProperty>
+                <NavigationProperty Name="history" Type="Collection(ClaimsService.ClaimHistory)" Partner="claim">
+                    <OnDelete Action="Cascade"/>
+                </NavigationProperty>
+            </EntityType>
+            <EntityType Name="ClaimFiles">
+                <Key>
+                    <PropertyRef Name="ID"/>
+                </Key>
+                <Property Name="ID" Type="Edm.Guid" Nullable="false"/>
+                <Property Name="createdAt" Type="Edm.DateTimeOffset" Precision="7"/>
+                <Property Name="createdBy" Type="Edm.String" MaxLength="255"/>
+                <Property Name="modifiedAt" Type="Edm.DateTimeOffset" Precision="7"/>
+                <Property Name="modifiedBy" Type="Edm.String" MaxLength="255"/>
+                <NavigationProperty Name="claim" Type="ClaimsService.Claims" Partner="files">
+                    <ReferentialConstraint Property="claim_ID" ReferencedProperty="ID"/>
+                </NavigationProperty>
+                <Property Name="claim_ID" Type="Edm.Guid"/>
+                <Property Name="slot" Type="Edm.String" MaxLength="5"/>
+                <Property Name="imageSeq" Type="Edm.String" MaxLength="3"/>
+                <Property Name="fileName" Type="Edm.String" MaxLength="100"/>
+                <Property Name="mimeType" Type="Edm.String" MaxLength="100"/>
+                <Property Name="size" Type="Edm.Int32"/>
+                <Property Name="content" Type="Edm.Stream"/>
+            </EntityType>
+            <EntityType Name="ClaimNotes">
+                <Key>
+                    <PropertyRef Name="ID"/>
+                </Key>
+                <Property Name="ID" Type="Edm.Guid" Nullable="false"/>
+                <Property Name="createdAt" Type="Edm.DateTimeOffset" Precision="7"/>
+                <Property Name="createdBy" Type="Edm.String" MaxLength="255"/>
+                <Property Name="modifiedAt" Type="Edm.DateTimeOffset" Precision="7"/>
+                <Property Name="modifiedBy" Type="Edm.String" MaxLength="255"/>
+                <NavigationProperty Name="claim" Type="ClaimsService.Claims" Partner="notes">
+                    <ReferentialConstraint Property="claim_ID" ReferencedProperty="ID"/>
+                </NavigationProperty>
+                <Property Name="claim_ID" Type="Edm.Guid"/>
+                <Property Name="text" Type="Edm.String" MaxLength="2000"/>
+            </EntityType>
+            <EntityType Name="ClaimHistory">
+                <Key>
+                    <PropertyRef Name="ID"/>
+                </Key>
+                <Property Name="ID" Type="Edm.Guid" Nullable="false"/>
+                <Property Name="createdAt" Type="Edm.DateTimeOffset" Precision="7"/>
+                <Property Name="createdBy" Type="Edm.String" MaxLength="255"/>
+                <Property Name="modifiedAt" Type="Edm.DateTimeOffset" Precision="7"/>
+                <Property Name="modifiedBy" Type="Edm.String" MaxLength="255"/>
+                <NavigationProperty Name="claim" Type="ClaimsService.Claims" Partner="history">
+                    <ReferentialConstraint Property="claim_ID" ReferencedProperty="ID"/>
+                </NavigationProperty>
+                <Property Name="claim_ID" Type="Edm.Guid"/>
+                <Property Name="field" Type="Edm.String" MaxLength="40"/>
+                <Property Name="oldValue" Type="Edm.String" MaxLength="255"/>
+                <Property Name="newValue" Type="Edm.String" MaxLength="255"/>
+            </EntityType>
+            <EntityType Name="Carriers">
+                <Key>
+                    <PropertyRef Name="code"/>
+                </Key>
+                <Property Name="name" Type="Edm.String" MaxLength="255"/>
+                <Property Name="descr" Type="Edm.String" MaxLength="1000"/>
+                <Property Name="code" Type="Edm.String" MaxLength="10" Nullable="false"/>
+                <NavigationProperty Name="texts" Type="Collection(ClaimsService.Carriers_texts)">
+                    <OnDelete Action="Cascade"/>
+                </NavigationProperty>
+                <NavigationProperty Name="localized" Type="ClaimsService.Carriers_texts">
+                    <ReferentialConstraint Property="code" ReferencedProperty="code"/>
+                </NavigationProperty>
+            </EntityType>
+            <EntityType Name="UnitsOfMeasure">
+                <Key>
+                    <PropertyRef Name="code"/>
+                </Key>
+                <Property Name="name" Type="Edm.String" MaxLength="255"/>
+                <Property Name="descr" Type="Edm.String" MaxLength="1000"/>
+                <Property Name="code" Type="Edm.String" MaxLength="3" Nullable="false"/>
+                <NavigationProperty Name="texts" Type="Collection(ClaimsService.UnitsOfMeasure_texts)">
+                    <OnDelete Action="Cascade"/>
+                </NavigationProperty>
+                <NavigationProperty Name="localized" Type="ClaimsService.UnitsOfMeasure_texts">
+                    <ReferentialConstraint Property="code" ReferencedProperty="code"/>
+                </NavigationProperty>
+            </EntityType>
+            <EntityType Name="Currencies">
+                <Key>
+                    <PropertyRef Name="code"/>
+                </Key>
+                <Property Name="name" Type="Edm.String" MaxLength="255"/>
+                <Property Name="descr" Type="Edm.String" MaxLength="1000"/>
+                <Property Name="code" Type="Edm.String" MaxLength="3" Nullable="false"/>
+                <Property Name="symbol" Type="Edm.String" MaxLength="5"/>
+                <Property Name="minorUnit" Type="Edm.Int16"/>
+                <NavigationProperty Name="texts" Type="Collection(ClaimsService.Currencies_texts)">
+                    <OnDelete Action="Cascade"/>
+                </NavigationProperty>
+                <NavigationProperty Name="localized" Type="ClaimsService.Currencies_texts">
+                    <ReferentialConstraint Property="code" ReferencedProperty="code"/>
+                </NavigationProperty>
+            </EntityType>
+            <EntityType Name="Carriers_texts">
+                <Key>
+                    <PropertyRef Name="locale"/>
+                    <PropertyRef Name="code"/>
+                </Key>
+                <Property Name="locale" Type="Edm.String" MaxLength="14" Nullable="false"/>
+                <Property Name="name" Type="Edm.String" MaxLength="255"/>
+                <Property Name="descr" Type="Edm.String" MaxLength="1000"/>
+                <Property Name="code" Type="Edm.String" MaxLength="10" Nullable="false"/>
+            </EntityType>
+            <EntityType Name="UnitsOfMeasure_texts">
+                <Key>
+                    <PropertyRef Name="locale"/>
+                    <PropertyRef Name="code"/>
+                </Key>
+                <Property Name="locale" Type="Edm.String" MaxLength="14" Nullable="false"/>
+                <Property Name="name" Type="Edm.String" MaxLength="255"/>
+                <Property Name="descr" Type="Edm.String" MaxLength="1000"/>
+                <Property Name="code" Type="Edm.String" MaxLength="3" Nullable="false"/>
+            </EntityType>
+            <EntityType Name="Currencies_texts">
+                <Key>
+                    <PropertyRef Name="locale"/>
+                    <PropertyRef Name="code"/>
+                </Key>
+                <Property Name="locale" Type="Edm.String" MaxLength="14" Nullable="false"/>
+                <Property Name="name" Type="Edm.String" MaxLength="255"/>
+                <Property Name="descr" Type="Edm.String" MaxLength="1000"/>
+                <Property Name="code" Type="Edm.String" MaxLength="3" Nullable="false"/>
+            </EntityType>
+            <Annotations Target="ClaimsService.Claims/ID">
+                <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.Claims/createdAt">
+                <Annotation Term="UI.HiddenFilter" Bool="true"/>
+                <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+                <Annotation Term="Core.Immutable" Bool="true"/>
+                <Annotation Term="Core.Computed" Bool="true"/>
+                <Annotation Term="Common.Label" String="{i18n>CreatedAt}"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.Claims/createdBy">
+                <Annotation Term="UI.HiddenFilter" Bool="true"/>
+                <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+                <Annotation Term="Core.Immutable" Bool="true"/>
+                <Annotation Term="Core.Computed" Bool="true"/>
+                <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
+                <Annotation Term="Common.Label" String="{i18n>CreatedBy}"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.Claims/modifiedAt">
+                <Annotation Term="UI.HiddenFilter" Bool="true"/>
+                <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+                <Annotation Term="Core.Computed" Bool="true"/>
+                <Annotation Term="Common.Label" String="{i18n>ChangedAt}"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.Claims/modifiedBy">
+                <Annotation Term="UI.HiddenFilter" Bool="true"/>
+                <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+                <Annotation Term="Core.Computed" Bool="true"/>
+                <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
+                <Annotation Term="Common.Label" String="{i18n>ChangedBy}"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.Claims/caseId">
+                <Annotation Term="Common.FieldControl" EnumMember="Common.FieldControlType/Mandatory"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.Claims/status">
+                <Annotation Term="Validation.AllowedValues">
+                    <Collection>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="New"/>
+                            <PropertyValue Property="Value" String="New"/>
+                        </Record>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="InReview"/>
+                            <PropertyValue Property="Value" String="InReview"/>
+                        </Record>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="Responded"/>
+                            <PropertyValue Property="Value" String="Responded"/>
+                        </Record>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="Closed"/>
+                            <PropertyValue Property="Value" String="Closed"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ClaimsService.Claims/assignedReviewer">
+                <Annotation Term="Common.Label" String="{i18n>UserID}"/>
+                <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.Claims/decision">
+                <Annotation Term="Validation.AllowedValues">
+                    <Collection>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="pay"/>
+                            <PropertyValue Property="Value" String="pay"/>
+                        </Record>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="not_pay"/>
+                            <PropertyValue Property="Value" String="not_pay"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ClaimsService.Claims/decisionCurrency">
+                <Annotation Term="Common.Label" String="{i18n>Currency}"/>
+                <Annotation Term="Core.Description" String="{i18n>CurrencyCode.Description}"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.Claims/decisionCurrency_code">
+                <Annotation Term="Common.Label" String="{i18n>Currency}"/>
+                <Annotation Term="Common.ValueList">
+                    <Record Type="Common.ValueListType">
+                        <PropertyValue Property="Label" String="{i18n>Currency}"/>
+                        <PropertyValue Property="CollectionPath" String="Currencies"/>
+                        <PropertyValue Property="Parameters">
+                            <Collection>
+                                <Record Type="Common.ValueListParameterInOut">
+                                    <PropertyValue Property="LocalDataProperty" PropertyPath="decisionCurrency_code"/>
+                                    <PropertyValue Property="ValueListProperty" String="code"/>
+                                </Record>
+                                <Record Type="Common.ValueListParameterDisplayOnly">
+                                    <PropertyValue Property="ValueListProperty" String="name"/>
+                                </Record>
+                            </Collection>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+                <Annotation Term="Core.Description" String="{i18n>CurrencyCode.Description}"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.Claims/preferredContactMethod">
+                <Annotation Term="Validation.AllowedValues">
+                    <Collection>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="email"/>
+                            <PropertyValue Property="Value" String="email"/>
+                        </Record>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="phone"/>
+                            <PropertyValue Property="Value" String="phone"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ClaimsService.Claims/carrier_code">
+                <Annotation Term="Common.ValueList">
+                    <Record Type="Common.ValueListType">
+                        <PropertyValue Property="Label" String="Carriers"/>
+                        <PropertyValue Property="CollectionPath" String="Carriers"/>
+                        <PropertyValue Property="Parameters">
+                            <Collection>
+                                <Record Type="Common.ValueListParameterInOut">
+                                    <PropertyValue Property="LocalDataProperty" PropertyPath="carrier_code"/>
+                                    <PropertyValue Property="ValueListProperty" String="code"/>
+                                </Record>
+                                <Record Type="Common.ValueListParameterDisplayOnly">
+                                    <PropertyValue Property="ValueListProperty" String="name"/>
+                                </Record>
+                            </Collection>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ClaimsService.Claims/reason">
+                <Annotation Term="Validation.AllowedValues">
+                    <Collection>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="damaged_goods"/>
+                            <PropertyValue Property="Value" String="damaged_goods"/>
+                        </Record>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="shortage"/>
+                            <PropertyValue Property="Value" String="shortage"/>
+                        </Record>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="overage"/>
+                            <PropertyValue Property="Value" String="overage"/>
+                        </Record>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="wrong_product"/>
+                            <PropertyValue Property="Value" String="wrong_product"/>
+                        </Record>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="contamination"/>
+                            <PropertyValue Property="Value" String="contamination"/>
+                        </Record>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="temperature_deviation"/>
+                            <PropertyValue Property="Value" String="temperature_deviation"/>
+                        </Record>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="late_delivery"/>
+                            <PropertyValue Property="Value" String="late_delivery"/>
+                        </Record>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="carrier_damage"/>
+                            <PropertyValue Property="Value" String="carrier_damage"/>
+                        </Record>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="seal_broken"/>
+                            <PropertyValue Property="Value" String="seal_broken"/>
+                        </Record>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="documentation_error"/>
+                            <PropertyValue Property="Value" String="documentation_error"/>
+                        </Record>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="other"/>
+                            <PropertyValue Property="Value" String="other"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ClaimsService.Claims/issueFoundWhen">
+                <Annotation Term="Validation.AllowedValues">
+                    <Collection>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="at_unloading"/>
+                            <PropertyValue Property="Value" String="at_unloading"/>
+                        </Record>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="during_storage"/>
+                            <PropertyValue Property="Value" String="during_storage"/>
+                        </Record>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="during_production"/>
+                            <PropertyValue Property="Value" String="during_production"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ClaimsService.Claims/unitOfMeasure_code">
+                <Annotation Term="Common.ValueList">
+                    <Record Type="Common.ValueListType">
+                        <PropertyValue Property="Label" String="UnitsOfMeasure"/>
+                        <PropertyValue Property="CollectionPath" String="UnitsOfMeasure"/>
+                        <PropertyValue Property="Parameters">
+                            <Collection>
+                                <Record Type="Common.ValueListParameterInOut">
+                                    <PropertyValue Property="LocalDataProperty" PropertyPath="unitOfMeasure_code"/>
+                                    <PropertyValue Property="ValueListProperty" String="code"/>
+                                </Record>
+                                <Record Type="Common.ValueListParameterDisplayOnly">
+                                    <PropertyValue Property="ValueListProperty" String="name"/>
+                                </Record>
+                            </Collection>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ClaimsService.Claims/currency">
+                <Annotation Term="Common.Label" String="{i18n>Currency}"/>
+                <Annotation Term="Core.Description" String="{i18n>CurrencyCode.Description}"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.Claims/currency_code">
+                <Annotation Term="Common.Label" String="{i18n>Currency}"/>
+                <Annotation Term="Common.ValueList">
+                    <Record Type="Common.ValueListType">
+                        <PropertyValue Property="Label" String="{i18n>Currency}"/>
+                        <PropertyValue Property="CollectionPath" String="Currencies"/>
+                        <PropertyValue Property="Parameters">
+                            <Collection>
+                                <Record Type="Common.ValueListParameterInOut">
+                                    <PropertyValue Property="LocalDataProperty" PropertyPath="currency_code"/>
+                                    <PropertyValue Property="ValueListProperty" String="code"/>
+                                </Record>
+                                <Record Type="Common.ValueListParameterDisplayOnly">
+                                    <PropertyValue Property="ValueListProperty" String="name"/>
+                                </Record>
+                            </Collection>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+                <Annotation Term="Core.Description" String="{i18n>CurrencyCode.Description}"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.Claims/requestedResolution">
+                <Annotation Term="Validation.AllowedValues">
+                    <Collection>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="credit"/>
+                            <PropertyValue Property="Value" String="credit"/>
+                        </Record>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="replacement"/>
+                            <PropertyValue Property="Value" String="replacement"/>
+                        </Record>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="refund"/>
+                            <PropertyValue Property="Value" String="refund"/>
+                        </Record>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="product_return"/>
+                            <PropertyValue Property="Value" String="product_return"/>
+                        </Record>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="information_only"/>
+                            <PropertyValue Property="Value" String="information_only"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ClaimsService.Claims/productLocation">
+                <Annotation Term="Validation.AllowedValues">
+                    <Collection>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="holding_for_inspection"/>
+                            <PropertyValue Property="Value" String="holding_for_inspection"/>
+                        </Record>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="quarantined"/>
+                            <PropertyValue Property="Value" String="quarantined"/>
+                        </Record>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="used"/>
+                            <PropertyValue Property="Value" String="used"/>
+                        </Record>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="discarded"/>
+                            <PropertyValue Property="Value" String="discarded"/>
+                        </Record>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="returned"/>
+                            <PropertyValue Property="Value" String="returned"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ClaimsService.ClaimFiles/ID">
+                <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.ClaimFiles/createdAt">
+                <Annotation Term="UI.HiddenFilter" Bool="true"/>
+                <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+                <Annotation Term="Core.Immutable" Bool="true"/>
+                <Annotation Term="Core.Computed" Bool="true"/>
+                <Annotation Term="Common.Label" String="{i18n>CreatedAt}"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.ClaimFiles/createdBy">
+                <Annotation Term="UI.HiddenFilter" Bool="true"/>
+                <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+                <Annotation Term="Core.Immutable" Bool="true"/>
+                <Annotation Term="Core.Computed" Bool="true"/>
+                <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
+                <Annotation Term="Common.Label" String="{i18n>CreatedBy}"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.ClaimFiles/modifiedAt">
+                <Annotation Term="UI.HiddenFilter" Bool="true"/>
+                <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+                <Annotation Term="Core.Computed" Bool="true"/>
+                <Annotation Term="Common.Label" String="{i18n>ChangedAt}"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.ClaimFiles/modifiedBy">
+                <Annotation Term="UI.HiddenFilter" Bool="true"/>
+                <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+                <Annotation Term="Core.Computed" Bool="true"/>
+                <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
+                <Annotation Term="Common.Label" String="{i18n>ChangedBy}"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.ClaimFiles/slot">
+                <Annotation Term="Validation.AllowedValues">
+                    <Collection>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="EV_01"/>
+                            <PropertyValue Property="Value" String="EV_01"/>
+                        </Record>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="EV_02"/>
+                            <PropertyValue Property="Value" String="EV_02"/>
+                        </Record>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="EV_03"/>
+                            <PropertyValue Property="Value" String="EV_03"/>
+                        </Record>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="EV_04"/>
+                            <PropertyValue Property="Value" String="EV_04"/>
+                        </Record>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="EV_05"/>
+                            <PropertyValue Property="Value" String="EV_05"/>
+                        </Record>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="EV_06"/>
+                            <PropertyValue Property="Value" String="EV_06"/>
+                        </Record>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="EV_07"/>
+                            <PropertyValue Property="Value" String="EV_07"/>
+                        </Record>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="EV_08"/>
+                            <PropertyValue Property="Value" String="EV_08"/>
+                        </Record>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="EV_09"/>
+                            <PropertyValue Property="Value" String="EV_09"/>
+                        </Record>
+                        <Record Type="Validation.AllowedValue">
+                            <Annotation Term="Core.SymbolicName" String="EV_10"/>
+                            <PropertyValue Property="Value" String="EV_10"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ClaimsService.ClaimFiles/mimeType">
+                <Annotation Term="Core.IsMediaType" Bool="true"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.ClaimFiles/content">
+                <Annotation Term="Core.MediaType" Path="mimeType"/>
+                <Annotation Term="Core.ContentDisposition">
+                    <Record Type="Core.ContentDispositionType">
+                        <PropertyValue Property="Filename" Path="fileName"/>
+                        <PropertyValue Property="Type" String="inline"/>
+                    </Record>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ClaimsService.ClaimNotes/ID">
+                <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.ClaimNotes/createdAt">
+                <Annotation Term="UI.HiddenFilter" Bool="true"/>
+                <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+                <Annotation Term="Core.Immutable" Bool="true"/>
+                <Annotation Term="Core.Computed" Bool="true"/>
+                <Annotation Term="Common.Label" String="{i18n>CreatedAt}"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.ClaimNotes/createdBy">
+                <Annotation Term="UI.HiddenFilter" Bool="true"/>
+                <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+                <Annotation Term="Core.Immutable" Bool="true"/>
+                <Annotation Term="Core.Computed" Bool="true"/>
+                <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
+                <Annotation Term="Common.Label" String="{i18n>CreatedBy}"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.ClaimNotes/modifiedAt">
+                <Annotation Term="UI.HiddenFilter" Bool="true"/>
+                <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+                <Annotation Term="Core.Computed" Bool="true"/>
+                <Annotation Term="Common.Label" String="{i18n>ChangedAt}"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.ClaimNotes/modifiedBy">
+                <Annotation Term="UI.HiddenFilter" Bool="true"/>
+                <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+                <Annotation Term="Core.Computed" Bool="true"/>
+                <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
+                <Annotation Term="Common.Label" String="{i18n>ChangedBy}"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.ClaimHistory/ID">
+                <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.ClaimHistory/createdAt">
+                <Annotation Term="UI.HiddenFilter" Bool="true"/>
+                <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+                <Annotation Term="Core.Immutable" Bool="true"/>
+                <Annotation Term="Core.Computed" Bool="true"/>
+                <Annotation Term="Common.Label" String="{i18n>CreatedAt}"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.ClaimHistory/createdBy">
+                <Annotation Term="UI.HiddenFilter" Bool="true"/>
+                <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+                <Annotation Term="Core.Immutable" Bool="true"/>
+                <Annotation Term="Core.Computed" Bool="true"/>
+                <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
+                <Annotation Term="Common.Label" String="{i18n>CreatedBy}"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.ClaimHistory/modifiedAt">
+                <Annotation Term="UI.HiddenFilter" Bool="true"/>
+                <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+                <Annotation Term="Core.Computed" Bool="true"/>
+                <Annotation Term="Common.Label" String="{i18n>ChangedAt}"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.ClaimHistory/modifiedBy">
+                <Annotation Term="UI.HiddenFilter" Bool="true"/>
+                <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+                <Annotation Term="Core.Computed" Bool="true"/>
+                <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
+                <Annotation Term="Common.Label" String="{i18n>ChangedBy}"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.Carriers">
+                <Annotation Term="UI.Identification">
+                    <Collection>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="name"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ClaimsService.EntityContainer/Carriers">
+                <Annotation Term="Capabilities.DeleteRestrictions">
+                    <Record Type="Capabilities.DeleteRestrictionsType">
+                        <PropertyValue Property="Deletable" Bool="false"/>
+                    </Record>
+                </Annotation>
+                <Annotation Term="Capabilities.InsertRestrictions">
+                    <Record Type="Capabilities.InsertRestrictionsType">
+                        <PropertyValue Property="Insertable" Bool="false"/>
+                    </Record>
+                </Annotation>
+                <Annotation Term="Capabilities.UpdateRestrictions">
+                    <Record Type="Capabilities.UpdateRestrictionsType">
+                        <PropertyValue Property="Updatable" Bool="false"/>
+                    </Record>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ClaimsService.Carriers/name">
+                <Annotation Term="Common.Label" String="{i18n>Name}"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.Carriers/descr">
+                <Annotation Term="Common.Label" String="{i18n>Description}"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.UnitsOfMeasure">
+                <Annotation Term="UI.Identification">
+                    <Collection>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="name"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ClaimsService.EntityContainer/UnitsOfMeasure">
+                <Annotation Term="Capabilities.DeleteRestrictions">
+                    <Record Type="Capabilities.DeleteRestrictionsType">
+                        <PropertyValue Property="Deletable" Bool="false"/>
+                    </Record>
+                </Annotation>
+                <Annotation Term="Capabilities.InsertRestrictions">
+                    <Record Type="Capabilities.InsertRestrictionsType">
+                        <PropertyValue Property="Insertable" Bool="false"/>
+                    </Record>
+                </Annotation>
+                <Annotation Term="Capabilities.UpdateRestrictions">
+                    <Record Type="Capabilities.UpdateRestrictionsType">
+                        <PropertyValue Property="Updatable" Bool="false"/>
+                    </Record>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ClaimsService.UnitsOfMeasure/name">
+                <Annotation Term="Common.Label" String="{i18n>Name}"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.UnitsOfMeasure/descr">
+                <Annotation Term="Common.Label" String="{i18n>Description}"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.Currencies">
+                <Annotation Term="UI.Identification">
+                    <Collection>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="name"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ClaimsService.Currencies/name">
+                <Annotation Term="Common.Label" String="{i18n>Name}"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.Currencies/descr">
+                <Annotation Term="Common.Label" String="{i18n>Description}"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.Currencies/code">
+                <Annotation Term="Common.Text" Path="name"/>
+                <Annotation Term="Common.Label" String="{i18n>CurrencyCode}"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.Currencies/symbol">
+                <Annotation Term="Common.Label" String="{i18n>CurrencySymbol}"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.Currencies/minorUnit">
+                <Annotation Term="Common.Label" String="{i18n>CurrencyMinorUnit}"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.Carriers_texts/locale">
+                <Annotation Term="Common.Label" String="{i18n>LanguageCode}"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.Carriers_texts/name">
+                <Annotation Term="Common.Label" String="{i18n>Name}"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.Carriers_texts/descr">
+                <Annotation Term="Common.Label" String="{i18n>Description}"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.UnitsOfMeasure_texts/locale">
+                <Annotation Term="Common.Label" String="{i18n>LanguageCode}"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.UnitsOfMeasure_texts/name">
+                <Annotation Term="Common.Label" String="{i18n>Name}"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.UnitsOfMeasure_texts/descr">
+                <Annotation Term="Common.Label" String="{i18n>Description}"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.Currencies_texts/locale">
+                <Annotation Term="Common.Label" String="{i18n>LanguageCode}"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.Currencies_texts/name">
+                <Annotation Term="Common.Label" String="{i18n>Name}"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.Currencies_texts/descr">
+                <Annotation Term="Common.Label" String="{i18n>Description}"/>
+            </Annotations>
+            <Annotations Target="ClaimsService.Currencies_texts/code">
+                <Annotation Term="Common.Text" Path="name"/>
+                <Annotation Term="Common.Label" String="{i18n>CurrencyCode}"/>
+            </Annotations>
+        </Schema>
+    </edmx:DataServices>
+</edmx:Edmx>

@@ -20,6 +20,10 @@ modules:
         - carrieranalytics.zip
       name: carrieranalytics
       target-path: resources/
+    - artifacts:
+        - claims.zip
+      name: claims
+      target-path: resources/
 - name: insptrack
   type: html5
   path: app/insptrack
@@ -40,6 +44,32 @@ modules:
     - npm install
     - npm run build:cf
     supported-platforms: []
+- name: claims
+  type: html5
+  path: app/claims
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+# Public claim form: own app router, serves the page and /public without login (backend: SmartInspect_Services_CAPM)
+- name: claims-form
+  type: approuter.nodejs
+  path: app/claims-form
+  parameters:
+    disk-quota: 256M
+    memory: 256M
+  build-parameters:
+    builder: custom
+    commands:
+    - npm ci
+    - npm run build
+    build-result: router
+  requires:
+  - name: Container_Inspection_mta-destination-service
+  - name: uaa_Container_Inspection_mta
 - name: Container_Inspection_mta-destination-content
   type: com.sap.application.content
   requires:

@@ -10,6 +10,10 @@
     {
       "name": "$XSAPPNAME.WorkzoneUser.Access",
       "description": "Generic access for Work Zone site visibility"
+    },
+    {
+      "name": "$XSAPPNAME.ClaimsAgent",
+      "description": "Work carrier claims in the Claims tile"
     }
   ],
   "role-templates": [
@@ -25,6 +29,13 @@
       "description": "Generic role for SAP Build Work Zone site access",
       "scope-references": [
         "$XSAPPNAME.WorkzoneUser.Access"
+      ]
+    },
+    {
+      "name": "ClaimsAgent",
+      "description": "Claims team, works the carrier claims ticket log",
+      "scope-references": [
+        "$XSAPPNAME.ClaimsAgent"
       ]
     }
   ],

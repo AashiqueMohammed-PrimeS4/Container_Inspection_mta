@@ -1,0 +1,16 @@
+{
+  "name": "claims-form",
+  "version": "0.1.0",
+  "description": "Public carrier claim form, bundled into the claims-form app router.",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "esbuild src/main.ts --bundle --format=esm --minify --outfile=router/resources/claim/bundle.js && cp index.html router/resources/claim/",
+    "start": "npm run build && cd router && npm start"
+  },
+  "devDependencies": {
+    "@ui5/webcomponents": "^2.27.2",
+    "@ui5/webcomponents-icons": "^2.27.2",
+    "esbuild": "^0.28.2"
+  }
+}
