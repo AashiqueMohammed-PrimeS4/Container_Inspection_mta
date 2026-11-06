@@ -9,7 +9,6 @@ sap.ui.define([
     "use strict";
 
     const SEARCH_FIELDS = ["caseId", "companyName", "salesOrder", "carrierNumber"];
-    const RESPOND_GROUP = "respond";
     const isPhoto = (f) => /^EV_0[1-6]$/.test(f.slot) && /^image\//.test(f.mimeType || "");
 
     return Controller.extend("claims.controller.Main", {
@@ -19,6 +18,7 @@ sap.ui.define([
             const view = this.getView();
             view.setModel(new JSONModel({ selected: 0, total: 0 }), "view");
             view.setModel(new JSONModel({ groups: [], photos: [], count: 0, index: 0, zoom: false, loading: false }), "files");
+            view.setModel(new JSONModel({ decision: "", amount: "", reason: "" }), "respond");
         },
 
         text(key, args) {
@@ -116,23 +116,19 @@ sap.ui.define([
             this.setStatus(event.getSource().getBindingContext(), "Closed");
         },
 
-        // Detail dialog with the files expanded. Edits are sent on Mark responded.
+        // Detail dialog. Files come from ClaimFiles of the same case.
         async onOpen(event) {
-            const path = event.getSource().getBindingContext().getPath();
+            const context = event.getSource().getBindingContext();
             this.detail ??= await this.loadFragment({ name: "claims.view.Detail" });
             this.getView().getModel("files").setData({ groups: [], photos: [], count: 0, index: 0, zoom: false, loading: false });
+            this.getView().getModel("respond").setData({ decision: "", amount: "", reason: "" });
             this.setValueStates();
-            this.detail.bindElement({
-                path,
-                parameters: {
-                    $expand: { files: { $select: ["ID", "slot", "imageSeq", "fileName", "mimeType", "size"], $orderby: "slot,imageSeq" } },
-                    $$updateGroupId: RESPOND_GROUP
-                }
-            });
+            this.detail.bindElement(context.getPath());
             this.detail.open();
             try {
-                const files = await this.detail.getElementBinding().getBoundContext().requestObject("files");
-                this.setFiles(files || []);
+                const files = this.getView().getModel().bindList("/ClaimFiles", null, [], [new Filter("caseId", FilterOperator.EQ, context.getProperty("caseId"))], { $orderby: "categoryId,imageSeq" });
+                const contexts = await files.requestContexts(0, 100);
+                this.setFiles(contexts.map((c) => c.getObject()));
             } catch (err) {
                 this.showError(err);
             }
@@ -148,14 +144,13 @@ sap.ui.define([
                     group = { slot: f.slot, title: this.text(`slot.${f.slot}`), photos: [], docs: [] };
                     groups.push(group);
                 }
-                const kb = Math.round((f.size || 0) / 1024);
+                const key = `caseId='${encodeURIComponent(f.caseId)}',categoryId='${f.categoryId}',imageSeq='${f.imageSeq}'`;
                 const item = {
-                    ID: f.ID,
+                    ID: `${f.categoryId}-${f.imageSeq}`,
                     slot: f.slot,
                     fileName: f.fileName,
-                    kb,
-                    info: this.text("fileInfo", [f.fileName, kb]),
-                    url: `${base}ClaimFiles(${encodeURIComponent(f.ID)})/content`
+                    info: this.text("fileInfo", [f.fileName]),
+                    url: `${base}ClaimFiles(${key})/content`
                 };
                 if (isPhoto(f)) {
                     item.index = photos.length;
@@ -182,27 +177,20 @@ sap.ui.define([
 
         async onRespond() {
             const context = this.detail.getBindingContext();
-            const decision = this.byId("decision").getSelectedKey();
-            const reason = this.byId("decisionReason").getValue().trim();
-            if (!decision || !reason) {
-                this.setValueStates(!decision, !reason);
+            const { decision, amount, reason } = this.getView().getModel("respond").getData();
+            if (!decision || !reason.trim()) {
+                this.setValueStates(!decision, !reason.trim());
                 return;
             }
-            const amount = context.getProperty("decisionAmount");
-            const hasAmount = amount !== null && amount !== undefined && amount !== "";
-            const model = this.getView().getModel();
+            const hasAmount = String(amount).trim() !== "";
+            const action = this.getView().getModel().bindContext("ClaimsService.respond(...)", context);
+            action.setParameter("decision", decision);
+            action.setParameter("decisionAmount", hasAmount ? Number(amount) : null);
+            action.setParameter("decisionCurrency", hasAmount ? context.getProperty("currency") || "USD" : null);
+            action.setParameter("decisionReason", reason.trim());
             this.detail.setBusy(true);
             try {
-                const writes = [
-                    context.setProperty("decisionReason", reason),
-                    context.setProperty("decisionCurrency_code", hasAmount ? context.getProperty("currency_code") || "USD" : null),
-                    context.setProperty("respondedAt", new Date().toISOString()),
-                    context.setProperty("status", "Responded")
-                ];
-                await model.submitBatch(RESPOND_GROUP);
-                for (const write of writes) {
-                    await write;
-                }
+                await action.invoke();
                 this.detail.close();
                 this.clearSelection();
                 this.items().refresh();
@@ -218,8 +206,6 @@ sap.ui.define([
         },
 
         onDetailAfterClose() {
-            const model = this.getView().getModel();
-            if (model.hasPendingChanges(RESPOND_GROUP)) {model.resetChanges(RESPOND_GROUP);}
             this.setValueStates();
         },
 
@@ -237,7 +223,7 @@ sap.ui.define([
             files.setProperty("/index", index);
             files.setProperty("/zoom", false);
             files.setProperty("/loading", changed);
-            files.setProperty("/meta", this.text("viewerMeta", [photo.kb, index + 1, photos.length]));
+            files.setProperty("/meta", this.text("viewerMeta", [index + 1, photos.length]));
             files.setProperty("/current", { ...photo, title: this.text(`slot.${photo.slot}`) });
             if (!this.viewer) {
                 this.viewer = await this.loadFragment({ name: "claims.view.Viewer" });

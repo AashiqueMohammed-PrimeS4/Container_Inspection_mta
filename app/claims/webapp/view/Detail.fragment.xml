@@ -30,7 +30,7 @@
                     <Label text="{i18n>lblDecision}"/>
                     <Text text="{ path: 'decision', targetType: 'any', formatter: '.formatter.code' }"/>
                     <Label text="{i18n>lblDecisionAmount}"/>
-                    <Text text="{ parts: [ {path: 'decisionAmount', targetType: 'any'}, {path: 'decisionCurrency_code', targetType: 'any'} ], formatter: '.formatter.amount' }"/>
+                    <Text text="{ parts: [ {path: 'decisionAmount', targetType: 'any'}, {path: 'decisionCurrency', targetType: 'any'} ], formatter: '.formatter.amount' }"/>
                     <Label text="{i18n>lblModified}"/>
                     <Text text="{ parts: [ {path: 'modifiedAt', targetType: 'any'} ], formatter: '.formatter.stamp' }"/>
                     <core:Title text="{i18n>secContact}"/>
@@ -66,7 +66,7 @@
                     <Label text="{i18n>lblShipment}"/>
                     <Text text="{ path: 'shipment', targetType: 'any', formatter: '.formatter.dash' }"/>
                     <Label text="{i18n>lblCarrier}"/>
-                    <Text text="{ path: 'carrier_code', targetType: 'any', formatter: '.formatter.dash' }"/>
+                    <Text text="{ path: 'carrier', targetType: 'any', formatter: '.formatter.dash' }"/>
                     <Label text="{i18n>lblBol}"/>
                     <Text text="{ path: 'billOfLading', targetType: 'any', formatter: '.formatter.dash' }"/>
                     <Label text="{i18n>lblDeliveryLocation}"/>
@@ -92,11 +92,11 @@
                     <Label text="{i18n>lblMaterial}"/>
                     <Text text="{ path: 'materialNumber', targetType: 'any', formatter: '.formatter.dash' }"/>
                     <Label text="{i18n>lblQtyOrdered}"/>
-                    <Text text="{ parts: [ {path: 'quantityOrdered', targetType: 'any'}, {path: 'unitOfMeasure_code', targetType: 'any'} ], formatter: '.formatter.quantity' }"/>
+                    <Text text="{ parts: [ {path: 'quantityOrdered', targetType: 'any'}, {path: 'unitOfMeasure', targetType: 'any'} ], formatter: '.formatter.quantity' }"/>
                     <Label text="{i18n>lblQtyAffected}"/>
-                    <Text text="{ parts: [ {path: 'quantityAffected', targetType: 'any'}, {path: 'unitOfMeasure_code', targetType: 'any'} ], formatter: '.formatter.quantity' }"/>
+                    <Text text="{ parts: [ {path: 'quantityAffected', targetType: 'any'}, {path: 'unitOfMeasure', targetType: 'any'} ], formatter: '.formatter.quantity' }"/>
                     <Label text="{i18n>lblValue}"/>
-                    <Text text="{ parts: [ {path: 'estimatedClaimValue', targetType: 'any'}, {path: 'currency_code', targetType: 'any'} ], formatter: '.formatter.value' }"/>
+                    <Text text="{ parts: [ {path: 'estimatedClaimValue', targetType: 'any'}, {path: 'currency', targetType: 'any'} ], formatter: '.formatter.value' }"/>
                     <Label text="{i18n>lblRequested}"/>
                     <Text text="{ path: 'requestedResolution', targetType: 'any', formatter: '.formatter.code' }"/>
                     <Label text="{i18n>lblProductNow}"/>
@@ -133,15 +133,15 @@
                     class="sapUiSmallMarginTop">
                     <core:Title text="{i18n>secDecision}"/>
                     <Label text="{i18n>lblDecision}" labelFor="decision" required="true"/>
-                    <Select id="decision" selectedKey="{decision}" forceSelection="false" change=".onDecisionInput">
+                    <Select id="decision" selectedKey="{respond>/decision}" forceSelection="false" change=".onDecisionInput">
                         <core:Item key="" text="{i18n>decisionSelect}"/>
                         <core:Item key="pay" text="{i18n>code.pay}"/>
                         <core:Item key="not_pay" text="{i18n>code.not_pay}"/>
                     </Select>
-                    <Label text="{ path: 'currency_code', formatter: '.formatter.amountLabel' }" labelFor="amount"/>
-                    <Input id="amount" value="{decisionAmount}"/>
+                    <Label text="{ path: 'currency', formatter: '.formatter.amountLabel' }" labelFor="amount"/>
+                    <Input id="amount" value="{respond>/amount}" type="Number"/>
                     <Label text="{i18n>reasonLabel}" labelFor="decisionReason" required="true"/>
-                    <TextArea id="decisionReason" value="{decisionReason}" rows="4" maxLength="2000" width="100%" liveChange=".onDecisionInput"/>
+                    <TextArea id="decisionReason" value="{respond>/reason}" rows="4" maxLength="2000" width="100%" liveChange=".onDecisionInput"/>
                 </form:SimpleForm>
             </VBox>
         </content>
