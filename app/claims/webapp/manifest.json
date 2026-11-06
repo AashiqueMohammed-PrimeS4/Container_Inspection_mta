@@ -98,6 +98,7 @@
         "dataSource": "mainService",
         "preload": true,
         "settings": {
+          "groupId": "$direct",
           "operationMode": "Server",
           "autoExpandSelect": true,
           "earlyRequests": true
