@@ -17,18 +17,19 @@ sap.ui.define(["sap/ui/core/format/DateFormat"], (DateFormat) => {
             return isEmpty(v) ? "-" : String(v);
         },
 
-        // Edm.Date has no time: read it as UTC midnight and format in UTC.
+        // S/4 sends dates as timestamps at UTC midnight: format the day in UTC.
         day(v) {
-            return isEmpty(v) ? "-" : dayFormat.format(new Date(`${v}T00:00:00Z`));
+            return isEmpty(v) ? "-" : dayFormat.format(new Date(String(v).length === 10 ? `${v}T00:00:00Z` : v));
         },
 
         stamp(v) {
             return isEmpty(v) ? "-" : stampFormat.format(new Date(v));
         },
 
+        // S/4 flags are "X" or "", form fields are booleans.
         yesNo(v) {
-            if (v === true) {return text(this, "yes") ?? "Yes";}
-            if (v === false) {return text(this, "no") ?? "No";}
+            if (v === true || v === "X") {return text(this, "yes") ?? "Yes";}
+            if (v === false || v === "") {return text(this, "no") ?? "No";}
             return "-";
         },
 
