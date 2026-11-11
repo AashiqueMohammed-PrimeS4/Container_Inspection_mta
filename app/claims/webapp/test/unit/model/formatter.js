@@ -27,9 +27,9 @@ sap.ui.define([
     });
 
     QUnit.test("status state", function (assert) {
-        assert.strictEqual(formatter.statusState("New"), "Information");
-        assert.strictEqual(formatter.statusState("InReview"), "Warning");
-        assert.strictEqual(formatter.statusState("Closed"), "None");
+        assert.strictEqual(formatter.statusState("01"), "Information");
+        assert.strictEqual(formatter.statusState("02"), "Warning");
+        assert.strictEqual(formatter.statusState("04"), "None");
     });
 
     QUnit.test("a date only value does not shift", function (assert) {

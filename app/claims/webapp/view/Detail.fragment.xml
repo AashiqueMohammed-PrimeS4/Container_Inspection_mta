@@ -146,7 +146,7 @@
             </VBox>
         </content>
         <buttons>
-            <Button id="respond" text="{i18n>markResponded}" type="Emphasized" enabled="{= %{status} !== 'Closed' }" press=".onRespond"/>
+            <Button id="respond" text="{i18n>markResponded}" type="Emphasized" enabled="{= %{status} !== '04' }" press=".onRespond"/>
             <Button text="{i18n>closeDialog}" press=".onDetailClose"/>
         </buttons>
     </Dialog>

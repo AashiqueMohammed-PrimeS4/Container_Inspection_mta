@@ -57,7 +57,7 @@ sap.ui.define([
         applyFilters() {
             const filters = [];
             const status = this.byId("statusFilter").getSelectedKey();
-            if (status === "open") {filters.push(new Filter("status", FilterOperator.NE, "Closed"));}
+            if (status === "open") {filters.push(new Filter("status", FilterOperator.NE, "04"));}
             else if (status !== "all") {filters.push(new Filter("status", FilterOperator.EQ, status));}
             const query = this.byId("search").getValue().trim();
             if (query) {
@@ -109,11 +109,11 @@ sap.ui.define([
         },
 
         onReview(event) {
-            this.setStatus(event.getSource().getBindingContext(), "InReview");
+            this.setStatus(event.getSource().getBindingContext(), "02");
         },
 
         onClose(event) {
-            this.setStatus(event.getSource().getBindingContext(), "Closed");
+            this.setStatus(event.getSource().getBindingContext(), "04");
         },
 
         // Detail dialog. Files come from ClaimFiles of the same case.

@@ -25,7 +25,7 @@
                     items="{
                         path: '/Claims',
                         parameters: { $orderby: 'submittedAt desc', $count: true },
-                        filters: { path: 'status', operator: 'NE', value1: 'Closed' }
+                        filters: { path: 'status', operator: 'NE', value1: '04' }
                     }">
                     <headerToolbar>
                         <OverflowToolbar>
@@ -34,10 +34,10 @@
                             <SearchField id="search" width="18rem" placeholder="{i18n>searchPlaceholder}" search=".onSearch"/>
                             <Select id="statusFilter" selectedKey="open" change=".onFilter">
                                 <core:Item key="open" text="{i18n>filterOpen}"/>
-                                <core:Item key="New" text="{i18n>status.New}"/>
-                                <core:Item key="InReview" text="{i18n>status.InReview}"/>
-                                <core:Item key="Responded" text="{i18n>status.Responded}"/>
-                                <core:Item key="Closed" text="{i18n>status.Closed}"/>
+                                <core:Item key="01" text="{i18n>status.01}"/>
+                                <core:Item key="02" text="{i18n>status.02}"/>
+                                <core:Item key="03" text="{i18n>status.03}"/>
+                                <core:Item key="04" text="{i18n>status.04}"/>
                                 <core:Item key="all" text="{i18n>filterAll}"/>
                             </Select>
                             <Button id="btnEvidence" text="{i18n>getEvidence}" type="Emphasized" enabled="{= ${view>/selected} > 0 }" press=".onGetEvidence"/>
@@ -65,8 +65,8 @@
                                 state="{ path: 'status', formatter: '.formatter.statusState' }"/>
                             <HBox wrap="Wrap">
                                 <Button text="{i18n>actOpen}" press=".onOpen" class="sapUiTinyMarginEnd"/>
-                                <Button text="{i18n>actReview}" press=".onReview" enabled="{= %{status} === 'New' }" class="sapUiTinyMarginEnd"/>
-                                <Button text="{i18n>actClose}" type="Transparent" press=".onClose" enabled="{= %{status} !== 'Closed' }"/>
+                                <Button text="{i18n>actReview}" press=".onReview" enabled="{= %{status} === '01' }" class="sapUiTinyMarginEnd"/>
+                                <Button text="{i18n>actClose}" type="Transparent" press=".onClose" enabled="{= %{status} !== '04' }"/>
                             </HBox>
                         </ColumnListItem>
                     </items>

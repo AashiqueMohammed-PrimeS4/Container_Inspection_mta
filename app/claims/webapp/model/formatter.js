@@ -3,7 +3,7 @@ sap.ui.define(["sap/ui/core/format/DateFormat"], (DateFormat) => {
 
     const dayFormat = DateFormat.getDateInstance({ style: "medium", UTC: true });
     const stampFormat = DateFormat.getDateTimeInstance({ style: "medium" });
-    const STATES = { New: "Information", InReview: "Warning", Responded: "Success", Closed: "None" };
+    const STATES = { "01": "Information", "02": "Warning", "03": "Success", "04": "None" }; // S/4 status codes
     const isEmpty = (v) => v === null || v === undefined || v === "";
 
     // Referenced as .formatter.x in the views.
