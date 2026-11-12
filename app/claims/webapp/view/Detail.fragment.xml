@@ -141,7 +141,7 @@
                     <Label text="{ path: 'currency', formatter: '.formatter.amountLabel' }" labelFor="amount"/>
                     <Input id="amount" value="{respond>/amount}" type="Number"/>
                     <Label text="{i18n>reasonLabel}" labelFor="decisionReason" required="true"/>
-                    <TextArea id="decisionReason" value="{respond>/reason}" rows="4" maxLength="2000" width="100%" liveChange=".onDecisionInput"/>
+                    <TextArea id="decisionReason" value="{respond>/reason}" rows="4" maxLength="225" width="100%" liveChange=".onDecisionInput"/>
                 </form:SimpleForm>
             </VBox>
         </content>
