@@ -3,7 +3,7 @@ import { $ } from "../lib/dom";
 
 /** OData error body: { error: { message, code, target, details[] } }. */
 export type ApiErrorDetail = { message: string; code?: string; target?: string };
-export type ApiError = ApiErrorDetail & { details?: ApiErrorDetail[] };
+export type ApiError = ApiErrorDetail & { details?: ApiErrorDetail[]; status?: number };
 
 /** POST to an unbound action on /public. */
 export async function call<T = unknown>(action: string, body: unknown): Promise<T> {
@@ -17,9 +17,10 @@ export async function call<T = unknown>(action: string, body: unknown): Promise<
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok)
-    throw (data.error ?? {
-      message: `Request failed (${res.status})`,
-    }) as ApiError;
+    throw {
+      ...(data.error ?? { message: `Request failed (${res.status})` }),
+      status: res.status,
+    } as ApiError;
   return data as T;
 }
 

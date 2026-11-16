@@ -14,6 +14,7 @@ import "@ui5/webcomponents/dist/DatePicker.js";
 import "@ui5/webcomponents/dist/FileUploader.js";
 import "@ui5/webcomponents/dist/Link.js";
 import "@ui5/webcomponents/dist/Dialog.js";
+import "@ui5/webcomponents/dist/ProgressIndicator.js";
 // Only the icons used on the page
 import "@ui5/webcomponents-icons/dist/camera.js";
 // Date and number formats for "en", bundled so the page loads no locale data from the public CDN.
