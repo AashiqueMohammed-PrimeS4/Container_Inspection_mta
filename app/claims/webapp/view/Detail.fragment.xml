@@ -126,6 +126,11 @@
                         </VBox>
                     </VBox>
                 </VBox>
+                <Title text="{i18n>secEvidence}" level="H4" class="sapUiSmallMarginTop sapUiSmallMarginBegin"/>
+                <Text text="{evidence>/note}" visible="{= !!${evidence>/note} }" class="sapUiSmallMarginBegin"/>
+                <VBox items="{ path: 'evidence>/reports', templateShareable: false }" class="sapUiSmallMarginBegin">
+                    <Link text="{evidence>title}" href="{evidence>url}" target="_blank"/>
+                </VBox>
                 <form:SimpleForm id="decisionForm"
                     visible="{= %{status} === '02' }"
                     editable="true"

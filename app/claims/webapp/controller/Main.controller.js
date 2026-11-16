@@ -11,6 +11,7 @@ sap.ui.define([
 
     const SEARCH_FIELDS = ["caseId", "companyName", "salesOrder", "carrierNumber"];
     const isPhoto = (f) => /^EV_0[1-6]$/.test(f.slot) && /^image\//.test(f.mimeType || "");
+    const keyValue = (v) => `'${encodeURIComponent(String(v).replace(/'/g, "''"))}'`;
 
     return Controller.extend("claims.controller.Main", {
         formatter,
@@ -20,6 +21,7 @@ sap.ui.define([
             view.setModel(new JSONModel({ selected: 0, total: 0 }), "view");
             view.setModel(new JSONModel({ groups: [], photos: [], count: 0, index: 0, zoom: false, loading: false }), "files");
             view.setModel(new JSONModel({ decision: "", amount: "", reason: "" }), "respond");
+            view.setModel(new JSONModel({ reports: [], note: "" }), "evidence");
         },
 
         text(key, args) {
@@ -93,9 +95,35 @@ sap.ui.define([
             this.getView().getModel("view").setProperty("/selected", this.byId("table").getSelectedItems().length);
         },
 
-        onGetEvidence() {
-            const n = this.byId("table").getSelectedItems().length;
-            this.showMessage(this.text(n === 1 ? "evidenceOne" : "evidenceMany", [n]), "Information");
+        // Get evidence: SmartInspect inspection reports of the claim's shipment and container.
+        async loadEvidence(context) {
+            const shipment = await context.requestProperty("shipment");
+            if (!shipment) {return { reports: [], note: this.text("evidenceNoShipment") };}
+            const fn = this.getView().getModel().bindContext("ClaimsService.evidence(...)", context);
+            await fn.invoke();
+            const base = this.getView().getModel().getServiceUrl();
+            const reports = (fn.getBoundContext().getObject()?.value ?? []).map((r) => ({
+                title: this.text(`evidence.${r.kind}`, [r.fileName]),
+                url: `${base}InspectionReports(shipment=${keyValue(r.shipment)},fileName=${keyValue(r.fileName)})/content`
+            }));
+            return { reports, note: reports.length ? "" : this.text("evidenceNone", [shipment]) };
+        },
+
+        async onGetEvidence() {
+            const contexts = this.byId("table").getSelectedItems().map((item) => item.getBindingContext());
+            const lines = [];
+            this.byId("table").setBusy(true);
+            for (const context of contexts) {
+                const caseId = context.getProperty("caseId");
+                try {
+                    const { reports, note } = await this.loadEvidence(context);
+                    lines.push(this.text("evidenceLine", [caseId, reports.length ? this.text("evidenceFound", [reports.length]) : note]));
+                } catch (err) {
+                    lines.push(this.text("evidenceLine", [caseId, err?.message || String(err)]));
+                }
+            }
+            this.byId("table").setBusy(false);
+            MessageBox.information(lines.join("\n"), { title: this.text("getEvidence") });
         },
 
         async setStatus(context, status) {
@@ -144,6 +172,7 @@ sap.ui.define([
             this.detail ??= await this.loadFragment({ name: "claims.view.Detail" });
             this.getView().getModel("files").setData({ groups: [], photos: [], count: 0, index: 0, zoom: false, loading: false });
             this.getView().getModel("respond").setData({ decision: "", amount: "", reason: "" });
+            this.getView().getModel("evidence").setData({ reports: [], note: this.text("evidenceLoading") });
             this.setValueStates();
             this.detail.bindElement(context.getPath());
             this.detail.open();
@@ -153,6 +182,11 @@ sap.ui.define([
                 this.setFiles(contexts.map((c) => c.getObject()));
             } catch (err) {
                 this.showError(err);
+            }
+            try {
+                this.getView().getModel("evidence").setData(await this.loadEvidence(context));
+            } catch (err) {
+                this.getView().getModel("evidence").setData({ reports: [], note: err?.message || String(err) });
             }
         },
 
