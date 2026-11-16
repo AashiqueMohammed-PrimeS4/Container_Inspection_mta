@@ -152,7 +152,7 @@ sap.ui.define([
 
         async onReview(event) {
             const context = event.getSource().getBindingContext();
-            if (await this.confirm(this.text("confirmReview", [context.getProperty("caseId")]), this.text("actReview"))) {
+            if (await this.confirm(this.text("confirmReview", [context.getProperty("caseId")]), this.text("confirmActReview"))) {
                 this.setStatus(context, "02");
             }
         },
@@ -161,7 +161,7 @@ sap.ui.define([
         async onClose(event) {
             const context = event.getSource().getBindingContext();
             const key = context.getProperty("status") === "03" ? "confirmClose" : "confirmCloseNoDecision";
-            if (await this.confirm(this.text(key, [context.getProperty("caseId")]), this.text("actClose"), true)) {
+            if (await this.confirm(this.text(key, [context.getProperty("caseId")]), this.text("confirmActClose"), true)) {
                 this.setStatus(context, "04");
             }
         },
