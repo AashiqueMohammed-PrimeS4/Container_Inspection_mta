@@ -31,6 +31,8 @@
                     <Text text="{ path: 'decision', targetType: 'any', formatter: '.formatter.code' }"/>
                     <Label text="{i18n>lblDecisionAmount}"/>
                     <Text text="{ parts: [ {path: 'decisionAmount', targetType: 'any'}, {path: 'decisionCurrency', targetType: 'any'} ], formatter: '.formatter.amount' }"/>
+                    <Label text="{i18n>lblDecisionReason}"/>
+                    <Text text="{ path: 'decisionReason', targetType: 'any', formatter: '.formatter.dash' }"/>
                     <Label text="{i18n>lblModified}"/>
                     <Text text="{ parts: [ {path: 'modifiedAt', targetType: 'any'} ], formatter: '.formatter.stamp' }"/>
                     <core:Title text="{i18n>secContact}"/>
@@ -125,6 +127,7 @@
                     </VBox>
                 </VBox>
                 <form:SimpleForm id="decisionForm"
+                    visible="{= %{status} === '02' }"
                     editable="true"
                     layout="ColumnLayout"
                     columnsM="1"
@@ -146,7 +149,7 @@
             </VBox>
         </content>
         <buttons>
-            <Button id="respond" text="{i18n>markResponded}" type="Emphasized" enabled="{= %{status} !== '04' }" press=".onRespond"/>
+            <Button id="respond" text="{i18n>markResponded}" type="Emphasized" visible="{= %{status} === '02' }" press=".onRespond"/>
             <Button text="{i18n>closeDialog}" press=".onDetailClose"/>
         </buttons>
     </Dialog>

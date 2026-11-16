@@ -1,11 +1,12 @@
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/ui/model/json/JSONModel",
+    "sap/m/MessageBox",
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
     "sap/ui/model/FilterType",
     "claims/model/formatter"
-], (Controller, JSONModel, Filter, FilterOperator, FilterType, formatter) => {
+], (Controller, JSONModel, MessageBox, Filter, FilterOperator, FilterType, formatter) => {
     "use strict";
 
     const SEARCH_FIELDS = ["caseId", "companyName", "salesOrder", "carrierNumber"];
@@ -108,12 +109,33 @@ sap.ui.define([
             }
         },
 
-        onReview(event) {
-            this.setStatus(event.getSource().getBindingContext(), "02");
+        // Asks before a change that goes to S/4. Resolves true on the action button.
+        confirm(message, actionText, warning) {
+            return new Promise((resolve) => {
+                const show = warning ? MessageBox.warning : MessageBox.confirm;
+                show(message, {
+                    title: this.text("confirmTitle"),
+                    actions: [actionText, MessageBox.Action.CANCEL],
+                    emphasizedAction: actionText,
+                    onClose: (action) => resolve(action === actionText)
+                });
+            });
         },
 
-        onClose(event) {
-            this.setStatus(event.getSource().getBindingContext(), "04");
+        async onReview(event) {
+            const context = event.getSource().getBindingContext();
+            if (await this.confirm(this.text("confirmReview", [context.getProperty("caseId")]), this.text("actReview"))) {
+                this.setStatus(context, "02");
+            }
+        },
+
+        // Close cannot be undone in the tile. Without a decision the text says so.
+        async onClose(event) {
+            const context = event.getSource().getBindingContext();
+            const key = context.getProperty("status") === "03" ? "confirmClose" : "confirmCloseNoDecision";
+            if (await this.confirm(this.text(key, [context.getProperty("caseId")]), this.text("actClose"), true)) {
+                this.setStatus(context, "04");
+            }
         },
 
         // Detail dialog. Files come from ClaimFiles of the same case.
@@ -183,6 +205,9 @@ sap.ui.define([
                 return;
             }
             const hasAmount = String(amount).trim() !== "";
+            const amountText = hasAmount ? `${Number(amount).toFixed(2)} ${context.getProperty("currency") || "USD"}` : "-";
+            const message = this.text("confirmRespond", [context.getProperty("caseId"), this.text(`code.${decision}`), amountText]);
+            if (!(await this.confirm(message, this.text("markResponded")))) {return;}
             const action = this.getView().getModel().bindContext("ClaimsService.respond(...)", context);
             action.setParameter("decision", decision);
             action.setParameter("decisionAmount", hasAmount ? Number(amount) : null);
