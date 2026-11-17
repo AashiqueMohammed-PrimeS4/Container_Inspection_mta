@@ -15,12 +15,10 @@
             <VBox>
                 <MessageStrip id="msg" visible="false" showIcon="true" showCloseButton="true" class="sapUiSmallMarginBottom"/>
                 <Table id="table"
-                    mode="MultiSelect"
                     growing="true"
                     growingThreshold="50"
                     sticky="HeaderToolbar,ColumnHeaders"
                     noDataText="{i18n>noData}"
-                    selectionChange=".onSelectionChange"
                     updateFinished=".onUpdateFinished"
                     items="{
                         path: '/Claims',
@@ -40,7 +38,6 @@
                                 <core:Item key="04" text="{i18n>status.04}"/>
                                 <core:Item key="all" text="{i18n>filterAll}"/>
                             </Select>
-                            <Button id="btnEvidence" text="{i18n>getEvidence}" type="Emphasized" enabled="{= ${view>/selected} > 0 }" press=".onGetEvidence"/>
                             <Button id="btnRefresh" icon="sap-icon://refresh" text="{i18n>refresh}" press=".onRefresh"/>
                         </OverflowToolbar>
                     </headerToolbar>

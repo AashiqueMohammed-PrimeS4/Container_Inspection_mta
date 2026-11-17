@@ -18,7 +18,7 @@ sap.ui.define([
 
         onInit() {
             const view = this.getView();
-            view.setModel(new JSONModel({ selected: 0, total: 0 }), "view");
+            view.setModel(new JSONModel({ total: 0 }), "view");
             view.setModel(new JSONModel({ groups: [], photos: [], count: 0, index: 0, zoom: false, loading: false }), "files");
             view.setModel(new JSONModel({ decision: "", amount: "", reason: "" }), "respond");
             view.setModel(new JSONModel({ reports: [], note: "" }), "evidence");
@@ -51,11 +51,6 @@ sap.ui.define([
             this.showMessage(err?.message || String(err), "Error");
         },
 
-        clearSelection() {
-            this.byId("table").removeSelections(true);
-            this.getView().getModel("view").setProperty("/selected", 0);
-        },
-
         // Status and search replace the application filters.
         applyFilters() {
             const filters = [];
@@ -69,7 +64,6 @@ sap.ui.define([
                     and: false
                 }));
             }
-            this.clearSelection();
             this.items().filter(filters.length ? new Filter({ filters, and: true }) : [], FilterType.Application);
         },
 
@@ -83,7 +77,6 @@ sap.ui.define([
 
         onRefresh() {
             this.byId("msg").setVisible(false);
-            this.clearSelection();
             this.items().refresh();
         },
 
@@ -91,11 +84,7 @@ sap.ui.define([
             this.getView().getModel("view").setProperty("/total", event.getParameter("total"));
         },
 
-        onSelectionChange() {
-            this.getView().getModel("view").setProperty("/selected", this.byId("table").getSelectedItems().length);
-        },
-
-        // Get evidence: SmartInspect inspection reports of the claim's shipment and container.
+        // Claim detail: SmartInspect inspection reports of the claim's shipment and container.
         async loadEvidence(context) {
             const shipment = await context.requestProperty("shipment");
             if (!shipment) {return { reports: [], note: this.text("evidenceNoShipment") };}
@@ -109,27 +98,9 @@ sap.ui.define([
             return { reports, note: reports.length ? "" : this.text("evidenceNone", [shipment]) };
         },
 
-        async onGetEvidence() {
-            const contexts = this.byId("table").getSelectedItems().map((item) => item.getBindingContext());
-            const lines = [];
-            this.byId("table").setBusy(true);
-            for (const context of contexts) {
-                const caseId = context.getProperty("caseId");
-                try {
-                    const { reports, note } = await this.loadEvidence(context);
-                    lines.push(this.text("evidenceLine", [caseId, reports.length ? this.text("evidenceFound", [reports.length]) : note]));
-                } catch (err) {
-                    lines.push(this.text("evidenceLine", [caseId, err?.message || String(err)]));
-                }
-            }
-            this.byId("table").setBusy(false);
-            MessageBox.information(lines.join("\n"), { title: this.text("getEvidence") });
-        },
-
         async setStatus(context, status) {
             try {
                 await context.setProperty("status", status);
-                this.clearSelection();
                 this.items().refresh();
             } catch (err) {
                 context.getBinding().resetChanges();
@@ -251,7 +222,6 @@ sap.ui.define([
             try {
                 await action.invoke();
                 this.detail.close();
-                this.clearSelection();
                 this.items().refresh();
             } catch (err) {
                 this.showError(err);
