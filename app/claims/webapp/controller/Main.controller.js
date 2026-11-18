@@ -1,15 +1,15 @@
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/ui/model/json/JSONModel",
+    "sap/m/MessageBox",
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
     "sap/ui/model/FilterType",
     "claims/model/formatter"
-], (Controller, JSONModel, Filter, FilterOperator, FilterType, formatter) => {
+], (Controller, JSONModel, MessageBox, Filter, FilterOperator, FilterType, formatter) => {
     "use strict";
 
     const SEARCH_FIELDS = ["caseId", "companyName", "salesOrder", "carrierNumber"];
-    const RESPOND_GROUP = "respond";
     const isPhoto = (f) => /^EV_0[1-6]$/.test(f.slot) && /^image\//.test(f.mimeType || "");
 
     return Controller.extend("claims.controller.Main", {
@@ -17,8 +17,9 @@ sap.ui.define([
 
         onInit() {
             const view = this.getView();
-            view.setModel(new JSONModel({ selected: 0, total: 0 }), "view");
+            view.setModel(new JSONModel({ total: 0 }), "view");
             view.setModel(new JSONModel({ groups: [], photos: [], count: 0, index: 0, zoom: false, loading: false }), "files");
+            view.setModel(new JSONModel({ decision: "", amount: "", reason: "" }), "respond");
         },
 
         text(key, args) {
@@ -48,16 +49,11 @@ sap.ui.define([
             this.showMessage(err?.message || String(err), "Error");
         },
 
-        clearSelection() {
-            this.byId("table").removeSelections(true);
-            this.getView().getModel("view").setProperty("/selected", 0);
-        },
-
         // Status and search replace the application filters.
         applyFilters() {
             const filters = [];
             const status = this.byId("statusFilter").getSelectedKey();
-            if (status === "open") {filters.push(new Filter("status", FilterOperator.NE, "Closed"));}
+            if (status === "open") {filters.push(new Filter("status", FilterOperator.NE, "04"));}
             else if (status !== "all") {filters.push(new Filter("status", FilterOperator.EQ, status));}
             const query = this.byId("search").getValue().trim();
             if (query) {
@@ -66,7 +62,6 @@ sap.ui.define([
                     and: false
                 }));
             }
-            this.clearSelection();
             this.items().filter(filters.length ? new Filter({ filters, and: true }) : [], FilterType.Application);
         },
 
@@ -80,7 +75,6 @@ sap.ui.define([
 
         onRefresh() {
             this.byId("msg").setVisible(false);
-            this.clearSelection();
             this.items().refresh();
         },
 
@@ -88,19 +82,9 @@ sap.ui.define([
             this.getView().getModel("view").setProperty("/total", event.getParameter("total"));
         },
 
-        onSelectionChange() {
-            this.getView().getModel("view").setProperty("/selected", this.byId("table").getSelectedItems().length);
-        },
-
-        onGetEvidence() {
-            const n = this.byId("table").getSelectedItems().length;
-            this.showMessage(this.text(n === 1 ? "evidenceOne" : "evidenceMany", [n]), "Information");
-        },
-
         async setStatus(context, status) {
             try {
                 await context.setProperty("status", status);
-                this.clearSelection();
                 this.items().refresh();
             } catch (err) {
                 context.getBinding().resetChanges();
@@ -108,31 +92,48 @@ sap.ui.define([
             }
         },
 
-        onReview(event) {
-            this.setStatus(event.getSource().getBindingContext(), "InReview");
+        // Asks before a change that goes to S/4. Resolves true on the action button.
+        confirm(message, actionText, warning) {
+            return new Promise((resolve) => {
+                const show = warning ? MessageBox.warning : MessageBox.confirm;
+                show(message, {
+                    title: this.text("confirmTitle"),
+                    actions: [actionText, MessageBox.Action.CANCEL],
+                    emphasizedAction: actionText,
+                    onClose: (action) => resolve(action === actionText)
+                });
+            });
         },
 
-        onClose(event) {
-            this.setStatus(event.getSource().getBindingContext(), "Closed");
+        async onReview(event) {
+            const context = event.getSource().getBindingContext();
+            if (await this.confirm(this.text("confirmReview", [context.getProperty("caseId")]), this.text("confirmActReview"))) {
+                this.setStatus(context, "02");
+            }
         },
 
-        // Detail dialog with the files expanded. Edits are sent on Mark responded.
+        // Close cannot be undone in the tile. Without a decision the text says so.
+        async onClose(event) {
+            const context = event.getSource().getBindingContext();
+            const key = context.getProperty("status") === "03" ? "confirmClose" : "confirmCloseNoDecision";
+            if (await this.confirm(this.text(key, [context.getProperty("caseId")]), this.text("confirmActClose"), true)) {
+                this.setStatus(context, "04");
+            }
+        },
+
+        // Detail dialog. Files come from ClaimFiles of the same case, with the SmartInspect reports (slot EV_SI) that S/4 adds.
         async onOpen(event) {
-            const path = event.getSource().getBindingContext().getPath();
+            const context = event.getSource().getBindingContext();
             this.detail ??= await this.loadFragment({ name: "claims.view.Detail" });
             this.getView().getModel("files").setData({ groups: [], photos: [], count: 0, index: 0, zoom: false, loading: false });
+            this.getView().getModel("respond").setData({ decision: "", amount: "", reason: "" });
             this.setValueStates();
-            this.detail.bindElement({
-                path,
-                parameters: {
-                    $expand: { files: { $select: ["ID", "slot", "imageSeq", "fileName", "mimeType", "size"], $orderby: "slot,imageSeq" } },
-                    $$updateGroupId: RESPOND_GROUP
-                }
-            });
+            this.detail.bindElement(context.getPath());
             this.detail.open();
             try {
-                const files = await this.detail.getElementBinding().getBoundContext().requestObject("files");
-                this.setFiles(files || []);
+                const files = this.getView().getModel().bindList("/ClaimFiles", null, [], [new Filter("caseId", FilterOperator.EQ, context.getProperty("caseId"))], { $orderby: "categoryId,imageSeq" });
+                const contexts = await files.requestContexts(0, 100);
+                this.setFiles(contexts.map((c) => c.getObject()));
             } catch (err) {
                 this.showError(err);
             }
@@ -148,14 +149,13 @@ sap.ui.define([
                     group = { slot: f.slot, title: this.text(`slot.${f.slot}`), photos: [], docs: [] };
                     groups.push(group);
                 }
-                const kb = Math.round((f.size || 0) / 1024);
+                const key = `caseId='${encodeURIComponent(f.caseId)}',categoryId='${f.categoryId}',imageSeq='${f.imageSeq}'`;
                 const item = {
-                    ID: f.ID,
+                    ID: `${f.categoryId}-${f.imageSeq}`,
                     slot: f.slot,
                     fileName: f.fileName,
-                    kb,
-                    info: this.text("fileInfo", [f.fileName, kb]),
-                    url: `${base}ClaimFiles(${encodeURIComponent(f.ID)})/content`
+                    info: this.text("fileInfo", [f.fileName]),
+                    url: `${base}ClaimFiles(${key})/content`
                 };
                 if (isPhoto(f)) {
                     item.index = photos.length;
@@ -182,29 +182,24 @@ sap.ui.define([
 
         async onRespond() {
             const context = this.detail.getBindingContext();
-            const decision = this.byId("decision").getSelectedKey();
-            const reason = this.byId("decisionReason").getValue().trim();
-            if (!decision || !reason) {
-                this.setValueStates(!decision, !reason);
+            const { decision, amount, reason } = this.getView().getModel("respond").getData();
+            if (!decision || !reason.trim()) {
+                this.setValueStates(!decision, !reason.trim());
                 return;
             }
-            const amount = context.getProperty("decisionAmount");
-            const hasAmount = amount !== null && amount !== undefined && amount !== "";
-            const model = this.getView().getModel();
+            const hasAmount = String(amount).trim() !== "";
+            const amountText = hasAmount ? `${Number(amount).toFixed(2)} ${context.getProperty("currency") || "USD"}` : "-";
+            const message = this.text("confirmRespond", [context.getProperty("caseId"), this.text(`code.${decision}`), amountText]);
+            if (!(await this.confirm(message, this.text("markResponded")))) {return;}
+            const action = this.getView().getModel().bindContext("ClaimsService.respond(...)", context);
+            action.setParameter("decision", decision);
+            action.setParameter("decisionAmount", hasAmount ? Number(amount) : null);
+            action.setParameter("decisionCurrency", hasAmount ? context.getProperty("currency") || "USD" : null);
+            action.setParameter("decisionReason", reason.trim());
             this.detail.setBusy(true);
             try {
-                const writes = [
-                    context.setProperty("decisionReason", reason),
-                    context.setProperty("decisionCurrency_code", hasAmount ? context.getProperty("currency_code") || "USD" : null),
-                    context.setProperty("respondedAt", new Date().toISOString()),
-                    context.setProperty("status", "Responded")
-                ];
-                await model.submitBatch(RESPOND_GROUP);
-                for (const write of writes) {
-                    await write;
-                }
+                await action.invoke();
                 this.detail.close();
-                this.clearSelection();
                 this.items().refresh();
             } catch (err) {
                 this.showError(err);
@@ -218,8 +213,6 @@ sap.ui.define([
         },
 
         onDetailAfterClose() {
-            const model = this.getView().getModel();
-            if (model.hasPendingChanges(RESPOND_GROUP)) {model.resetChanges(RESPOND_GROUP);}
             this.setValueStates();
         },
 
@@ -237,7 +230,7 @@ sap.ui.define([
             files.setProperty("/index", index);
             files.setProperty("/zoom", false);
             files.setProperty("/loading", changed);
-            files.setProperty("/meta", this.text("viewerMeta", [photo.kb, index + 1, photos.length]));
+            files.setProperty("/meta", this.text("viewerMeta", [index + 1, photos.length]));
             files.setProperty("/current", { ...photo, title: this.text(`slot.${photo.slot}`) });
             if (!this.viewer) {
                 this.viewer = await this.loadFragment({ name: "claims.view.Viewer" });

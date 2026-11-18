@@ -12,7 +12,7 @@
     {
       "source": "^/public/(.*)$",
       "target": "/odata/v4/claims-public/$1",
-      "destination": "SmartInspect_Services_CAPM",
+      "destination": "SmartInspect_Claims_Public",
       "authenticationType": "none",
       "csrfProtection": false
     }

@@ -3,7 +3,7 @@ sap.ui.define(["sap/ui/core/format/DateFormat"], (DateFormat) => {
 
     const dayFormat = DateFormat.getDateInstance({ style: "medium", UTC: true });
     const stampFormat = DateFormat.getDateTimeInstance({ style: "medium" });
-    const STATES = { New: "Information", InReview: "Warning", Responded: "Success", Closed: "None" };
+    const STATES = { "01": "Information", "02": "Warning", "03": "Success", "04": "None" }; // S/4 status codes
     const isEmpty = (v) => v === null || v === undefined || v === "";
 
     // Referenced as .formatter.x in the views.
@@ -17,18 +17,19 @@ sap.ui.define(["sap/ui/core/format/DateFormat"], (DateFormat) => {
             return isEmpty(v) ? "-" : String(v);
         },
 
-        // Edm.Date has no time: read it as UTC midnight and format in UTC.
+        // S/4 sends dates as timestamps at UTC midnight: format the day in UTC.
         day(v) {
-            return isEmpty(v) ? "-" : dayFormat.format(new Date(`${v}T00:00:00Z`));
+            return isEmpty(v) ? "-" : dayFormat.format(new Date(String(v).length === 10 ? `${v}T00:00:00Z` : v));
         },
 
         stamp(v) {
             return isEmpty(v) ? "-" : stampFormat.format(new Date(v));
         },
 
+        // S/4 flags are "X" or "", form fields are booleans.
         yesNo(v) {
-            if (v === true) {return text(this, "yes") ?? "Yes";}
-            if (v === false) {return text(this, "no") ?? "No";}
+            if (v === true || v === "X") {return text(this, "yes") ?? "Yes";}
+            if (v === false || v === "") {return text(this, "no") ?? "No";}
             return "-";
         },
 

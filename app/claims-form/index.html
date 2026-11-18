@@ -253,6 +253,9 @@
       .preview-actions .spacer {
         flex: 1;
       }
+      #uploadProgress {
+        margin: 4px 0 8px;
+      }
       #uploadFailed {
         margin: 0 0 12px;
         color: #b00;
@@ -927,7 +930,8 @@
             <p class="hint" id="filesHint">
               Photos: JPG or PNG, up to 5 per category, made smaller in your
               browser. Documents: PDF, JPG or PNG, up to 10 MB each. Files
-              upload right after you submit.
+              upload right after you submit. Keep the page open until the
+              upload is complete.
             </p>
           </section>
 
@@ -975,9 +979,9 @@
 
       <!-- Step 3: receipt -->
       <section id="step-done" hidden>
-        <ui5-message-strip design="Positive" hide-close-button
-          >Your claim is registered. A confirmation has been sent to your
-          email.</ui5-message-strip
+        <ui5-message-strip id="doneStrip" design="Information" hide-close-button
+          >Your claim is created. Uploading your files. Keep this page open
+          until the upload is complete.</ui5-message-strip
         >
         <p class="hint">Your claim number</p>
         <div class="receipt" id="caseId"></div>
@@ -985,13 +989,17 @@
           Keep it for any follow up. Our team reviews the claim and replies by
           email.
         </p>
+        <ui5-progress-indicator id="uploadProgress" value="0"></ui5-progress-indicator>
         <p class="hint" id="uploadStatus" aria-live="polite"></p>
         <ul id="uploadFailed" hidden></ul>
         <div class="actions">
           <ui5-button id="btnRetry" design="Emphasized" hidden
             >Retry uploads</ui5-button
           >
-          <ui5-button id="btnNew">File another claim</ui5-button>
+          <ui5-button id="btnSkip" design="Transparent" hidden
+            >Finish without these files</ui5-button
+          >
+          <ui5-button id="btnNew" hidden>File another claim</ui5-button>
         </div>
       </section>
 
