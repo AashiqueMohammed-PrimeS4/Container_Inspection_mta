@@ -11,7 +11,6 @@ sap.ui.define([
 
     const SEARCH_FIELDS = ["caseId", "companyName", "salesOrder", "carrierNumber"];
     const isPhoto = (f) => /^EV_0[1-6]$/.test(f.slot) && /^image\//.test(f.mimeType || "");
-    const keyValue = (v) => `'${encodeURIComponent(String(v).replace(/'/g, "''"))}'`;
 
     return Controller.extend("claims.controller.Main", {
         formatter,
@@ -21,7 +20,6 @@ sap.ui.define([
             view.setModel(new JSONModel({ total: 0 }), "view");
             view.setModel(new JSONModel({ groups: [], photos: [], count: 0, index: 0, zoom: false, loading: false }), "files");
             view.setModel(new JSONModel({ decision: "", amount: "", reason: "" }), "respond");
-            view.setModel(new JSONModel({ reports: [], note: "" }), "evidence");
         },
 
         text(key, args) {
@@ -84,20 +82,6 @@ sap.ui.define([
             this.getView().getModel("view").setProperty("/total", event.getParameter("total"));
         },
 
-        // Claim detail: SmartInspect inspection reports of the claim's shipment and container.
-        async loadEvidence(context) {
-            const shipment = await context.requestProperty("shipment");
-            if (!shipment) {return { reports: [], note: this.text("evidenceNoShipment") };}
-            const fn = this.getView().getModel().bindContext("ClaimsService.evidence(...)", context);
-            await fn.invoke();
-            const base = this.getView().getModel().getServiceUrl();
-            const reports = (fn.getBoundContext().getObject()?.value ?? []).map((r) => ({
-                title: this.text(`evidence.${r.kind}`, [r.fileName]),
-                url: `${base}InspectionReports(shipment=${keyValue(r.shipment)},fileName=${keyValue(r.fileName)})/content`
-            }));
-            return { reports, note: reports.length ? "" : this.text("evidenceNone", [shipment]) };
-        },
-
         async setStatus(context, status) {
             try {
                 await context.setProperty("status", status);
@@ -137,13 +121,12 @@ sap.ui.define([
             }
         },
 
-        // Detail dialog. Files come from ClaimFiles of the same case.
+        // Detail dialog. Files come from ClaimFiles of the same case, with the SmartInspect reports (slot EV_SI) that S/4 adds.
         async onOpen(event) {
             const context = event.getSource().getBindingContext();
             this.detail ??= await this.loadFragment({ name: "claims.view.Detail" });
             this.getView().getModel("files").setData({ groups: [], photos: [], count: 0, index: 0, zoom: false, loading: false });
             this.getView().getModel("respond").setData({ decision: "", amount: "", reason: "" });
-            this.getView().getModel("evidence").setData({ reports: [], note: this.text("evidenceLoading") });
             this.setValueStates();
             this.detail.bindElement(context.getPath());
             this.detail.open();
@@ -153,11 +136,6 @@ sap.ui.define([
                 this.setFiles(contexts.map((c) => c.getObject()));
             } catch (err) {
                 this.showError(err);
-            }
-            try {
-                this.getView().getModel("evidence").setData(await this.loadEvidence(context));
-            } catch (err) {
-                this.getView().getModel("evidence").setData({ reports: [], note: err?.message || String(err) });
             }
         },
 
