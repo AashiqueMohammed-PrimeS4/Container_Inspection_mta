@@ -56,7 +56,7 @@
                             <ObjectIdentifier title="{companyName}" text="{contactName}"/>
                             <Text text="{ parts: [ {path: 'salesOrder'}, {path: 'lineItem'}, {path: 'delivery'} ], formatter: '.formatter.soItem' }"/>
                             <Text text="{carrierNumber}"/>
-                            <Text text="{ parts: [ {path: 'reason'}, {path: 'reasonOther'} ], formatter: '.formatter.reason' }"/>
+                            <Text text="{ parts: [ {path: 'reason'}, {path: 'reasonOther'}, {path: 'vh>/ClaimReasons'} ], formatter: '.formatter.reason' }"/>
                             <ObjectStatus
                                 text="{ path: 'status', formatter: '.formatter.statusText' }"
                                 state="{ path: 'status', formatter: '.formatter.statusState' }"/>

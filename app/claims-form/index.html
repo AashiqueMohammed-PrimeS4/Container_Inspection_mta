@@ -597,7 +597,9 @@
                 <ui5-label for="deliveryLocation" required
                   >Delivery location / plant</ui5-label
                 >
-                <ui5-input id="deliveryLocation" maxlength="40"></ui5-input>
+                <ui5-select id="deliveryLocation"
+                  ><ui5-option value="">Select plant</ui5-option></ui5-select
+                >
               </div>
               <div class="field">
                 <ui5-label for="shipDate">Ship date</ui5-label>
@@ -626,23 +628,6 @@
                 <ui5-label for="reason" required>Reason for claim</ui5-label>
                 <ui5-select id="reason">
                   <ui5-option value="">Select a reason</ui5-option>
-                  <ui5-option value="damaged_goods">Damaged goods</ui5-option>
-                  <ui5-option value="shortage">Shortage</ui5-option>
-                  <ui5-option value="overage">Overage</ui5-option>
-                  <ui5-option value="wrong_product">Wrong product</ui5-option>
-                  <ui5-option value="contamination">Contamination</ui5-option>
-                  <ui5-option value="temperature_deviation"
-                    >Temperature deviation</ui5-option
-                  >
-                  <ui5-option value="late_delivery">Late delivery</ui5-option>
-                  <ui5-option value="carrier_damage">Carrier damage</ui5-option>
-                  <ui5-option value="seal_broken"
-                    >Seal broken or missing</ui5-option
-                  >
-                  <ui5-option value="documentation_error"
-                    >Documentation error</ui5-option
-                  >
-                  <ui5-option value="other">Other</ui5-option>
                 </ui5-select>
               </div>
               <div class="field">
@@ -651,11 +636,6 @@
                 >
                 <ui5-select id="issueFoundWhen">
                   <ui5-option value="">Select</ui5-option>
-                  <ui5-option value="at_unloading">At unloading</ui5-option>
-                  <ui5-option value="during_storage">During storage</ui5-option>
-                  <ui5-option value="during_production"
-                    >During production use</ui5-option
-                  >
                 </ui5-select>
               </div>
             </div>
@@ -766,9 +746,6 @@
                   <!-- QV-05: required when a value is entered. -->
                   <ui5-select id="currency_code">
                     <ui5-option value="">Currency</ui5-option>
-                    <ui5-option value="USD">USD</ui5-option>
-                    <ui5-option value="AED">AED</ui5-option>
-                    <ui5-option value="EUR">EUR</ui5-option>
                   </ui5-select>
                   <ui5-input id="estimatedClaimValue" type="Number"></ui5-input>
                 </div>
@@ -779,13 +756,6 @@
                 >
                 <ui5-select id="requestedResolution">
                   <ui5-option value="">Select</ui5-option>
-                  <ui5-option value="credit">Credit</ui5-option>
-                  <ui5-option value="replacement">Replacement</ui5-option>
-                  <ui5-option value="refund">Refund</ui5-option>
-                  <ui5-option value="product_return">Return</ui5-option>
-                  <ui5-option value="information_only"
-                    >Information only</ui5-option
-                  >
                 </ui5-select>
               </div>
             </div>
@@ -795,13 +765,6 @@
               >
               <ui5-select id="productLocation">
                 <ui5-option value="">Select</ui5-option>
-                <ui5-option value="holding_for_inspection"
-                  >Holding for inspection</ui5-option
-                >
-                <ui5-option value="quarantined">Quarantined</ui5-option>
-                <ui5-option value="used">Used</ui5-option>
-                <ui5-option value="discarded">Discarded</ui5-option>
-                <ui5-option value="returned">Returned</ui5-option>
               </ui5-select>
             </div>
           </section>

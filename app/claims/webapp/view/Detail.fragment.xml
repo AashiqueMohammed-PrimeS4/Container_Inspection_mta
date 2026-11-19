@@ -68,20 +68,20 @@
                     <Label text="{i18n>lblShipment}"/>
                     <Text text="{ path: 'shipment', targetType: 'any', formatter: '.formatter.dash' }"/>
                     <Label text="{i18n>lblCarrier}"/>
-                    <Text text="{ path: 'carrier', targetType: 'any', formatter: '.formatter.dash' }"/>
+                    <Text text="{ parts: [ {path: 'carrier', targetType: 'any'}, {path: 'vh>/Carriers'} ], formatter: '.formatter.listText' }"/>
                     <Label text="{i18n>lblBol}"/>
                     <Text text="{ path: 'billOfLading', targetType: 'any', formatter: '.formatter.dash' }"/>
                     <Label text="{i18n>lblDeliveryLocation}"/>
-                    <Text text="{ path: 'deliveryLocation', targetType: 'any', formatter: '.formatter.dash' }"/>
+                    <Text text="{ parts: [ {path: 'deliveryLocation', targetType: 'any'}, {path: 'vh>/Plants'} ], formatter: '.formatter.listText' }"/>
                     <Label text="{i18n>lblShipDate}"/>
                     <Text text="{ path: 'shipDate', targetType: 'any', formatter: '.formatter.day' }"/>
                     <Label text="{i18n>lblDateReceived}"/>
                     <Text text="{ path: 'dateReceived', targetType: 'any', formatter: '.formatter.day' }"/>
                     <core:Title text="{i18n>secClaim}"/>
                     <Label text="{i18n>lblReason}"/>
-                    <Text text="{ parts: [ {path: 'reason', targetType: 'any'}, {path: 'reasonOther', targetType: 'any'} ], formatter: '.formatter.reasonDetail' }"/>
+                    <Text text="{ parts: [ {path: 'reason', targetType: 'any'}, {path: 'reasonOther', targetType: 'any'}, {path: 'vh>/ClaimReasons'} ], formatter: '.formatter.reasonDetail' }"/>
                     <Label text="{i18n>lblFound}"/>
-                    <Text text="{ path: 'issueFoundWhen', targetType: 'any', formatter: '.formatter.code' }"/>
+                    <Text text="{ parts: [ {path: 'issueFoundWhen', targetType: 'any'}, {path: 'vh>/IssueTimings'} ], formatter: '.formatter.listText' }"/>
                     <Label text="{i18n>lblDescription}"/>
                     <Text text="{ path: 'description', targetType: 'any', formatter: '.formatter.dash' }" renderWhitespace="true"/>
                     <Label text="{i18n>lblDamageNoted}"/>
@@ -100,9 +100,9 @@
                     <Label text="{i18n>lblValue}"/>
                     <Text text="{ parts: [ {path: 'estimatedClaimValue', targetType: 'any'}, {path: 'currency', targetType: 'any'} ], formatter: '.formatter.value' }"/>
                     <Label text="{i18n>lblRequested}"/>
-                    <Text text="{ path: 'requestedResolution', targetType: 'any', formatter: '.formatter.code' }"/>
+                    <Text text="{ parts: [ {path: 'requestedResolution', targetType: 'any'}, {path: 'vh>/Resolutions'} ], formatter: '.formatter.listText' }"/>
                     <Label text="{i18n>lblProductNow}"/>
-                    <Text text="{ path: 'productLocation', targetType: 'any', formatter: '.formatter.code' }"/>
+                    <Text text="{ parts: [ {path: 'productLocation', targetType: 'any'}, {path: 'vh>/ProductLocations'} ], formatter: '.formatter.listText' }"/>
                     <core:Title text="{i18n>secReview}"/>
                     <Label text="{i18n>lblAccuracy}"/>
                     <Text text="{ path: 'accuracyDeclared', targetType: 'any', formatter: '.formatter.yesNo' }"/>

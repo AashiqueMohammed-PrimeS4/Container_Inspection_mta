@@ -11,6 +11,8 @@ sap.ui.define([
 
     const SEARCH_FIELDS = ["caseId", "companyName", "salesOrder", "carrierNumber"];
     const isPhoto = (f) => /^EV_0[1-6]$/.test(f.slot) && /^image\//.test(f.mimeType || "");
+    /** S/4 value helps whose texts the tile shows. */
+    const VALUE_HELPS = ["ClaimReasons", "IssueTimings", "Resolutions", "ProductLocations", "Plants", "Carriers"];
 
     return Controller.extend("claims.controller.Main", {
         formatter,
@@ -20,6 +22,22 @@ sap.ui.define([
             view.setModel(new JSONModel({ total: 0 }), "view");
             view.setModel(new JSONModel({ groups: [], photos: [], count: 0, index: 0, zoom: false, loading: false }), "files");
             view.setModel(new JSONModel({ decision: "", amount: "", reason: "" }), "respond");
+            view.setModel(new JSONModel({}), "vh");
+            this.loadValueHelps();
+        },
+
+        // Texts of the S/4 value helps, as code -> name per list, read once.
+        async loadValueHelps() {
+            const model = this.getOwnerComponent().getModel();
+            const vh = this.getView().getModel("vh");
+            try {
+                await Promise.all(VALUE_HELPS.map(async (name) => {
+                    const contexts = await model.bindList(`/${name}`, null, [], [], { $select: "code,name" }).requestContexts(0, 500);
+                    vh.setProperty(`/${name}`, Object.fromEntries(contexts.map((c) => [c.getProperty("code"), c.getProperty("name")])));
+                }));
+            } catch (err) {
+                this.showError(err);
+            }
         },
 
         text(key, args) {
@@ -146,13 +164,14 @@ sap.ui.define([
             for (const f of files) {
                 let group = groups.find((g) => g.slot === f.slot);
                 if (!group) {
-                    group = { slot: f.slot, title: this.text(`slot.${f.slot}`), photos: [], docs: [] };
+                    group = { slot: f.slot, title: f.category || f.slot, photos: [], docs: [] }; // category text from S/4
                     groups.push(group);
                 }
                 const key = `caseId='${encodeURIComponent(f.caseId)}',categoryId='${f.categoryId}',imageSeq='${f.imageSeq}'`;
                 const item = {
                     ID: `${f.categoryId}-${f.imageSeq}`,
                     slot: f.slot,
+                    title: group.title,
                     fileName: f.fileName,
                     info: this.text("fileInfo", [f.fileName]),
                     url: `${base}ClaimFiles(${key})/content`
@@ -231,7 +250,7 @@ sap.ui.define([
             files.setProperty("/zoom", false);
             files.setProperty("/loading", changed);
             files.setProperty("/meta", this.text("viewerMeta", [index + 1, photos.length]));
-            files.setProperty("/current", { ...photo, title: this.text(`slot.${photo.slot}`) });
+            files.setProperty("/current", photo);
             if (!this.viewer) {
                 this.viewer = await this.loadFragment({ name: "claims.view.Viewer" });
                 this.viewer.attachBrowserEvent("keydown", (e) => {

@@ -24,8 +24,8 @@ export async function call<T = unknown>(action: string, body: unknown): Promise<
   return data as T;
 }
 
-/** Fills a ui5-select with one ui5-option per row of a code list (code, name). */
-export async function fillSelect(id: string, path: string): Promise<void> {
+/** Fills a ui5-select with one ui5-option per row of a code list (code, name). show "code" for narrow fields. */
+export async function fillSelect(id: string, path: string, show: "name" | "code" = "name"): Promise<void> {
   const res = await fetch(path, {
     headers: { Accept: "application/json" },
   });
@@ -37,7 +37,7 @@ export async function fillSelect(id: string, path: string): Promise<void> {
       value: string;
     };
     opt.value = row.code;
-    opt.textContent = row.name;
+    opt.textContent = show === "code" ? row.code : row.name;
     $(id).appendChild(opt);
   }
 }

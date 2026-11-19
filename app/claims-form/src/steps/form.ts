@@ -4,9 +4,20 @@ import { $, radio, show } from "../lib/dom";
 import type { ApiErrorDetail } from "../api/client";
 import { LABELS, REQUIRED_FIELDS, type ClaimInput, type FileInput } from "../models/claim";
 
+/** Reason codes with an extra rule. The codes come from VH_ClaimReasonSet in S/4. */
+const REASON_TEMPERATURE = "06"; // needs the temperature logger file
+const REASON_OTHER = "11"; // needs a free text
+
 export function initForm(): void {
-  fillSelect("carrier_code", "/public/Carriers?$select=code,name&$orderby=name");
-  fillSelect("unitOfMeasure_code", "/public/UnitsOfMeasure?$select=code,name&$orderby=name");
+  // Every list comes from the S/4 value helps, in the order S/4 sends them.
+  fillSelect("carrier_code", "/public/Carriers");
+  fillSelect("deliveryLocation", "/public/Plants");
+  fillSelect("reason", "/public/ClaimReasons");
+  fillSelect("issueFoundWhen", "/public/IssueTimings");
+  fillSelect("unitOfMeasure_code", "/public/UnitsOfMeasure");
+  fillSelect("currency_code", "/public/Currencies", "code"); // narrow field next to the value: USD
+  fillSelect("requestedResolution", "/public/Resolutions");
+  fillSelect("productLocation", "/public/ProductLocations");
 
   // Whole numbers, Decimal(13,0) in S/4. ui5-input has no step property, so set it on the inner input.
   for (const id of ["quantityOrdered", "quantityAffected"]) Object.assign($(id), { _nativeInputAttributes: { min: 0, step: 1 } });
@@ -17,8 +28,8 @@ export function initForm(): void {
   // FS section 5: conditional fields
   $("reason").addEventListener("change", () => {
     const r = $("reason").value;
-    show("reasonOtherField", r === "other");
-    show("EV_09Field", r === "temperature_deviation");
+    show("reasonOtherField", r === REASON_OTHER);
+    show("EV_09Field", r === REASON_TEMPERATURE);
   });
   for (const r of document.querySelectorAll('ui5-radio-button[name="carrierNotified"]'))
     r.addEventListener("change", () => show("dateCarrierNotifiedField", radio("carrierNotified") === "true"));
@@ -85,8 +96,8 @@ export function checkRequired(c: ClaimInput): ApiErrorDetail[] {
   if (!(Number(c.quantityAffected) > 0)) report("Quantity affected must be greater than 0", "quantityAffected"); // QV-03
   if (!c.salesOrder && !c.delivery) report("Provide a sales order or delivery number", "salesOrder"); // FR-02
   const slots = c.files.map((f) => f.slot);
-  if (c.reason === "other" && !c.reasonOther) missing("reasonOther"); // CL-02
-  if (c.reason === "temperature_deviation" && !slots.includes("EV_09")) report("Temperature logger data is required", "files"); // EV-09
+  if (c.reason === REASON_OTHER && !c.reasonOther) missing("reasonOther"); // CL-02
+  if (c.reason === REASON_TEMPERATURE && !slots.includes("EV_09")) report("Temperature logger data is required", "files"); // EV-09
   if (c.estimatedClaimValue != null && !c.currency_code) missing("currency_code"); // QV-05
   if (!slots.some((s) => /^EV_0[1-6]$/.test(s))) report("At least one photo is required", "files"); // FR-05
   for (const field of ["accuracyDeclared", "privacyConsented"] as const) // RS-01, RS-02

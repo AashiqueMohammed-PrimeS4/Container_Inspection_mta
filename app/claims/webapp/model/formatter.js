@@ -5,6 +5,7 @@ sap.ui.define(["sap/ui/core/format/DateFormat"], (DateFormat) => {
     const stampFormat = DateFormat.getDateTimeInstance({ style: "medium" });
     const STATES = { "01": "Information", "02": "Warning", "03": "Success", "04": "None" }; // S/4 status codes
     const isEmpty = (v) => v === null || v === undefined || v === "";
+    const REASON_OTHER = "11"; // VH_ClaimReasonSet code of "Other"
 
     // Referenced as .formatter.x in the views.
     function text(controller, key, args) {
@@ -67,15 +68,20 @@ sap.ui.define(["sap/ui/core/format/DateFormat"], (DateFormat) => {
             return isEmpty(v) ? "-" : text(this, `code.${v}`) ?? v;
         },
 
-        // List column: the customer's own words when the reason is other.
-        reason(v, other) {
-            if (v === "other") {return other || (text(this, "reason.other") ?? "Other");}
-            return isEmpty(v) ? "-" : text(this, `reason.${v}`) ?? v;
+        // Text of an S/4 value help code. names: code -> name from the vh model. Unknown codes show as they are.
+        listText(v, names) {
+            return isEmpty(v) ? "-" : names?.[v] ?? v;
         },
 
-        reasonDetail(v, other) {
-            if (v === "other") {return text(this, "reasonOtherText", [other || ""]) ?? `Other: ${other || ""}`;}
-            return isEmpty(v) ? "-" : text(this, `reason.${v}`) ?? v;
+        // List column: the customer's own words when the reason is other.
+        reason(v, other, names) {
+            if (v === REASON_OTHER) {return other || (names?.[v] ?? v);}
+            return isEmpty(v) ? "-" : names?.[v] ?? v;
+        },
+
+        reasonDetail(v, other, names) {
+            if (v === REASON_OTHER) {return text(this, "reasonOtherText", [other || ""]) ?? `Other: ${other || ""}`;}
+            return isEmpty(v) ? "-" : names?.[v] ?? v;
         },
 
         amountLabel(currency) {

@@ -97,14 +97,14 @@ export const MAX_LENGTHS: Record<string, number> = {
   carrierNumber: 35,
   sealNumber: 20,
   shipment: 35,
-  carrier_code: 10,
+  carrier_code: 2,
   billOfLading: 35,
-  deliveryLocation: 40,
+  deliveryLocation: 4,
   reasonOther: 100,
   description: 225,
   materialNumber: 40,
   unitOfMeasure_code: 3,
-  currency_code: 3,
+  currency_code: 5,
 };
 
 /** The rule behind a CDS type, for messages like "Company name: check this value (at most 25 characters)". */

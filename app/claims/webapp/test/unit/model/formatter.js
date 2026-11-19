@@ -32,6 +32,17 @@ sap.ui.define([
         assert.strictEqual(formatter.statusState("04"), "None");
     });
 
+    QUnit.test("value help codes show the S/4 text", function (assert) {
+        const reasons = { "01": "Damaged goods", "11": "Other" };
+        assert.strictEqual(formatter.listText("01", reasons), "Damaged goods");
+        assert.strictEqual(formatter.listText("damaged_goods", reasons), "damaged_goods");
+        assert.strictEqual(formatter.listText("02", undefined), "02");
+        assert.strictEqual(formatter.listText("", reasons), "-");
+        assert.strictEqual(formatter.reason("11", "Pallet labels swapped", reasons), "Pallet labels swapped");
+        assert.strictEqual(formatter.reason("11", "", reasons), "Other");
+        assert.strictEqual(formatter.reason("01", "", reasons), "Damaged goods");
+    });
+
     QUnit.test("a date only value does not shift", function (assert) {
         assert.ok(formatter.day("2026-10-20").indexOf("20") !== -1);
     });
